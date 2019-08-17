@@ -335,7 +335,7 @@ function FPall(& $molecule,$paramHash=array()) {
 function addToFingerprint(& $fingerprint,& $shift,$atom,$number) {
 	// fügt eines oder mehrere Bit zu einem fingerprint hinzu, um shift nach links verschoben
 	// dazu wird das Atomsymbol (ggf. auch Ringname) atom und die Anzahl number verwendet
-	$number+=0;
+	$number = intval($number);
 	if ($number==0) {
 		$retval=0;
 	}
@@ -1311,7 +1311,11 @@ function getSumFingerprint($molecule) {
 	// "+" schiebt ein Bit weiter, am Anfang sind Atome bis Cl, die in addToFingerprint gesondert behandelt werden und kein + brauchen
 	$symbols=array("H","C","O","N","F","Cl","Br","+","I","+","B","+","Si","+","S","+","P","+","Li","Na","K","Rb","Cs","+","Be","Mg","Ca","Sr","Ba","+","Al","Ga","In","Tl","Sn","Pb","Bi","+","Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn","+","Y","Zr","Nb","Mo","Tc","Ag","Cd","Hf","Ta","W","Re","Au","Hg","+","Ru","Rh","Pd","Os","Ir","Pt","+","La","Ce","Pr","Nd","Pm","Sm","Eu","Gd","Tb","Dy","Ho","Er","Tm","Yb","Lu","+","Ge","As","Sb","Se","Te","He","Ne","Ar","Kr","Xe","Rn","Po","At","Fr","Ra","Ac","Th","Pa","U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm","Md","No","Lr","Unq","Unp","Unh","Uns","+");
 	foreach ($symbols as $sym) {
-		addToFingerprint($fingerprint,$shift,$sym,$molecule["emp_formula"][$sym]);
+		$number=0;
+		if (array_key_exists($sym, $molecule["emp_formula"])) {
+			$number=$molecule["emp_formula"][$sym];
+		}
+		addToFingerprint($fingerprint,$shift,$sym,$number);
 	}
 	return $fingerprint;
 }

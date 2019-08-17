@@ -108,7 +108,7 @@ function setSteps() {
 	global $g_settings,$suppliers,$steps;
 	$steps=array();
 	for ($a=0;$a<count($g_settings["supplier_order"]);$a++) { // filter invalid steps
-		if ($g_settings["supplier_order"][$a]["disabled"]) {
+		if (array_key_exists("disabled", $g_settings["supplier_order"][$a]) && $g_settings["supplier_order"][$a]["disabled"]) {
 			continue;
 		}
 		$code=& $g_settings["supplier_order"][$a]["code"];
@@ -125,7 +125,7 @@ function autoAddSteps() { // call only if going to global settings
 		$known[]=$g_settings["supplier_order"][$a]["code"];
 	}
 	if (is_array($suppliers)) foreach ($suppliers as $code => $supplier) { // add steps not in list at the end
-		if (!$supplier["noExtSearch"] && !in_array($code,$known)) {
+		if (array_key_exists("noExtSearch", $supplier) && (!$supplier["noExtSearch"] && !in_array($code,$known))) {
 			$g_settings["supplier_order"][]=array(
 				"code" => $code, 
 				"name" => $supplier["name"], 
