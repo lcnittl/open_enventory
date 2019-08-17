@@ -92,7 +92,7 @@ $GLOBALS["suppliers"][$code]=array(
 	$result["molecule_names_array"]=array(fixTags($name_data[1]));
 	
 	preg_match_all("/(?ims)<img\s+src=\"\/eshop\/image\/pictgram\/G(\d+)\.gif\"/",$body,$ghs_syms,PREG_PATTERN_ORDER);
-	if (count($ghs_syms) && count($ghs_syms[1])) {
+	if (count_compat($ghs_syms) && count_compat($ghs_syms[1])) {
 		$ghs_syms=join(",GHS0",$ghs_syms[1]);
 		if (!isEmptyStr($ghs_syms)) {
 			$result["safety_sym_ghs"]="GHS0".$ghs_syms; // add prefix while joining
@@ -191,7 +191,7 @@ $GLOBALS["suppliers"][$code]=array(
 	else {
 		preg_match_all("/(?ims)<div[^>]*class=\"bobW\".*?<\/form>/",$body,$manyLines,PREG_SET_ORDER);
 		//~ print_r($manyLines);
-		for ($b=0;$b<count($manyLines);$b++) {
+		for ($b=0;$b<count_compat($manyLines);$b++) {
 			if (preg_match_all("/(?ims)(<th.*?<\/th>)\s*(<td.*?<\/td>)/",$manyLines[$b][0],$nameValuePairs,PREG_SET_ORDER)) {
 				$result=array("supplierCode" => $code,);
 				foreach ($nameValuePairs as $nameValuePair) {
@@ -232,7 +232,7 @@ if (preg_match_all("/(?ims)<tr.*?(<td.*?<\/td>)\s*(<td.*?<\/td>)/",$html,$nameVa
 return $retval;
 '),
 "getBestHit" => create_function('& $hitlist,$name=NULL','
-	if (count($hitlist)>0) {
+	if (count_compat($hitlist)>0) {
 		return 0;
 	}
 '),

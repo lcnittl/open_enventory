@@ -98,10 +98,10 @@ function checkResults($results,$or_words,$field="name") {
 	if (!is_array($word)) {
 		$word=array(array($word));
 	}
-	for ($c=0;$c<count($or_words);$c++) { // OR
+	for ($c=0;$c<count_compat($or_words);$c++) { // OR
 		$word=$or_words[$c];
-		for ($a=0;$a<count($results);$a++) {
-			for ($b=0;$b<count($word);$b++) { // AND
+		for ($a=0;$a<count_compat($results);$a++) {
+			for ($b=0;$b<count_compat($word);$b++) { // AND
 				if (strpos(strtolower($results[$a][$field]),$word[$b])===FALSE) {
 					continue 2; // next result
 				}
@@ -125,7 +125,7 @@ function checkStrSearch() {
 	
 	$oldStrSearch=$strSearch;
 	
-	for ($a=0;$a<count($oldStrSearch);$a++) {
+	for ($a=0;$a<count_compat($oldStrSearch);$a++) {
 		$supplierCode=$oldStrSearch[$a];
 		if (!$suppliers[$supplierCode]) {
 			continue;
@@ -145,7 +145,7 @@ function checkStrSearch() {
 function performSingleCheck($type) {
 	global $steps,$suppliers,$text,$molfile_cas,$molfile_words,$emp_form,$emp_form_words;
 	echo "<h3>".s($type)."</h3>";
-	for ($a=0;$a<count($steps);$a++) {
+	for ($a=0;$a<count_compat($steps);$a++) {
 		$supplierCode=$steps[$a];
 		
 		if ((is_array($suppliers[$supplierCode]["excludeFields"]) && in_array($type,$suppliers[$supplierCode]["excludeFields"]))
@@ -162,7 +162,7 @@ function performSingleCheck($type) {
 		case "cas_nr":
 		// CAS search
 			$checkarray=$suppliers[$supplierCode]["testCas"];
-			if (!count($checkarray)) {
+			if (!count_compat($checkarray)) {
 				$checkarray=array($molfile_cas => $molfile_words);
 			}
 			
@@ -181,7 +181,7 @@ function performSingleCheck($type) {
 		case "emp_formula":
 		// emp form search
 			$checkarray=$suppliers[$supplierCode]["testEmpFormula"];
-			if (!count($checkarray)) {
+			if (!count_compat($checkarray)) {
 				$checkarray=array($emp_form => $emp_form_words);
 			}
 			

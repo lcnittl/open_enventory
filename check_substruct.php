@@ -52,7 +52,7 @@ function checkSubstructure(& $needle,& $haystack,$correct=array()) {
 		print_r($needle["fingerprints"]);
 		echo "</pre></td><td><pre>";
 		$test=array();
-		for ($a=0;$a<count($needle["fingerprints"]);$a++) {
+		for ($a=0;$a<count_compat($needle["fingerprints"]);$a++) {
 			$test[$a]=$haystack["fingerprints"][$a] & $needle["fingerprints"][$a];
 		}
 		print_r($test);

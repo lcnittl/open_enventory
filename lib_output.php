@@ -167,12 +167,12 @@ function stereoStructureRelationship($smiles1,$stereo1,$smiles2,$stereo2) { // r
 	}
 	$frags1=preg_split("/@{1,2}/",$stereo1,-1,PREG_SPLIT_DELIM_CAPTURE);
 	$frags2=preg_split("/@{1,2}/",$stereo2,-1,PREG_SPLIT_DELIM_CAPTURE);
-	if (count($frags1)!=count($frags2)) {
+	if (count_compat($frags1)!=count_compat($frags2)) {
 		return STEREO_UNDEFINED;
 	}
 	$stereocenter=0;
 	$diff_stereo=0;
-	for ($a=0;$a<count($frags1);$a++) {
+	for ($a=0;$a<count_compat($frags1);$a++) {
 		switch ($frags1[$a]) {
 		case "@":
 		case "@@":
@@ -238,7 +238,7 @@ function showImageOverlay($paramHash) { // $pkName,$db_id,$pk,$w,$h,$mode,$linkT
 
 function isSelectTable($table) {
 	global $selectTables;
-	return (count($selectTables) && in_array($table,$selectTables));
+	return (count_compat($selectTables) && in_array($table,$selectTables));
 }
 
 function getTHeadText($col,$column_data,$index="") {
@@ -287,7 +287,7 @@ function getTHeadText($col,$column_data,$index="") {
 
 function getHiddenColsOverlay($table,$hidden) {
 	global $columns;
-	if (count($hidden)) {
+	if (count_compat($hidden)) {
 		// control for additional columns
 		$retval.=" <div id=\"showColumnOverlay\" style=\"display:none\" onMouseover=\"cancelOverlayTimeout()\" onMouseout=\"hideOverlayId(&quot;showColumnOverlay&quot;);\">";
 		foreach ($hidden as $fullCol) {
@@ -428,7 +428,7 @@ function getFields(& $columns,$listvisible="") {
 	}
 	else {
 		$listvisible=explode(",",$listvisible);
-		$visible_count=count($listvisible);
+		$visible_count=count_compat($listvisible);
 	}
 	
 	if (!empty($_REQUEST["ref_reaction_db_id"]) && !empty($_REQUEST["ref_reaction_id"])) {
@@ -439,7 +439,7 @@ function getFields(& $columns,$listvisible="") {
 		if (is_array($data)) {
 			$display=$data["display"];
 			if (isset($data["int_names"])) {
-				$multiple=count($data["int_names"]);
+				$multiple=count_compat($data["int_names"]);
 				$int_names=array_keys($data["int_names"]);
 			}
 			else {
@@ -501,7 +501,7 @@ function addHeadline(& $output,$fields,$paramHash) {
 function outputList($res,$fields,$paramHash=array()) {
 	global $table,$permissions,$person_id;
 	
-	if ($paramHash["output_type"]!="html" && count($res)==0) {
+	if ($paramHash["output_type"]!="html" && count_compat($res)==0) {
 		closeWin();
 		return;
 	}
@@ -555,7 +555,7 @@ function outputList($res,$fields,$paramHash=array()) {
 	break;
 	case "html":
 		$noResMessage=ifempty($paramHash["noResMessage"],s("no_results"));
-		if (count($res)==0 && !$paramHash["showZeroResults"]) {
+		if (count_compat($res)==0 && !$paramHash["showZeroResults"]) {
 			return $noResMessage;
 		}
 		$retval="<table class=\"listtable\" width=\"100%\"><thead><tr>";
@@ -573,7 +573,7 @@ function outputList($res,$fields,$paramHash=array()) {
 	$prevseparatorField=null; // is always different
 	
 	$subidx=0;
-	if (count($res)) {
+	if (count_compat($res)) {
 		foreach ($res as $idx => $row) { // zeilen
 			// Zwischenzeile wie Edukte, Produkte oder Datenbank xyz
 			if ($separatorField!="") {
@@ -600,7 +600,7 @@ function outputList($res,$fields,$paramHash=array()) {
 						// nothing, have field db_id instead
 					break;
 					case "html":
-						$retval.="<tr><td colspan=\"".count($fields)."\" class=\"separatorLine\">".getSeparatorLine($separatorField,$row)."</td></tr>\n";
+						$retval.="<tr><td colspan=\"".count_compat($fields)."\" class=\"separatorLine\">".getSeparatorLine($separatorField,$row)."</td></tr>\n";
 					break;
 					}
 					$prevseparatorField=$row[$separatorField];
@@ -1274,15 +1274,15 @@ function addTBodyCell(& $output,& $files,$idx,$subidx,& $fieldIdx,$row,$col,$par
 		}
 	break;
 	case "mpi_order_item":
-		for ($a=0;$a<min(5,count($row["mpi_order_item"]));$a++) {
+		for ($a=0;$a<min(5,count_compat($row["mpi_order_item"]));$a++) {
 			$mpi_order_item=& $row["mpi_order_item"][$a];
 			$retval.=ifnotempty("",$mpi_order_item["amount"]," ".$mpi_order_item["amount_unit"]);
 			if ($paramHash["output_type"]=="html") {
 				$retval.="<br>";
 			}
 		}
-		if (count($row["mpi_order_item"])>$a) {
-			$retval.=s("more1").(count($row["mpi_order_item"])-$a).s("more2");
+		if (count_compat($row["mpi_order_item"])>$a) {
+			$retval.=s("more1").(count_compat($row["mpi_order_item"])-$a).s("more2");
 		}
 	break;
 	
@@ -1399,7 +1399,7 @@ function addTBodyCell(& $output,& $files,$idx,$subidx,& $fieldIdx,$row,$col,$par
 		
 		$ret_array=array();
 		
-		if (count($row[$col])) {
+		if (count_compat($row[$col])) {
 			foreach ($row[$col] as $order_alternative) {
 				$selected=($order_alternative["order_alternative_id"]==ifempty($row["selected_alternative_id"],$row["customer_selected_alternative_id"]));
 				$highlight_start="";
@@ -1919,10 +1919,10 @@ function addTBodyCell(& $output,& $files,$idx,$subidx,& $fieldIdx,$row,$col,$par
 			break;
 			case "ratio":
 				// Produkte durchgehen
-				if (count($row[$col_name])>1) {
+				if (count_compat($row[$col_name])>1) {
 					$yields=array();
 					unset($min_yield);
-					for ($idx=0;$idx<count($row[$col_name]);$idx++) {
+					for ($idx=0;$idx<count_compat($row[$col_name]);$idx++) {
 						$this_yield=$row[$col_name][$idx][$col]; // yield or gc_yield
 						$yields[]=$this_yield;
 						if ($this_yield>0 && (!isset($min_yield) || $min_yield>$this_yield)) {
@@ -1937,7 +1937,7 @@ function addTBodyCell(& $output,& $files,$idx,$subidx,& $fieldIdx,$row,$col,$par
 			break;
 			case "ee-de":
 				// assume 1st and 2nd prod are enantio/diastereomers, 3rd... are side prods
-				if (count($row[$col_name])>=2) {
+				if (count_compat($row[$col_name])>=2) {
 					$min_yield=min($row[$col_name][0][$col],$row[$col_name][1][$col]); // yield or gc_yield
 					$max_yield=max($row[$col_name][0][$col],$row[$col_name][1][$col]); // yield or gc_yield
 					$total_yield=$max_yield+$min_yield;
@@ -2059,7 +2059,7 @@ function addTBodyCell(& $output,& $files,$idx,$subidx,& $fieldIdx,$row,$col,$par
 	break;
 	case "reaction_analytics":
 		$raw=true;
-		$totalSpectra=count($row["analytical_data"]);
+		$totalSpectra=count_compat($row["analytical_data"]);
 		$ret_array=array();
 		
 		if ($totalSpectra) {

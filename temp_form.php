@@ -66,7 +66,7 @@ print_r($molfile2["smiles_stereo"]);
 //~ echo "</pre></td></tr></table></body></html>";
 //~ die();
 //~ var_dump($molfile2);
-for ($a=0;$a<count($molfile1["fingerprints"]);$a++) {
+for ($a=0;$a<count_compat($molfile1["fingerprints"]);$a++) {
 	$test[$a]=$molfile1["fingerprints"][$a] & $molfile2["fingerprints"][$a];
 }
 print_r($test);
@@ -81,7 +81,7 @@ echo "<br>1 in 2: ".$result1[0].
 print_r($result1[1]);
 
 function outputOxStates(& $molecule) {
-	for ($a=0;$a<count($molecule["atoms"]);$a++) {
+	for ($a=0;$a<count_compat($molecule["atoms"]);$a++) {
 		echo $molecule["atoms"][$a]["s"].getOxidationState($molecule,$a)."<br>";
 	}
 }

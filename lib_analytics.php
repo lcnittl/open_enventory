@@ -155,13 +155,13 @@ function getProcData(& $zipdata,$paramHash=array(),$analytics_type_code="generic
 				continue;
 			}
 			// required
-			for ($a=0;$a<count($device_data["requiredFiles"]);$a++) {
+			for ($a=0;$a<count_compat($device_data["requiredFiles"]);$a++) {
 				$file_contents[ $device_data["requiredFiles"][$a] ]=array();
 				$file_names[ $device_data["requiredFiles"][$a] ]=array();
 			}
 			$required_filenames=arr_merge($required_filenames,$device_data["requiredFiles"]);
 			// optional
-			for ($a=0;$a<count($device_data["optionalFiles"]);$a++) {
+			for ($a=0;$a<count_compat($device_data["optionalFiles"]);$a++) {
 				$file_contents[ $device_data["optionalFiles"][$a] ]=array();
 				$file_names[ $device_data["optionalFiles"][$a] ]=array();
 			}
@@ -196,14 +196,14 @@ function getProcData(& $zipdata,$paramHash=array(),$analytics_type_code="generic
 		$filecontent=$zip->getData();
 		$completeFileData[]=$filecontent;
 		//~ echo $filename_in_zip."<br>";
-		for ($a=0;$a<count($required_filenames);$a++) {
+		for ($a=0;$a<count_compat($required_filenames);$a++) {
 			if (endswith($filename_in_zip,$required_filenames[$a])) {
 				array_push($file_contents[ $required_filenames[$a] ],$filecontent);
 				array_push($file_names[ $required_filenames[$a] ],$filename);
 				// find all continue 2;
 			}
 		}
-		for ($a=0;$a<count($optional_filenames);$a++) {
+		for ($a=0;$a<count_compat($optional_filenames);$a++) {
 			if (endswith($filename_in_zip,$optional_filenames[$a])) {
 				array_push($file_contents[ $optional_filenames[$a] ],$filecontent);
 				array_push($file_names[ $optional_filenames[$a] ],$filename);
@@ -222,9 +222,9 @@ function getProcData(& $zipdata,$paramHash=array(),$analytics_type_code="generic
 	// checking if the file is readable with the choosen converter
 	if($tempConverter->verifyFileSignature($file_contents)==0 || $tempConverter->verifyFileSignature($file_contents)==2) {
 		// if the file is not readable with the choosen converter or it is not verifyable, search a converter that fits
-		for($i=0; $i<count($GLOBALS['analytics']); $i++) {
+		for($i=0; $i<count_compat($GLOBALS['analytics']); $i++) {
 			$device_codes = array_keys($GLOBALS['analytics'][array_keys($GLOBALS['analytics'])[$i]]);
-			for($j=0; $j<count($device_codes); $j++) {
+			for($j=0; $j<count_compat($device_codes); $j++) {
 				// ignore if it is not a converter
 				if(is_array($GLOBALS['analytics'][array_keys($GLOBALS['analytics'])[$i]][$device_codes[$j]])) {
 					$device_drivers = $GLOBALS['analytics'][array_keys($GLOBALS['analytics'])[$i]][$device_codes[$j]];
@@ -233,35 +233,35 @@ function getProcData(& $zipdata,$paramHash=array(),$analytics_type_code="generic
 					continue;
 				}
 				// create entry if it does not exist already
-				if($bestFitCounter[count($bestFitCounter)-1][1]!=array_keys($GLOBALS['analytics'][array_keys($GLOBALS['analytics'])[$i]])[$j]) {
-					$bestFitCounter[count($bestFitCounter)][1]=array_keys($GLOBALS['analytics'][array_keys($GLOBALS['analytics'])[$i]])[$j];
-					$bestFitCounter[count($bestFitCounter)-1][0]=array_keys($GLOBALS['analytics'])[$i];
-					$bestFitCounter[count($bestFitCounter)-1][2]=0;
+				if($bestFitCounter[count_compat($bestFitCounter)-1][1]!=array_keys($GLOBALS['analytics'][array_keys($GLOBALS['analytics'])[$i]])[$j]) {
+					$bestFitCounter[count_compat($bestFitCounter)][1]=array_keys($GLOBALS['analytics'][array_keys($GLOBALS['analytics'])[$i]])[$j];
+					$bestFitCounter[count_compat($bestFitCounter)-1][0]=array_keys($GLOBALS['analytics'])[$i];
+					$bestFitCounter[count_compat($bestFitCounter)-1][2]=0;
 				}
 				$converterFound=true;
 				// go through required files: if the uploaded data does not contains one of the required files -> mark as not fitting, else: fitcounter++
-				for($k=0; $k<count($device_drivers['requiredFiles']); $k++) {
+				for($k=0; $k<count_compat($device_drivers['requiredFiles']); $k++) {
 					if($file_contents[$device_drivers['requiredFiles'][$k]][0]=="") {
 						$converterFound=false;
-						$bestFitCounter[count($bestFitCounter)-1][2]=-1;
+						$bestFitCounter[count_compat($bestFitCounter)-1][2]=-1;
 						continue 2;
 					}
-					elseif($bestFitCounter[count($bestFitCounter)-1][2]!=-1) {
-						$bestFitCounter[count($bestFitCounter)-1][2]++;
+					elseif($bestFitCounter[count_compat($bestFitCounter)-1][2]!=-1) {
+						$bestFitCounter[count_compat($bestFitCounter)-1][2]++;
 					}
 				}
 				// go through excluded files... if uploaded data contains just one of it, mark it as not fitting
-				for($k=0; $k<count($device_drivers['excludeFiles']); $k++) {
+				for($k=0; $k<count_compat($device_drivers['excludeFiles']); $k++) {
 					if($file_contents[$device_drivers['excludeFiles'][$k]][0]!="") {
 						$converterFound=false;
-						$bestFitCounter[count($bestFitCounter)-1][2]=-1;
+						$bestFitCounter[count_compat($bestFitCounter)-1][2]=-1;
 						continue 2;
 					}
 				}
 				// go through optional files and increment fitcounter, if the uploaded data contains an optional file
-				for($k=0; $k<count($device_drivers['optionalFiles']); $k++) {
-					if($file_contents[$device_drivers['optionalFiles'][$k]][0]!="" && $bestFitCounter[count($bestFitCounter)-1][2]!=-1) {
-						$bestFitCounter[count($bestFitCounter)-1][2]++;
+				for($k=0; $k<count_compat($device_drivers['optionalFiles']); $k++) {
+					if($file_contents[$device_drivers['optionalFiles'][$k]][0]!="" && $bestFitCounter[count_compat($bestFitCounter)-1][2]!=-1) {
+						$bestFitCounter[count_compat($bestFitCounter)-1][2]++;
 					}
 				}
 			}
@@ -281,7 +281,7 @@ function getProcData(& $zipdata,$paramHash=array(),$analytics_type_code="generic
 			$converter = new $analytics_device_driver($completeFileData, true);
 		}
 		elseif($bestFitCounter[0][1]=="generic" || $bestFitCounter[0][1]=="jcampIR" || $bestFitCounter[0][1]=="jcampNMR") {
-			for($i=1; $i<count($bestFitCounter); $i++) {
+			for($i=1; $i<count_compat($bestFitCounter); $i++) {
 				$tempConverter = new $bestFitCounter[$i][1]($file_contents, false);
 				if($bestFitCounter[$i][2]<1) {
 					break;
@@ -300,7 +300,7 @@ function getProcData(& $zipdata,$paramHash=array(),$analytics_type_code="generic
 			}
 		}
 		else {
-			for($i=0; $i<count($bestFitCounter); $i++) {
+			for($i=0; $i<count_compat($bestFitCounter); $i++) {
 				$tempConverter = new $bestFitCounter[$i][1]($file_contents, false);
 				if($bestFitCounter[$i][2]<1) {
 					break;
@@ -336,7 +336,7 @@ function getProcData(& $zipdata,$paramHash=array(),$analytics_type_code="generic
 	
 	// next lines merges it all together
 	$this_retval['img_mime'][0] = $graphData['imageMime'];
-	for($i=0; $i<count($graphData['ms']); $i++) {
+	for($i=0; $i<count_compat($graphData['ms']); $i++) {
 		$config['axisOffset']['y']=50;
 		$msImage = new graph($graphData['ms'][$i], $config);
 		$this_retval['img'][$i+1]=$msImage->getBinaryData(); 
@@ -383,7 +383,7 @@ function findFileName($type_code,$device_driver,$index,$opt,$file_names,$filenam
 		$hash="requiredFiles";
 	}
 	$this_filenames=& $file_names[ $analytics[$type_code][$device_driver][$hash][$index] ];
-	for ($a=0;$a<count($this_filenames);$a++) {
+	for ($a=0;$a<count_compat($this_filenames);$a++) {
 		$this_filename=$this_filenames[$a];
 		if (endswith($this_filename,$filename)) {
 			return $a;
@@ -395,7 +395,7 @@ function findFileName($type_code,$device_driver,$index,$opt,$file_names,$filenam
 function getPeakList($values,$paramHash=array()) {
 	$peak_data=array();
 	
-	if (!count($values)) {
+	if (!count_compat($values)) {
 		return $peak_data;
 	}
 	
@@ -460,7 +460,7 @@ function getPeakList($values,$paramHash=array()) {
 		$peak_data=$values;
 	}
 	
-	if (count($peak_data)>$max_peaks) { // keep the x highest
+	if (count_compat($peak_data)>$max_peaks) { // keep the x highest
 		arsort($peak_data); // x => y
 		$peak_data=array_slice($peak_data,0,$max_peaks,true);
 	}
@@ -518,7 +518,7 @@ function getXrange($values) {
 		$maxX[]=max($x_values);
 	}
 	
-	if (count($minX) && count($maxX)) {
+	if (count_compat($minX) && count_compat($maxX)) {
 		return array(min($minX),max($maxX));
 	}
 }
@@ -531,7 +531,7 @@ function getYrange($values) {
 		$maxY[]=max($trace_values);
 	}
 	
-	if (count($minY) && count($maxY)) {
+	if (count_compat($minY) && count_compat($maxY)) {
 		return array(min($minY),max($maxY));
 	}
 }
@@ -554,7 +554,7 @@ function prepareChromaGraph($values,& $paramHash) {
 function getChromaGraphImg($values,$paramHash=array(),$peak_block_list=array()) {
 	global $ttffontsize,$ttffontname;
 		
-	if (!count($values)) {
+	if (!count_compat($values)) {
 		return getEmptyImage($paramHash["format"]);
 	}
 	
@@ -702,7 +702,7 @@ function getChromaGraphImg($values,$paramHash=array(),$peak_block_list=array()) 
 			unset($prevxpos);
 			unset($prevypos);
 			$xpos=$x0;
-			$x_fac=($shift_x*$x1)/count($this_values);
+			$x_fac=($shift_x*$x1)/count_compat($this_values);
 			foreach ($this_values as $yval) {
 				$xpos+=$x_fac;
 				$ypos=$y0*(($paramHash["min_y"]-$yval)*$fac+1);
@@ -723,7 +723,7 @@ function getChromaGraphImg($values,$paramHash=array(),$peak_block_list=array()) 
 		}
 		// ticks
 		foreach ($peak_block_list as $idx => $this_peak_block_list) {
-			$block_count=count($values[$idx]);
+			$block_count=count_compat($values[$idx]);
 			if (is_array($this_peak_block_list)) foreach ($this_peak_block_list as $block_no) {
 				// get ypos for this block
 				$xpos=$x0+$shift_x*$x1*$block_no/$block_count;
@@ -833,7 +833,7 @@ function readASCII($asc,$paramHash=array()) {
 	$asc=fixLineEnd($asc);
 	$lines=explode("\n",$asc);
 	// cut comment
-	for ($a=0;$a<count($lines);$a++) {
+	for ($a=0;$a<count_compat($lines);$a++) {
 		list($x,$y)=preg_split($sep_re,trim($lines[$a]),2);
 		$x=trim($x);
 		$y=trim($y);
@@ -843,7 +843,7 @@ function readASCII($asc,$paramHash=array()) {
 		}
 	}
 	
-	if (count($graph_data)) {
+	if (count_compat($graph_data)) {
 		//~ $x_values=array_keys($graph_data);
 		
 		$dataHash["x_max"]=max($x_values);
@@ -1005,7 +1005,7 @@ function pk($code,$data) {
 function getOLEchild(& $ole,$path) {
 	$list=$ole->_list;
 	$ole_branch=$list[0];
-	for ($a=0;$a<count($path);$a++) {
+	for ($a=0;$a<count_compat($path);$a++) {
 		$children=$ole_branch->children;
 		if (is_array($children)) foreach ($children as $child) {
 			$child_name=$child->Name;

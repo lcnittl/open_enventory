@@ -276,7 +276,7 @@ function interpretBarcode($barcode,$flags=0) {
 					"limit" => 1, 
 				));
 				
-				if (count($retval["result"])) {
+				if (count_compat($retval["result"])) {
 					$baseTable="mpi_order_item";
 					$retval["table"]=getBaseTable($baseTable);
 				}

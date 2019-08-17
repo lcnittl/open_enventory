@@ -202,7 +202,7 @@ $GLOBALS["suppliers"][$code]=array(
 '),
 "getBestHit" => create_function('& $hitlist,$name=NULL','
 	if (!is_null($name)) {
-		$a=count($hitlist)-1;
+		$a=count_compat($hitlist)-1;
 		while ($a>=0) {
 			if ($name==strtolower($hitlist[$a]["name"])) {
 				return $a;
@@ -210,7 +210,7 @@ $GLOBALS["suppliers"][$code]=array(
 			$a--;
 		}
 	}
-	$a=count($hitlist)-1;
+	$a=count_compat($hitlist)-1;
 	while ($a>=0 && (strpos($hitlist[$a]["name"],"radical")!==FALSE || strpos($hitlist[$a]["name"],"&quot;")!==FALSE)) {
 		$a--;
 	}
@@ -263,7 +263,7 @@ $GLOBALS["suppliers"][$code]=array(
 '),
 "getCAS" => create_function('& $molfile',getFunctionHeader().'
 	$result=$self["strSearch"]($molfile,"se");
-	if (count($result)>1) {
+	if (count_compat($result)>1) {
 		$a=$self["getBestHit"]($result);
 		$result[0]=$self["getInfo"]($result[$a]["catNo"]);
 		$result[0]["supplierCode"]=$code;

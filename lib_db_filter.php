@@ -56,7 +56,7 @@ function getSubtableSelect($st_name,$fieldname,$isLast=false) {
 function getDbList() {
 	global $other_db_data;
 	$db_list=array();
-	for ($a=0;$a<count($other_db_data);$a++) {
+	for ($a=0;$a<count_compat($other_db_data);$a++) {
 		$db_list[$a]=$other_db_data[$a]["other_db_id"];
 	}
 	array_unshift($db_list,-1);
@@ -101,9 +101,9 @@ function getFilterObject($paramHash=array()) { // Erstellung der WHERE-Bedingung
 	if (!empty($_REQUEST["ref_cache_id"]) && $_REQUEST["list_op"]>1) {
 		$ref_cache=readCache($_REQUEST["ref_cache_id"]);
 		$ref_cache=$ref_cache["results"]["db"];
-		if (count($ref_cache)) {
+		if (count_compat($ref_cache)) {
 			$cache_dbs=array_keys($ref_cache); // zu welchen Datenbanken gibt es Daten im "alten" Cache
-			for ($b=0;$b<count($cache_dbs);$b++) {
+			for ($b=0;$b<count_compat($cache_dbs);$b++) {
 				$ref_cache[ $cache_dbs[$b] ]=@join(",",$ref_cache[ $cache_dbs[$b] ]);
 			}
 		}
@@ -124,7 +124,7 @@ $filter_obj
 	query_pattern: <0> AND <1> OR ..., wird auf Validität intensiv geprüft
 	query_string: die WHERE Bedingung für die SQL-Abfrage, substructure-Suchen sind molecule_id IN(...), damit alle 
 */
-	if (count($filter_obj)==0) { // sonst ist die arbeit schon vorher erledigt
+	if (count_compat($filter_obj)==0) { // sonst ist die arbeit schon vorher erledigt
 		// Zusammenfügen fragmentierter queries
 		
 		if (is_array($_REQUEST["query"])) {
@@ -140,7 +140,7 @@ $filter_obj
 		//~ $filter_obj["subquery_numbers"]=$subquery_number_match[1];
 		$filter_obj["subquery_numbers"]=array_unique(arr_merge(getSubqueryNumberFromPattern($filter_obj["query_pattern"]),getSubqueryNumberFromPattern($filter_obj["select_pattern"])));
 		
-		for($a=0;$a<count($filter_obj["subquery_numbers"]);$a++) { // Basistabelle für Abfrage wählen (!= subquery)
+		for($a=0;$a<count_compat($filter_obj["subquery_numbers"]);$a++) { // Basistabelle für Abfrage wählen (!= subquery)
 			$filter_obj["subquery_numbers"][$a]+=0;
 			$subquery_number=$filter_obj["subquery_numbers"][$a];
 			$filter_obj["forTable"][$subquery_number]=$table;
@@ -149,7 +149,7 @@ $filter_obj
 		// get unused subquery
 		// problem: op=sq may result in additional <xx> which are NOT in query or select_query!!
 		/*
-		if (count($filter_obj["subquery_numbers"])) {
+		if (count_compat($filter_obj["subquery_numbers"])) {
 			$subquery_number=max(max($filter_obj["subquery_numbers"])+1,1); // not treated by section 3
 		}
 		else {
@@ -193,13 +193,13 @@ $filter_obj
 		if ($_REQUEST["selected_only"]) {
 			$filter_obj["query_pattern"]="(".$filter_obj["query_pattern"].") AND <".$subquery_number.">";
 			
-			if (count($settings["selection"][$table])) {
+			if (count_compat($settings["selection"][$table])) {
 				//~ foreach ($settings["selection"][$table] as $db_id => $pkData) {
 				$selected_cache=array();
 				foreach ($db_list as $db_id) {
 					$pkData=& $settings["selection"][$table][$db_id];
 					$tempArray=array();
-					if (count($pkData)) {
+					if (count_compat($pkData)) {
 						foreach ($pkData as $pk => $active) {
 							if ($active) {
 								$tempArray[]=$pk;
@@ -255,7 +255,7 @@ $filter_obj
 		}
 
 		// 3. für <\d+> Bedingungen auslesen und in Arraystruktur speichern (-> query-cache), leere Bedingungen werden durch TRUE ersetzt
-		for ($a=0;$a<count($filter_obj["subquery_numbers"]);$a++) { // hier MUSS count direkt in Schleifenbedingungen stehen, weil die Zahl ggf noch wächst
+		for ($a=0;$a<count_compat($filter_obj["subquery_numbers"]);$a++) { // hier MUSS count direkt in Schleifenbedingungen stehen, weil die Zahl ggf noch wächst
 			$subquery_number=& $filter_obj["subquery_numbers"][$a];
 			
 			// save query parts
@@ -292,7 +292,7 @@ $filter_obj
 				//~ preg_match_all("/(?ims)<(\d+)>/",$filter_obj["vals"][$subquery_number][0],$subquery_number_match,PREG_PATTERN_ORDER);
 				//~ $subquery_number_match=$subquery_number_match[1];
 				$subquery_number_match=getSubqueryNumberFromPattern($filter_obj["vals"][$subquery_number][0]);
-				for ($b=0;$b<count($subquery_number_match);$b++) {
+				for ($b=0;$b<count_compat($subquery_number_match);$b++) {
 					$filter_obj["subquery_numbers"][]=$subquery_number_match[$b];
 					$filter_obj["forTable"][$subquery_number_match[$b]]=$filter_obj["selectTable"][$subquery_number];
 				}
@@ -304,9 +304,9 @@ $filter_obj
 				$filter_obj["subreaction"][$subquery_number]=$reaction;
 				// rxnfile durchgehen und subquery bauen
 				$rxn_conditions=array();
-				if (count($reaction["molecules"])) {
+				if (count_compat($reaction["molecules"])) {
 					foreach ($reaction["molecules"] as $idx => $molecule) { // rc_$subquery_number_$idx
-						if (count($molecule["atoms"])==0) {
+						if (count_compat($molecule["atoms"])==0) {
 							continue;
 						}
 						$st_name="rc_".$subquery_number."_".$idx;
@@ -329,7 +329,7 @@ $filter_obj
 						$rxn_conditions[$idx]=getSimilarFilter($molecule,$st_name)." AND ".$st_name.".role IN(".$roles.")";
 					}
 				}
-				if (count($rxn_conditions)) {
+				if (count_compat($rxn_conditions)) {
 					$filter_obj["subqueries"][$subquery_number]=join(" AND ",$rxn_conditions);
 				}
 				else {
@@ -535,13 +535,13 @@ $filter_obj
 			$filter_obj["subqueries"][$subquery_number]=getSubstructureFilter(array("table" => $table, "dbs" => $dbs, "db_filter" => $paramHash["db_filter"] ),$molecule,"formula"); // check only changed structures if possible
 		}*/
 	// 5. sq behandeln
-	for ($b=0;$b<count($filter_obj["subquery_numbers"]);$b++) {
+	for ($b=0;$b<count_compat($filter_obj["subquery_numbers"]);$b++) {
 		$subquery_number=& $filter_obj["subquery_numbers"][$b];
 		if ($filter_obj["ops"][$subquery_number]=="sq") {
 			// <9> AND <17> prüfen
 			$filter_obj["vals"][$subquery_number][0]=checkQueryPattern($filter_obj["vals"][$subquery_number][0],$invalid_cond);
 			// Unterabfrage einbauen
-			for ($a=0;$a<count($db_list);$a++) {
+			for ($a=0;$a<count_compat($db_list);$a++) {
 				$db_id=$db_list[$a];
 				$this_subquery=$table.".".$pk_name." IN( SELECT ".$filter_obj["crits"][$subquery_number]." FROM ".getTableFrom($filter_obj["selectTable"][$subquery_number],$db_id);
 				//~ if ($db_id=="-1") {
@@ -566,7 +566,7 @@ $filter_obj
 	
 	// 7. bei Reaktionssuche: Abfrage ausführen und Reaktionsstruktur-Filter, IN(...)-Abfrage als query-string setzen
 	//~ print_r($filter_obj);
-	if (count($filter_obj["selects"]) && count($filter_obj["subreaction"]) && count($filter_obj["local_joins"]) && count($filter_obj["remote_joins"])) {
+	if (count_compat($filter_obj["selects"]) && count_compat($filter_obj["subreaction"]) && count_compat($filter_obj["local_joins"]) && count_compat($filter_obj["remote_joins"])) {
 		// , "db_filter" => $paramHash["db_filter"]
 		
 		$results=mysql_select_array(array(
@@ -597,19 +597,19 @@ $filter_obj
 		
 		// leere arrays vorbereiten
 		$subreactions=array_keys($filter_obj["subreaction"]);
-		for ($a=0;$a<count($subreactions);$a++) {
+		for ($a=0;$a<count_compat($subreactions);$a++) {
 			$subquery_number=& $subreactions[$a];
 			$reaction=& $filter_obj["subreaction"][$subquery_number];
 			$good_smiles[$subquery_number]=array();
 			$bad_smiles[$subquery_number]=array();
-			for ($idx=0;$idx<count($reaction["molecules"]);$idx++) {
+			for ($idx=0;$idx<count_compat($reaction["molecules"]);$idx++) {
 				$good_smiles[$subquery_number][$idx]=array();
 				$bad_smiles[$subquery_number][$idx]=array();
 			}
 		}
 		
 		// Ergebnisse durchgehen
-		for ($a=0;$a<count($results);$a++) { // 3
+		for ($a=0;$a<count_compat($results);$a++) { // 3
 			if (!is_array($good_pks[ $results[$a]["db_id"] ])) {
 				$good_pks[ $results[$a]["db_id"] ]=array();
 			}
@@ -667,7 +667,7 @@ $filter_obj
 		//~ print_r($good_smiles);
 		//~ print_r($bad_smiles);die();
 		if (is_array($db_list)) foreach ($db_list as $db_id) {
-			if (count($good_pks[$db_id])) {
+			if (count_compat($good_pks[$db_id])) {
 				$good_pks[$db_id]=$table.".".$pk_name." IN(".join(",",$good_pks[$db_id]).")";
 			}
 			else {
@@ -1025,14 +1025,14 @@ function procSubquery($db_list,$table,$crit_table,$crit,$op,$vals) { // gibt ein
 		// 1. parse quot marks, only "
 		$vals[0]=trim($vals[0]);
 		$fragments=explode("\"",$vals[0]);
-		for ($b=0;$b<count($fragments);$b++) {
+		for ($b=0;$b<count_compat($fragments);$b++) {
 			if ($b%2) { // ungerade, in den quot-marks
 				$words=array($fragments[$b]);
 			}
 			else { // gerade, außerhalb der quot-marks
 				$words=explode(" ",$fragments[$b]);
 			}
-			for ($a=0;$a<count($words);$a++) {
+			for ($a=0;$a<count_compat($words);$a++) {
 				//~ $words[$a]=trim($words[$a]);
 				if ($words[$a]=="") {
 					continue;
@@ -1053,7 +1053,7 @@ function procSubquery($db_list,$table,$crit_table,$crit,$op,$vals) { // gibt ein
 				$retval.=$crit." LIKE ".fixStrSQL("%".SQLSearch($words[$a])."%");
 			}
 		}
-		if ($retval=="" || count($fragments)==0) {
+		if ($retval=="" || count_compat($fragments)==0) {
 			$retval="FALSE";
 		}
 		multiConcat($subquery,$retval);
@@ -1098,7 +1098,7 @@ function checkQueryPattern($pattern,$invalid_cond=array()) {
 	$pattern=str_replace(array("AND","OR","X OR ","NOT","(",")","<",">"),array(" AND "," OR "," XOR "," NOT "," ( "," ) "," <","> "),strtoupper($pattern));
 	$elements=explode(" ",$pattern); // may contain many empty
 	$level=0;
-	for ($a=0;$a<count($elements);$a++) {
+	for ($a=0;$a<count_compat($elements);$a++) {
 		if ($binary_allowed) {
 			switch ($elements[$a]) {
 			case "AND":
@@ -1275,14 +1275,14 @@ function getSubstructureFilter($db_list,$paramHash,& $molecule,$mode) { // retur
 	break;
 	}*/
 	//~ print_r($db_results);
-	//~ die(count($db_results)."X");
+	//~ die(count_compat($db_results)."X");
 	$results=array();
 	
 	if (in_array($mode,array("ia","ba","ib","su"))) { // Substruktursuche
 		
 		$no_proc=intval($g_settings["no_processors"]); // make int
 		// min 500 Strukturen/Prozessor
-		//~ $no_proc=min($no_proc,ceil(count($db_results)/500));
+		//~ $no_proc=min($no_proc,ceil(count_compat($db_results)/500));
 		$no_proc=min($no_proc,ceil($db_results["count"]/500));
 		
 		//~ if (true || $no_proc<=1) {
@@ -1295,7 +1295,7 @@ function getSubstructureFilter($db_list,$paramHash,& $molecule,$mode) { // retur
 				}
 			}
 		}
-		//~ for ($a=0;$a<count($db_results);$a++) {
+		//~ for ($a=0;$a<count_compat($db_results);$a++) {
 			//~ $haystackMolecule=unserialize(@gzuncompress($db_results[$a]["molecule_serialized"]));
 			//~ if (getSubstMatch($molecule,$haystackMolecule)) {
 				//~ $results[$db_results[$a]["db_id"]][]=$db_results[$a]["pk"];
@@ -1307,7 +1307,7 @@ function getSubstructureFilter($db_list,$paramHash,& $molecule,$mode) { // retur
 			$process=array();
 			$pipes=array();
 			$buffer=array();
-			$struc_per_proc=ceil(count($db_results)/$no_proc);
+			$struc_per_proc=ceil(count_compat($db_results)/$no_proc);
 			//~ die($struc_per_proc);
 			
 			//~ for ($b=0;$b<$no_proc;$b++) {
@@ -1324,7 +1324,7 @@ require_once "lib_molfile.php";
 $molecule=unserialize(\''.serialize($molecule).'\');
 $db_results=unserialize(\''.str_replace(array("\\","'"),array("\\\\","\'"),serialize(array_splice($db_results,$b*$struc_per_proc,$struc_per_proc))).'\');
 $results=array();
-for ($a=0;$a<count($db_results);$a++) {
+for ($a=0;$a<count_compat($db_results);$a++) {
 	$haystackMolecule=unserialize(@gzuncompress($db_results[$a]["molecule_serialized"]));
 	
 	if (getSubstMatch($molecule,$haystackMolecule)) {
@@ -1400,7 +1400,7 @@ echo serialize($results);
 			}
 		}
 		//~ // Subst-Prüfung
-		//~ for ($a=0;$a<count($db_results);$a++) {
+		//~ for ($a=0;$a<count_compat($db_results);$a++) {
 			//~ $haystackMolecule=readSumFormula($db_results[$a]["emp_formula"],$haystackParamHash);
 			//~ if (getSubEmpFormulaMatch($molecule,$haystackMolecule)) {
 				//~ $results[ $db_results[$a]["db_id"] ][]=$db_results[$a]["pk"];
@@ -1410,7 +1410,7 @@ echo serialize($results);
 	
 	// Rückgabewerte für SQL aufbauen
 	if (is_array($db_list)) foreach ($db_list as $db_id) {
-		if (count($results[$db_id])) {
+		if (count_compat($results[$db_id])) {
 			$retval[$db_id]=$pk." IN(".join(",",$results[$db_id]).")";
 		}
 		else {

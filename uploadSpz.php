@@ -33,7 +33,7 @@ require_once "File/Archive.php";
 // go through zip and search for .openenv
 $spzfile_name="spzfile";
 
-if (count($_FILES[$spzfile_name]) && $_FILES[$spzfile_name]["error"]==0) {
+if (count_compat($_FILES[$spzfile_name]) && $_FILES[$spzfile_name]["error"]==0) {
 	$filename=& $_FILES[$spzfile_name]["tmp_name"];
 	$filesize=& $_FILES[$spzfile_name]["size"];
 	// datei öffnen
@@ -101,7 +101,7 @@ $table="analytical_data";
 if (!$fail && isset($zip)) {
 	// generate GIF
 	$spectrum_data=getProcData($file_contents,$analytics_img_params,$data["analytics_type_code"],$data["analytics_device_driver"]);
-	if (count($spectrum_data)) { // generieren
+	if (count_compat($spectrum_data)) { // generieren
 		$graphics_text=
 		",analytical_data_graphics_blob=".fixBlob($spectrum_data["img"][0]).
 		",analytical_data_graphics_type=".fixStrSQL($spectrum_data["img_mime"][0]); // update image only if generated
@@ -110,7 +110,7 @@ if (!$fail && isset($zip)) {
 	// insert additional images (if any)
 	$sql_query[]="DELETE FROM analytical_data_image WHERE analytical_data_image.analytical_data_id=".fixNull($data["analytical_data_id"]).";";
 	$imagesUpdated=true;
-	for ($a=1;$a<count($spectrum_data["img"]);$a++) {
+	for ($a=1;$a<count_compat($spectrum_data["img"]);$a++) {
 		$sql_query[]="INSERT INTO analytical_data_image (analytical_data_id,reaction_id,project_id,image_no,analytical_data_graphics_blob,analytical_data_graphics_type) 
 			VALUES (".fixNull($data["analytical_data_id"]).",".fixNull($analytical_data["reaction_id"]).",".fixNull($analytical_data["project_id"]).",".$a.",".fixBlob($spectrum_data["img"][$a]).",".fixStrSQL($spectrum_data["img_mime"][$a]).");";
 	}

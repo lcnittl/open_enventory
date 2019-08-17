@@ -24,7 +24,7 @@ along with open enventory.  If not, see <http://www.gnu.org/licenses/>.
 /* function fixMetalAllyl(& $molecule,$atom_no) { // Allylbindungen aromatisieren (auch wenn es eigentlich KEIN Aromat ist, Ladung wird weggenommen, um Symmetrie zu erreichen
 	$retval=false;
 	
-	for ($a=0;$a<count($molecule["atoms"][$atom_no][NEIGHBOURS]);$a++) { // Nachbarn durchgehen
+	for ($a=0;$a<count_compat($molecule["atoms"][$atom_no][NEIGHBOURS]);$a++) { // Nachbarn durchgehen
 		$neighbour_atom=$molecule["atoms"][$atom_no][NEIGHBOURS][$a];
 		if ($molecule["atoms"][$neighbour_atom]["hasMetalNeighbour"] && $molecule["bondsFromNeighbours"][$atom_no][$neighbour_atom][BOND_ORDER]==1) {
 			// Allyl-Konstellation gefunden
@@ -46,10 +46,10 @@ along with open enventory.  If not, see <http://www.gnu.org/licenses/>.
 * /
 	$atom_no=end($path);
 	
-	for ($a=0;$a<count($molecule["atoms"][$atom_no][NEIGHBOURS]);$a++) { // Nachbarn durchgehen
+	for ($a=0;$a<count_compat($molecule["atoms"][$atom_no][NEIGHBOURS]);$a++) { // Nachbarn durchgehen
 		$neighbour_atom=$molecule["atoms"][$atom_no][NEIGHBOURS][$a];
 		// prüfen, ob weitere Doppelbindung an $neighbour_atom hängt (=> Konjugation)
-		for ($b=0;$b<count($molecule["atoms"][$neighbour_atom][NEIGHBOURS]);$b++) {
+		for ($b=0;$b<count_compat($molecule["atoms"][$neighbour_atom][NEIGHBOURS]);$b++) {
 			$new_atom_no=$molecule["atoms"][$neighbour_atom][NEIGHBOURS][$b];
 			if ($molecule["bondsFromNeighbours"][$new_atom_no][$neighbour_atom][BOND_ORDER]!=2 || in_array($new_atom_no,$path)) { // prevent endless loop
 				continue;
@@ -68,7 +68,7 @@ along with open enventory.  If not, see <http://www.gnu.org/licenses/>.
 function getHybridisation(& $molecule,$atom_no) { // spx
 	if (
 		$atom_no<0 || 
-		$atom_no>=count($molecule["atoms"]) || 
+		$atom_no>=count_compat($molecule["atoms"]) || 
 		$molecule["atoms"][$atom_no][ATOMIC_SYMBOL]=="H" || 
 		$molecule["atoms"][$atom_no][NON_H_BONDS]>5 || // Sulfate, Phosphate
 		isMetal($molecule["atoms"][$atom_no][ATOMIC_SYMBOL]) 
@@ -150,7 +150,7 @@ function getBondPolarity(& $molecule,$bond_no) {
 	if (isset($molecule[BONDS][$bond_no][BOND_POLARITY])) {
 		return $molecule[BONDS][$bond_no][BOND_POLARITY];
 	}
-	if ($bond_no<0 || $bond_no>=count($molecule[BONDS])) {
+	if ($bond_no<0 || $bond_no>=count_compat($molecule[BONDS])) {
 		return;
 	}
 	$atom_no1=$molecule[BONDS][$bond_no][ATOM1];
@@ -166,7 +166,7 @@ function getBondPolarity(& $molecule,$bond_no) {
 }
 
 function getOxidationState(& $molecule,$atom_no) {
-	if ($atom_no<0 || $atom_no>=count($molecule["atoms"])) {
+	if ($atom_no<0 || $atom_no>=count_compat($molecule["atoms"])) {
 		return;
 	}
 	if (isset($molecule["atoms"][$atom_no][OXIDATION_STATE])) {
@@ -178,7 +178,7 @@ function getOxidationState(& $molecule,$atom_no) {
 		return;
 	}
 	$tol=0.2; // if the diff is smaller, considered equal
-	for ($a=0;$a<count($molecule["atoms"][$atom_no][NEIGHBOURS]);$a++) {
+	for ($a=0;$a<count_compat($molecule["atoms"][$atom_no][NEIGHBOURS]);$a++) {
 		$neighbour_atom=$molecule["atoms"][$atom_no][NEIGHBOURS][$a];
 		$neighbour_eneg=getEneg($molecule["atoms"][$neighbour_atom][ATOMIC_NUMBER]);
 		if ($neighbour_eneg>0.0) {
@@ -207,12 +207,12 @@ function getOxidationState(& $molecule,$atom_no) {
 }
 
 function walkAllylConjugation(& $molecule,$path=array()) {
-	$path_count=count($path);
+	$path_count=count_compat($path);
 	if ($path_count<1) {
 		return;
 	}
 	$atom_no=$path[$path_count-1];
-	for ($a=0;$a<count($molecule["atoms"][$atom_no][NEIGHBOURS]);$a++) {
+	for ($a=0;$a<count_compat($molecule["atoms"][$atom_no][NEIGHBOURS]);$a++) {
 		$new_atom=$molecule["atoms"][$atom_no][NEIGHBOURS][$a];
 		if (in_array($new_atom,$path)) { // no loops, too dangerous
 			continue;
@@ -266,15 +266,15 @@ function walkAllylConjugation(& $molecule,$path=array()) {
 }
 
 function walkAllylAlternate($molecule,$orig_atom,$path=array()) {
-	$path_count=count($path);
+	$path_count=count_compat($path);
 	if ($path_count<1) {
 		return;
 	}
-	if (!count($molecule["atoms"][$orig_atom]["SMpivot_atoms"]) || !count($molecule["atoms"][$orig_atom]["SMcharge_atoms"])) {
+	if (!count_compat($molecule["atoms"][$orig_atom]["SMpivot_atoms"]) || !count_compat($molecule["atoms"][$orig_atom]["SMcharge_atoms"])) {
 		return;
 	}
 	$atom_no=$path[$path_count-1];
-	for ($a=0;$a<count($molecule["atoms"][$atom_no][NEIGHBOURS]);$a++) {
+	for ($a=0;$a<count_compat($molecule["atoms"][$atom_no][NEIGHBOURS]);$a++) {
 		$new_atom=$molecule["atoms"][$atom_no][NEIGHBOURS][$a];
 		if ($molecule["bondsFromNeighbours"][$atom_no][$new_atom][BOND_ORDER]!=1.5 || $molecule["atoms"][$new_atom]["ar"] || in_array($new_atom,$path)) {
 		// 	not aromatized, 										in real aromatic ring, 				in loop (too dangerous)
@@ -301,7 +301,7 @@ function aromatizeAllyl(& $molecule) {
 	global $sideOnEl;
 	
 	// atome durchgehen und neg ladung suchen
-	for ($a=0;$a<count($molecule["atoms"]);$a++) {
+	for ($a=0;$a<count_compat($molecule["atoms"]);$a++) {
 		if ($molecule["atoms"][$a][CHARGE]<0) {
 			walkAllylConjugation($molecule,array($a) );
 		}
@@ -309,7 +309,7 @@ function aromatizeAllyl(& $molecule) {
 	
 /*	// Einfachbindungen neben ECHTEN Doppelbindungen zu 1.5 machen (original 1 bleibt), wenn ein Metall benachbart ist (Allyl, Enolat,...)
 	// vorerst KEIN Propargyl (- und Dreifach)
-	for ($a=0;$a<count($molecule[BONDS]);$a++) {
+	for ($a=0;$a<count_compat($molecule[BONDS]);$a++) {
 		// ist es echte Doppelbgd
 		if ($molecule[BONDS][$a][BOND_ORDER]!=2) { //  && $molecule[BONDS][$a][BOND_ORDER]!=3
 			continue;
@@ -343,11 +343,11 @@ function aromatizeAllyl(& $molecule) {
 }
 
 function getHighestAtomNoFromList(& $molecule,$list) {
-	if (!count($list)) {
+	if (!count_compat($list)) {
 		return false;
 	}
 	$highest_atom=$list[0];
-	for ($b=1;$b<count($list);$b++) {
+	for ($b=1;$b<count_compat($list);$b++) {
 		$a=$list[$b];
 		
 		if (SMisHigherThan($molecule["atoms"][$a],$molecule["atoms"][$highest_atom])) {
@@ -358,11 +358,11 @@ function getHighestAtomNoFromList(& $molecule,$list) {
 }
 
 function getLowestAtomNoFromList(& $molecule,$list) {
-	if (!count($list)) {
+	if (!count_compat($list)) {
 		return false;
 	}
 	$lowest_atom=$list[0];
-	for ($b=1;$b<count($list);$b++) {
+	for ($b=1;$b<count_compat($list);$b++) {
 		$a=$list[$b];
 		
 		if (SMisHigherThan($molecule["atoms"][$lowest_atom],$molecule["atoms"][$a])) {
@@ -374,12 +374,12 @@ function getLowestAtomNoFromList(& $molecule,$list) {
 
 function dearomatizeAllyl(& $molecule) { // Ladung und 2/1-Bindungen bei Allylsystemen wiederherstellen, dadurch werden diese Systeme unique, NUR sm_o für SMILES-Generierung ändern!!
 	// Cp-Ringe behandeln (relativ einfach und definiert)
-	for ($a=0;$a<count($molecule[RINGS]);$a++) {
+	for ($a=0;$a<count_compat($molecule[RINGS]);$a++) {
 		if ($molecule[RINGS][$a]["type"]!="Cp-") {
 			continue;
 		}
 		unset($SMc_atom);
-		$membersCount=count($molecule[RINGS][$a]["atoms"]);
+		$membersCount=count_compat($molecule[RINGS][$a]["atoms"]);
 		for ($b=0;$b<$membersCount;$b++) { // gibt es SMc (Originalladung)?
 			$atom_no=$molecule[RINGS][$a]["atoms"][$b];
 			$SMc=$molecule["atoms"][$atom_no][SMILES_CHARGE];
@@ -413,7 +413,7 @@ function dearomatizeAllyl(& $molecule) { // Ladung und 2/1-Bindungen bei Allylsy
 	
 	// Allylsysteme durchgehen
 	// atome durchgehen und neg ladung suchen
-	for ($a=0;$a<count($molecule["atoms"]);$a++) {
+	for ($a=0;$a<count_compat($molecule["atoms"]);$a++) {
 		$SMc=$molecule["atoms"][$a][SMILES_CHARGE];
 		if (isset($SMc)) { // Cp-artiges ist schon weg
 			$highest=getLowestAtomNoFromList($molecule,$molecule["atoms"][$a]["SMcharge_atoms"]); // MUST be lowest as otherwise we may get vinyl anions
@@ -430,15 +430,15 @@ function dearomatizeAllyl(& $molecule) { // Ladung und 2/1-Bindungen bei Allylsy
 
 function transformForSearchDisconnect(& $molecule) { // muß recht früh durchgeführt werden, vor ringbehandlung, fingerprinting, smiles, usw. DIREKT nach dem Einlesen des Molfiles, weil ggf. neue parts entstehen
 	global $valencies,$sideOnEl,$ionicEl,$group16el,$halogens;
-	for ($a=0;$a<count($molecule["atoms"]);$a++) {
+	for ($a=0;$a<count_compat($molecule["atoms"]);$a++) {
 		
 		//~ if ($molecule["atoms"][$a][CHARGE]<0) { // treat anion like metal-bound
 			//~ $molecule["atoms"][$a]["hasMetalNeighbour"]=true;
 		//~ }
 		
-		if ($molecule["atoms"][$a][ATOMIC_SYMBOL]=="O" && count($molecule["atoms"][$a][NEIGHBOURS])==1) { // fix ionic CO
+		if ($molecule["atoms"][$a][ATOMIC_SYMBOL]=="O" && count_compat($molecule["atoms"][$a][NEIGHBOURS])==1) { // fix ionic CO
 			$neighbour_b=$molecule["atoms"][$a][NEIGHBOURS][0]; // Carbon
-			if ($molecule["atoms"][$neighbour_b][ATOMIC_SYMBOL]=="C" && count($molecule["atoms"][$neighbour_b][NEIGHBOURS])==1 && (
+			if ($molecule["atoms"][$neighbour_b][ATOMIC_SYMBOL]=="C" && count_compat($molecule["atoms"][$neighbour_b][NEIGHBOURS])==1 && (
 				$molecule["bondsFromNeighbours"][$neighbour_b][$a][BOND_ORDER]==2 || $molecule["bondsFromNeighbours"][$neighbour_b][$a][BOND_ORDER]==3 // C=O bond
 			)) {
 				// make CO-Bond double with no charges
@@ -453,7 +453,7 @@ function transformForSearchDisconnect(& $molecule) { // muß recht früh durchge
 		$hasImplicitHneighbour=($molecule["atoms"][$a][IMPLICIT_H]>0);
 		$explicitHneighbour=false;
 		if (!$hasImplicitHneighbour) { // try to find explicit H
-			for ($b=count($molecule["atoms"][$a][NEIGHBOURS])-1;$b>=0;$b--) {
+			for ($b=count_compat($molecule["atoms"][$a][NEIGHBOURS])-1;$b>=0;$b--) {
 				$neighbour_b=$molecule["atoms"][$a][NEIGHBOURS][$b];
 				if ($molecule["atoms"][$neighbour_b][ATOMIC_SYMBOL]=="H") {
 					$explicitHneighbour=$neighbour_b;
@@ -490,7 +490,7 @@ function transformForSearchDisconnect(& $molecule) { // muß recht früh durchge
 			
 			// separate acidic protons
 			if (in_array($molecule["atoms"][$a][ATOMIC_SYMBOL],$group16el) && $molecule["atoms"][$a][CHARGE]==0) { // O,S
-				for ($b=count($molecule["atoms"][$a][NEIGHBOURS])-1;$b>=0;$b--) { // Nachbarn von Atom $a durchgehen
+				for ($b=count_compat($molecule["atoms"][$a][NEIGHBOURS])-1;$b>=0;$b--) { // Nachbarn von Atom $a durchgehen
 					$neighbour_b=$molecule["atoms"][$a][NEIGHBOURS][$b];
 					if (
 						in_array($molecule["atoms"][$neighbour_b][ATOMIC_SYMBOL],array("C","N","Si","P","S")) // COOH, SO3H, PO3H2, HNO3, HX(O)n => C,S,P, N, X mit entsprechenden O's, die impl oder expl H's haben
@@ -507,7 +507,7 @@ function transformForSearchDisconnect(& $molecule) { // muß recht früh durchge
 						*/
 						
 						// find another $group16el with double bond
-						for ($c=count($molecule["atoms"][$neighbour_b][NEIGHBOURS])-1;$c>=0;$c--) { // Nachbarn von Atom $neighbour_b durchgehen
+						for ($c=count_compat($molecule["atoms"][$neighbour_b][NEIGHBOURS])-1;$c>=0;$c--) { // Nachbarn von Atom $neighbour_b durchgehen
 							$neighbour_c=$molecule["atoms"][$neighbour_b][NEIGHBOURS][$c];
 							if  (
 								$neighbour_c!=$a
@@ -554,7 +554,7 @@ function transformForSearchDisconnect(& $molecule) { // muß recht früh durchge
 		}
 		
 		// Nachbarn markieren für ggf Allyl,Enolat,...-Erkennung
-		for ($b=count($molecule["atoms"][$a][NEIGHBOURS])-1;$b>=0;$b--) {
+		for ($b=count_compat($molecule["atoms"][$a][NEIGHBOURS])-1;$b>=0;$b--) {
 			$atom_no=$molecule["atoms"][$a][NEIGHBOURS][$b];
 			//~ $molecule["atoms"][$atom_no]["hasMetalNeighbour"]=true;
 			//~ $molecule["atoms"][$atom_no]["metalNeighbours"][]=$a;
@@ -567,7 +567,7 @@ function transformForSearchDisconnect(& $molecule) { // muß recht früh durchge
 			$metallacyclopropaneStats=array();
 			// metallacyclopropan => olefin + M
 			// 2 Bindungfolgen durchgehen, Ringbindung suchen
-			for ($b=count($molecule["atoms"][$a][NEIGHBOURS])-1;$b>=0;$b--) { // von oben nach unten (wg Löschungen)
+			for ($b=count_compat($molecule["atoms"][$a][NEIGHBOURS])-1;$b>=0;$b--) { // von oben nach unten (wg Löschungen)
 				$neighbour_b=$molecule["atoms"][$a][NEIGHBOURS][$b]; // 1. Nachbar
 				if ($molecule["bondsFromNeighbours"][$a][$neighbour_b][BOND_ORDER]!=1 || !in_array($molecule["atoms"][$neighbour_b][ATOMIC_SYMBOL],$sideOnEl)) {
 					continue;
@@ -585,14 +585,14 @@ function transformForSearchDisconnect(& $molecule) { // muß recht früh durchge
 					}
 				}
 			}
-			while (count($metallacyclopropanes)) {
+			while (count_compat($metallacyclopropanes)) {
 				asort($metallacyclopropaneStats,SORT_NUMERIC);
 				foreach ($metallacyclopropaneStats as $neighbour => $freq) {
 					if ($freq<1) {
 						continue;
 					}
 					// take the member with the fewest participations and find a metallacyclopropane with it
-					for ($d=count($metallacyclopropanes)-1;$d>=0;$d--) {
+					for ($d=count_compat($metallacyclopropanes)-1;$d>=0;$d--) {
 						$metallacyclopropane=$metallacyclopropanes[$d];
 						if (in_array($neighbour,$metallacyclopropane)) {
 							$neighbour_b=$metallacyclopropane[0];
@@ -622,7 +622,7 @@ function transformForSearchDisconnect(& $molecule) { // muß recht früh durchge
 		// ionische und dative Bindungen auflösen
 		if ($molecule["atoms"][$a][BONDS]>=1) {
 			// M-X => M[+] + X[-]
-			for ($b=count($molecule["atoms"][$a][NEIGHBOURS])-1;$b>=0;$b--) { // von oben nach unten (wg Löschungen)
+			for ($b=count_compat($molecule["atoms"][$a][NEIGHBOURS])-1;$b>=0;$b--) { // von oben nach unten (wg Löschungen)
 				$neighbour_b=$molecule["atoms"][$a][NEIGHBOURS][$b];
 				$sym=$molecule["atoms"][$neighbour_b][ATOMIC_SYMBOL];
 				
@@ -642,10 +642,10 @@ function transformForSearchDisconnect(& $molecule) { // muß recht früh durchge
 					&& $molecule["atoms"][$neighbour_b][RADICAL]==0 
 					&& $molecule["atoms"][$neighbour_b][ORIG_IMPLICIT_H]==0 // Carbene complexes defined by valency
 					&& $molecule["atoms"][$neighbour_b][IMPLICIT_H]==0 // Carbene complexes defined by valency
-					&& count($molecule["atoms"][$neighbour_b][NEIGHBOURS])<4
+					&& count_compat($molecule["atoms"][$neighbour_b][NEIGHBOURS])<4
 				) { // Carben, single or double
 					// check for double or triple bound O as single neighbour
-					if (count($molecule["atoms"][$neighbour_b][NEIGHBOURS])==2) for ($c=0;$c<2;$c++) {
+					if (count_compat($molecule["atoms"][$neighbour_b][NEIGHBOURS])==2) for ($c=0;$c<2;$c++) {
 						$neighbour_c=$molecule["atoms"][$neighbour_b][NEIGHBOURS][$c];
 						if ($neighbour_c==$a) { // bond to metal
 							continue;

@@ -161,7 +161,7 @@ function showSelect($paramHash) {
 	
 	// calc int_names from langKeys
 	if (!isset($paramHash["int_names"])) { // mit Zahlen fr ENUM fllen
-		$paramHash["int_names"]=range(1,count($paramHash["langKeys"]));
+		$paramHash["int_names"]=range(1,count_compat($paramHash["langKeys"]));
 	}
 	
 	if (!isset($paramHash["texts"])) {
@@ -194,13 +194,13 @@ function showSelect($paramHash) {
 	
 	// rw-teil
 	if ($paramHash["radioMode"]) {
-		for ($a=0;$a<count($int_names);$a++) {
+		for ($a=0;$a<count_compat($int_names);$a++) {
 			$retval.="<input type=\"radio\" name=".fixStr($int_name)." id=".fixStr($int_names[$a])." value=".fixStr($int_names[$a]).$onChangeText.$allowLockText.$classText.($int_names[$a]==$paramHash["value"]?" checked=\"checked\"":"")."><label for=".fixStr($int_names[$a]).$allowLockText.$classText.">".removeWbr($texts[$a])."</label><br>";
 		}
 	}
 	else {
 		$retval="<label id=".fixStr("rw_".$int_name)." for=".fixStr($int_name).$allowLockText.$classText.">".$text."&nbsp;<select ".getNameId($int_name).$onChangeText.$allowLockText.$classText.">";
-		for ($a=0;$a<count($int_names);$a++) {
+		for ($a=0;$a<count_compat($int_names);$a++) {
 			$retval.="<option value=".fixStr($int_names[$a]).($int_names[$a]==$paramHash["value"]?" selected=\"selected\"":"")." title=".fixStr(removeWbr($texts[$a])).">".removeWbr($texts[$a]);
 		}
 		$retval.="</select></label>";
@@ -239,7 +239,7 @@ function showDBSelect($paramHash) {
 	
 	$retval="<label id=".fixStr("rw_".$int_name)." for=".fixStr($int_name).$allowLockText.$classText.">".$text."&nbsp;<select ".getNameId($int_name).$onChangeText.$allowLockText.$classText.">";
 	
-	for ($a=0;$a<count($paramHash["int_names"]);$a++) {
+	for ($a=0;$a<count_compat($paramHash["int_names"]);$a++) {
 		if (isset($paramHash["value"])) {
 			$checkText=($paramHash["int_names"][$a]==$paramHash["value"]?" selected=\"selected\"":"");
 		}
@@ -261,7 +261,7 @@ function showLanguageSelect($paramHash) { // nur für login
 	$int_names=array_keys($localizedString);
 	$texts=array();
 	
-	for ($a=0;$a<count($int_names);$a++) {
+	for ($a=0;$a<count_compat($int_names);$a++) {
 		array_push($texts,$localizedString[$int_names[$a]]["language_name"]);
 	}
 	if ($paramHash["allowDefault"]) {
@@ -271,7 +271,7 @@ function showLanguageSelect($paramHash) { // nur für login
 	$classText=getClass($paramHash);
 	
 	$retval=$text."&nbsp;<select ".getNameId($int_name).$classText.">";
-	for ($a=0;$a<count($int_names);$a++) {
+	for ($a=0;$a<count_compat($int_names);$a++) {
 		$retval.="<option value=\"".$int_names[$a]."\"".($int_names[$a]==$paramHash["value"]?"selected=\"selected\"":"").">".$texts[$a];
 	}
 	$retval.="</select>";
@@ -283,7 +283,7 @@ function loadJS($filenames,$prefix="") {
 		$filenames=array($filenames);
 	}
 	$retval="";
-	for ($a=0;$a<count($filenames);$a++) {
+	for ($a=0;$a<count_compat($filenames);$a++) {
 		if (empty($filenames[$a])) {
 			continue;
 		}
@@ -304,7 +304,7 @@ function getTableCell($value) {
 }
 
 function getTableLine($line) {
-	if (!count($line)) {
+	if (!count_compat($line)) {
 		return;
 	}
 	$retval="<tr>";
@@ -316,22 +316,22 @@ function getTableLine($line) {
 }
 
 function getTable($table,$headline=array()) {
-	if (!count($table)) {
+	if (!count_compat($table)) {
 		return;
 	}
 	// sync sizes
-	$max=count($headline);
+	$max=count_compat($headline);
 	foreach ($table as $line) {
-		$max=max($max,count($line));
+		$max=max($max,count_compat($line));
 	}
 	foreach ($table as $idx => $line) {
-		for ($a=count($line);$a<$max;$a++) {
+		for ($a=count_compat($line);$a<$max;$a++) {
 			$table[$idx][$a]="";
 		}
 	}
 	
 	$retval="<table class=\"listtable\">";
-	if (count($headline)) {
+	if (count_compat($headline)) {
 		$retval.="<thead><tr>";
 		for ($a=0;$a<$max;$a++) { // if too short, cells will be empty
 			$retval.=getTableCell($headline[$a]);

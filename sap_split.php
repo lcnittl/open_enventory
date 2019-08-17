@@ -90,7 +90,7 @@ function parseSAP($data) {
 	$old_REQUEST=$_REQUEST;
 	$data=fixLineEnd($data);
 	$raw_lines=explode("\n",$data);
-	echo "RAW lines: ".count($raw_lines)."<br>\n";
+	echo "RAW lines: ".count_compat($raw_lines)."<br>\n";
 	$line_len=81;
 	$lines=array();
 	$stage=-1;
@@ -101,7 +101,7 @@ function parseSAP($data) {
 	$dashLine="---------------------------------------------------------------------------------";
 	$pipeLine="|-------------------------------------------------------------------------------|";
 
-	for ($a=0;$a<count($raw_lines);$a++) {
+	for ($a=0;$a<count_compat($raw_lines);$a++) {
 		$this_line_len=strlen($raw_lines[$a]);
 		if ($this_line_len==0) {
 			continue;
@@ -131,11 +131,11 @@ function parseSAP($data) {
 		$lines[]=utf8_encode($raw_lines[$a]);
 	}
 
-	echo "Data lines: ".count($lines)."<br>\n";
+	echo "Data lines: ".count_compat($lines)."<br>\n";
 	echo "<table class=\"subitemlist\"><thead><tr><td>".s("order_date")."</td><td>".s("sap_stamm_nr")."</td><td>".s("identifier")."</td><td>".s("amount")."</td><td>".s("supplier")."</td><td>".s("order_account")."</td><td>".s("order_person")."</td></tr></thead><tbody>\n";
 
 	$skip=0;
-	for ($a=0;$a<count($lines);$a++) {
+	for ($a=0;$a<count_compat($lines);$a++) {
 		if ($skip>0) {
 			$skip--;
 			continue;
@@ -226,7 +226,7 @@ function parseSAP($data) {
 			"limit" => 1,
 		));
 
-		if (count($mpi_order)) {
+		if (count_compat($mpi_order)) {
 			// add missing info
 
 
@@ -299,7 +299,7 @@ echo "<title>".s("read_sap_dump")."</title><link href=\"style.css.php\" rel=\"st
 <input type=\"file\" name=\"load_sap\" id=\"load_sap\">
 <input type=\"submit\">
 </form>";
-if (count($_FILES["load_sap"])) {
+if (count_compat($_FILES["load_sap"])) {
 	// print_r($_FILES);
 	/*
     [load_molfile] => Array
@@ -342,7 +342,7 @@ function getDbIdForCostCentre( $costCentres, $dbIds, $account_no ) {
         $dbname = null;
 
         //find dbname for given account number
-        for( $i=0; $i < count( $costCentres); $i++ ) {
+        for( $i=0; $i < count_compat( $costCentres); $i++ ) {
 
             if( $costCentres[ $i ]["cost_centre"] == $account_no ) {
                 $dbname = $costCentres[ $i ]["name"];
@@ -352,7 +352,7 @@ function getDbIdForCostCentre( $costCentres, $dbIds, $account_no ) {
 
         //find local db id for given dbname
         if( $dbname != null ) {
-            for( $i=0; $i < count( $dbIds); $i++ ) {
+            for( $i=0; $i < count_compat( $dbIds); $i++ ) {
                 if( $dbIds[ $i ]["db_name"] == $dbname ) {
                     $ret = $dbIds[ $i ]["other_db_id"];
                     break;

@@ -43,7 +43,7 @@ elseif (function_exists($supplier_obj["getInfo"])) {
 	$result=$supplier_obj["getInfo"]($_REQUEST["extCatNo"]);
 }
 // create info text/list
-if (count($result["price"])>0) {
+if (count_compat($result["price"])>0) {
 	// menge,description (if applies), price+currency
 	$prices_text.=displayPrice($result,$supplier_obj["catalogHierarchy"],$supplier_obj["hasPriceList"]);
 	

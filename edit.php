@@ -108,14 +108,14 @@ if ((isset($_REQUEST["query"]) || !isEmptyStr($_REQUEST["cached_query"])) && $_R
 	if (isset($_REQUEST["goto_page"])) { // goto_page
 		$page=$_REQUEST["goto_page"];
 		if ($page<0) {
-			$page+=count($res);
+			$page+=count_compat($res);
 		}
-		$page=constrainVal($page,0,count($res)-1);
+		$page=constrainVal($page,0,count_compat($res)-1);
 		$_REQUEST["db_id"]=ifnotset($_REQUEST["db_id"],$res[$page]["db_id"]);
 		$pk=ifnotset($pk,$res[$page]["pk"]);
 	}
 	else { // db_id pk
-		for ($a=0;$a<count($res);$a++) { // finde aktives ergebnis
+		for ($a=0;$a<count_compat($res);$a++) { // finde aktives ergebnis
 			if ($res[$a]["db_id"]==$_REQUEST["db_id"] && $res[$a]["pk"]==$pk) {
 				$page=$a;
 				break;
@@ -167,7 +167,7 @@ elseif (
 			!empty($_REQUEST["db_id"]) 
 			&& !empty($_REQUEST["supplier_offer_id"])
 		) 
-		|| count($_REQUEST["order_alternative"])
+		|| count_compat($_REQUEST["order_alternative"])
 	)
 ) {
 	$result[0]=getDefaultDataset($table);
@@ -189,7 +189,7 @@ elseif (
 	}
 	else {
 		$backURL="searchExt.php";
-		for ($a=0;$a<count($_REQUEST["order_alternative"]);$a++) {
+		for ($a=0;$a<count_compat($_REQUEST["order_alternative"]);$a++) {
 			$result[0]["order_alternative"][$a]=unserialize(stripslashes($_REQUEST["order_alternative"][$a]));
 			
 			if (!empty($result[0]["order_alternative"][$a]["amount_unit"])) {
@@ -262,11 +262,11 @@ elseif ($table=="chemical_storage" && !empty($_REQUEST["from_reaction_id"]) && !
 				array("field" => $order_obj0_field, "order" => "DESC")
 			), 
 		));
-		if (count($result)) {
+		if (count_compat($result)) {
 			$result[0]=arr_merge(getDefaultDataset($table),$result[0]);
 		}
 	}
-	if (count($result)==0) {
+	if (count_compat($result)==0) {
 		$result[0]["molecule_id"]=""; // important
 		$rc_to_molecule=true; // transfer data from reaction
 	}
@@ -576,7 +576,7 @@ if ($editMode) {
 		$right[]=getInventoryButton();
 	}
 
-	if (count($res)) {
+	if (count_compat($res)) {
 		$center.="<form onsubmit=\"gotoNum();return false\" name=\"browseForm\">
 		<a href=\"Javascript:gotoFirst()\"><img src=\"lib/1st.png\" id=\"imgfirst\" width=\"16\" height=\"19\" border=\"0\"".getTooltip("btn_1st")."></a> 
 		<a href=\"Javascript:gotoPrev()\"><img src=\"lib/prev.png\" id=\"imgprev\" width=\"16\" height=\"18\" border=\"0\"".getTooltip("btn_prev")."></a> 
@@ -596,7 +596,7 @@ if ($editMode) {
 		
 		if ($baseTable=="reaction") { // new for this LJ
 			$buttons_ro_other.="<td><a href=\"javascript:void getNewReaction()\" class=\"imgButtonSm\" id=\"buttons_add\"><img src=\"lib/".$table."_sm.png\" border=\"0\"".getTooltip("new").">+</a></td>";
-			if (count($settings["include_in_auto_transfer"])) {
+			if (count_compat($settings["include_in_auto_transfer"])) {
 				$buttons_ro.=getEditButton("auto_trans");
 			}
 			$buttons_ro_other.=getEditButton("copy_reaction").
@@ -812,7 +812,7 @@ showCommFrame(array("name" => "edit")); // for async ops (reload data, save data
 
 $paramHash=array("text" => $actionText, "editMode" => $editMode, "table" => $baseTable, );
 
-if ($editMode && count($res)==0) { // keine Ergebnisse
+if ($editMode && count_compat($res)==0) { // keine Ergebnisse
 	echo s("no_results").
 script."
 activateEditView();
@@ -824,7 +824,7 @@ showMessage(".fixStr(s("no_results")).");
 	case "chemical_storage":
 	case "molecule":
 	case "supplier_offer":
-		if (!count($res)) {
+		if (!count_compat($res)) {
 			displayFixedQuery();
 		}
 	break;
@@ -919,7 +919,7 @@ else {
 	case "message":
 		require_once "lib_edit_message.php";
 		echo showMessageEditForm($paramHash);
-		//~ if ($readOnly && count($result["person"])) { // sowohl der absender als auch die empfnger sehen den bearbeitungsstatus
+		//~ if ($readOnly && count_compat($result["person"])) { // sowohl der absender als auch die empfnger sehen den bearbeitungsstatus
 			//~ echo outputList($result["person"],$columns["message_person"],array("noButtons" => true));
 		//~ }
 	break;
@@ -1018,7 +1018,7 @@ else {
 	if ($editMode) { // Datensatz bearbeiten
 
 		// cache initial dataset
-		for ($a=0;$a<count($result);$a++) {
+		for ($a=0;$a<count_compat($result);$a++) {
 			cacheDataset($a,$result[$a]["db_id"]!=$_REQUEST["db_id"] || $result[$a][$pk_name]!=$pk);
 			//~ if ($result[$a]["db_id"]==$_REQUEST["db_id"] && $result[$a][$pk_name]==$pk) {
 			//~ }
@@ -1030,7 +1030,7 @@ focusInput(\"idx\");\n";
 
 		// cache the rest with 300 ms delay
 		echo "window.setTimeout(function () {";
-		for ($a=0;$a<count($result);$a++) {
+		for ($a=0;$a<count_compat($result);$a++) {
 			if ($result[$a]["db_id"]!=$_REQUEST["db_id"] || $result[$a][$pk_name]!=$pk) {
 				cacheDataset($a);
 			}
@@ -1038,7 +1038,7 @@ focusInput(\"idx\");\n";
 		echo "},".$clientCache["initLoadDelay"].");\n";
 	}
 	else { // neuer Datensatz
-		if (count($result)==1) { // Vorgabewerte
+		if (count_compat($result)==1) { // Vorgabewerte
 			//~ print_r($result[0]);die();
 			echo "setControlValues(".json_encode($result[0]).",false);\n";
 		}

@@ -66,7 +66,7 @@ do {
 		"limit" => $start.",".$inc, 
 	));
 	
-	for ($a=0;$a<count($results);$a++) {
+	for ($a=0;$a<count_compat($results);$a++) {
 		for ($b=0;$b<fingerprint_count;$b++) {
 			$val=$results[$a]["fingerprint".($b+1)];
 			$coord=$b*fingerprint_bit; // $coord ist immer >= $coord2
@@ -90,9 +90,9 @@ do {
 			}
 		}
 	}
-	$item_count+=count($results);
+	$item_count+=count_compat($results);
 	
-	if (count($results)<$inc) {
+	if (count_compat($results)<$inc) {
 		break;
 	}
 	

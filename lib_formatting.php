@@ -92,7 +92,7 @@ function removeStyles($str,$stylePatterns) {
 // $replaceBy must have ; at the end if not empty
 function replaceStyles($str,$stylePatterns,$replaceBy) {
 	if (!is_array($replaceBy)) {
-		$replaceBy=array_fill(0,count($stylePatterns),$replaceBy);
+		$replaceBy=array_fill(0,count_compat($stylePatterns),$replaceBy);
 	}
 	foreach ($stylePatterns as $idx => $stylePattern) {
 		$str=replaceRecursive("/(?ims)(<[^>]+\sstyle=\'[^\']*)\s*".$stylePattern.";?\s*([^\']*\'[^>]*>)/","$1".$replaceBy[$idx]."$2",$str);
@@ -123,13 +123,13 @@ function textOnly(& $string) {
 
 function strip_tagsJS($data,$allowed=array()) {
 	$allowedStr="";
-	if (count($allowed)) {
+	if (count_compat($allowed)) {
 		$allowedStr="<".join("><",$allowed).">";
 	}
 	$data=strip_tags($data,$allowedStr);
 	
 	// remove on*-attribs from allowed tags
-	if (count($allowed)) {
+	if (count_compat($allowed)) {
 		foreach (array("on[a-zA-Z0-9]+","id","class") as $attribPattern) { // remove event handlers, id, class
 			$data=replaceRecursive("/(?ims)(<\/?[a-zA-Z0-9]+)" // $1
 				."(.*?\s)" // $2
@@ -274,10 +274,10 @@ function matchingFields(& $row,$prio1,$prio2,$formatting_function="") {
 }
 
 function fixStrSQLLists($arr,$field=null) {
-	if (!count($arr)) {
+	if (!count_compat($arr)) {
 		return "";
 	}
-	for ($a=0;$a<count($arr);$a++) {
+	for ($a=0;$a<count_compat($arr);$a++) {
 		if (is_null($field)) {
 			$arr[$a]=fixStrSQL($arr[$a]);
 		}
@@ -290,7 +290,7 @@ function fixStrSQLLists($arr,$field=null) {
 
 function fixArrayListString($arr1) {
 	$arr2=array();
-	for ($a=0;$a<count($arr1);$a++) {
+	for ($a=0;$a<count_compat($arr1);$a++) {
 		$arr2[]=fixStrSQL($arr1[$a]);
 	}
 	return join(",",$arr2);
@@ -298,7 +298,7 @@ function fixArrayListString($arr1) {
  
 function fixArrayList($arr1,$allowFloat=false) {
 	$arr2=array();
-	for ($a=0;$a<count($arr1);$a++) {
+	for ($a=0;$a<count_compat($arr1);$a++) {
 		if (is_numeric($arr1[$a])) {
 			if (!$allowFloat) {
 				$arr1[$a]+=0;
@@ -306,7 +306,7 @@ function fixArrayList($arr1,$allowFloat=false) {
 			$arr2[]=$arr1[$a];
 		}
 	}
-	if (count($arr2)) {
+	if (count_compat($arr2)) {
 		return join(",",$arr2);
 	}
 	else {
@@ -316,7 +316,7 @@ function fixArrayList($arr1,$allowFloat=false) {
  
 function fixNumberLists($list,$allowFloat=false) {
 	if (is_array($list)) {
-		if (count($list)<=0) {
+		if (count_compat($list)<=0) {
 			return "";
 		}
 		foreach ($list as $name => $value) {
@@ -337,7 +337,7 @@ function multiConcat(& $strOrArr1,$strOrArr2) { // sehr wichtig für lib_db_filt
 		$strOrArr1.=$strOrArr2;
 		return;
 	}
-	if (is_array($strOrArr2) && count($strOrArr2)==0) { // quick end
+	if (is_array($strOrArr2) && count_compat($strOrArr2)==0) { // quick end
 		return;
 	}
 	if (is_array($strOrArr2) && !is_array($strOrArr1)) { // convert 1 to array
@@ -400,7 +400,7 @@ function isEmpFormula($text) {
 	// deep check
 	preg_match_all("/[A-Z%][a-z]{0,2}/",$text,$matches,PREG_PATTERN_ORDER);
 	$matches=$matches[0];
-	for ($a=0;$a<count($matches);$a++) {
+	for ($a=0;$a<count_compat($matches);$a++) {
 		if (array_key_exists($matches[$a],$pse) || array_key_exists($matches[$a],$func_groups) || in_array($matches[$a],$atom_wildcards)) {
 			continue;
 		}
@@ -422,10 +422,10 @@ function makeCAS($text) {
 }
 
 function getBestCAS($cas_nrs) {
-	if (count($cas_nrs)) {
+	if (count_compat($cas_nrs)) {
 		$minqual=30; // lower is better
 		$cas_freq=array_count_values($cas_nrs);
-		for ($d=0;$d<count($cas_nrs);$d++) {
+		for ($d=0;$d<count_compat($cas_nrs);$d++) {
 			$this_len=strlen($cas_nrs[$d]);
 			$qual=$this_len-$cas_freq[ $cas_nrs[$d] ];
 			if ($this_len>0 && $qual<$minqual) {
@@ -698,7 +698,7 @@ function fixMultispace($string) {
 }
 
 function colSplit($string,$colArray=array(),$bin=false) {
-	if (count($colArray)==0) {
+	if (count_compat($colArray)==0) {
 		return $string;
 	}
 	$retval=array();
@@ -827,8 +827,8 @@ function formatSize($bytes) {
 		return "";
 	}
 	$units=array("Byte","KB","MB","GB");
-	for ($a=0;$a<count($units);$a++) {
-		if ($bytes<1024 || $a==count($units)-1) {
+	for ($a=0;$a<count_compat($units);$a++) {
+		if ($bytes<1024 || $a==count_compat($units)-1) {
 			return round($bytes,2)." ".$units[$a];
 		}
 		$bytes/=1024;
@@ -852,7 +852,7 @@ function getCitation($literature_data,$mode,$noHTML=false) {
 	$retval=array();
 	$author_list=array();
 	
-	if (count($literature_data["authors"])) {
+	if (count_compat($literature_data["authors"])) {
 		foreach ($literature_data["authors"] as $author) {
 			if ($author["author_first"] || $author["author_last"]) {
 				if ($mode==0) {
@@ -863,7 +863,7 @@ function getCitation($literature_data,$mode,$noHTML=false) {
 				}
 			}
 		}
-		if (count($author_list)) {
+		if (count_compat($author_list)) {
 			if ($mode==0) {
 				$retval[]=join(", ",$author_list);
 			}
@@ -1017,7 +1017,7 @@ function splitDatasetRange($limit_low,$limit_high,$datasetRange,$shift_down=1) {
 	$fragments=explode(",",$datasetRange);
 	$retval=array();
 	
-	for ($a=0;$a<count($fragments);$a++) {
+	for ($a=0;$a<count_compat($fragments);$a++) {
 		if (strpos($fragments[$a],"-")===FALSE) {
 			$retval[]=$fragments[$a]+$shift_down;
 		}
@@ -1120,7 +1120,7 @@ function fixHtmlOut($str) {
 }
 
 function conditionWrapJoin($pre,$delimit,$pArray,$post,$condArray) {
-	for ($a=0;$a<count($pArray);$a++) {
+	for ($a=0;$a<count_compat($pArray);$a++) {
 		if ($a!=0) {
 			$retval.=$delimit;
 		}
@@ -1136,7 +1136,7 @@ function conditionWrapJoin($pre,$delimit,$pArray,$post,$condArray) {
 }
 
 function ifjoin($pre,$delimit,$pArray,$post="",$pDefault="") {
-	if (!is_array($pArray) || !count($pArray)) {
+	if (!is_array($pArray) || !count_compat($pArray)) {
 		return $pDefault;
 	}
 	return $pre.join($delimit,$pArray).$post;
@@ -1181,7 +1181,7 @@ function containerFmt($container) { // replace by ifnotempty
 
 function joinIfNotEmpty($strArray,$delimiter=", ") {
 	$retStr="";
-	for ($a=0;$a<count($strArray);$a++) {
+	for ($a=0;$a<count_compat($strArray);$a++) {
 		if (empty($retStr) && !empty($strArray[$a])) {
 			$retStr=$strArray[$a];
 		}
@@ -1260,8 +1260,8 @@ function procReactionProduct(& $reaction,$reaction_chemical) {
 }
 
 function addPackageNames(& $moleculeData) {
-	for ($a=0;$a<count($moleculeData["molecule"]);$a++) {
-		for ($b=0;$b<count($moleculeData["molecule"][$a]["chemical_storage"]);$b++) {
+	for ($a=0;$a<count_compat($moleculeData["molecule"]);$a++) {
+		for ($b=0;$b<count_compat($moleculeData["molecule"][$a]["chemical_storage"]);$b++) {
 			addPackageName($moleculeData["molecule"][$a]["chemical_storage"][$b]);
 		}
 	}
@@ -1373,7 +1373,7 @@ function rightSpace($number,$digits=10) {
 }
 
 function formatPrice($price,$index="price") {
-	if (count($price)==0) {
+	if (count_compat($price)==0) {
 		return "";
 	}
 	$retval=@number_format($price[$index],2,".","")."&nbsp;";

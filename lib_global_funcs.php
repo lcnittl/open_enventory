@@ -218,7 +218,7 @@ function a($key,$mask) { // gibt array für Bitmaske zurück
 	
 	$retval=array();
 	$strArray=$localizedString[$lang][$key];
-	for ($a=0;$a<count($strArray);$a++) {
+	for ($a=0;$a<count_compat($strArray);$a++) {
 		if ($mask & pow(2,$a)) {
 			$retval[]=$strArray[$a];
 		}
@@ -228,7 +228,7 @@ function a($key,$mask) { // gibt array für Bitmaske zurück
 
 function m($strArray,$mask) { // gibt array für Bitmaske zurück
 	$retval=array();
-	for ($a=0;$a<count($strArray);$a++) {
+	for ($a=0;$a<count_compat($strArray);$a++) {
 		if ($mask & pow(2,$a)) {
 			$retval[]=s($strArray[$a]);
 		}
@@ -299,7 +299,7 @@ function checkExtensions() {
 	global $requiredExtensions,$requiredSettings;
 	$problem=false;
 	$messages="<html><body>";
-	for ($a=0;$a<count($requiredExtensions);$a++) {
+	for ($a=0;$a<count_compat($requiredExtensions);$a++) {
 		$extension=& $requiredExtensions[$a];
 		if (!extension_loaded($extension)) {
 			if (!$problem) {
@@ -309,7 +309,7 @@ function checkExtensions() {
 			$messages.=s("ext_not_inst1").$extension.s("ext_not_inst2")."<br>";
 		}
 	}
-	for ($a=0;$a<count($requiredSettings);$a++) {
+	for ($a=0;$a<count_compat($requiredSettings);$a++) {
 		$requiredSetting=& $requiredSettings[$a];
 		if (ini_get($requiredSetting["name"])!=$requiredSetting["value"]) {
 			if (!$problem) {
@@ -372,7 +372,7 @@ function getFunctionParameters($data,$fields) { // erzeugt JS-Array aus einem Da
 
 function getVarIdx($variables) { // erzeugt JS-Code, der JS-Variablen mit aufsteigenden ganzzahligen Werten erzeugt, $variables enthält die Variablennamen 
 	$retval="var a=0";
-	if (count($variables)==0) {
+	if (count_compat($variables)==0) {
 		return "";
 	}
 	foreach ($variables as $field) { // change to reaction_chemical_data_fields
@@ -467,7 +467,7 @@ function saveUserSettings($own_data_settings=array()) {
 	}
 	// setzt die globalen Einstellung in der DB
 	$sql_query="UPDATE ".getSelfViewName($db_user)." SET ";
-	for ($a=0;$a<count($own_data_settings);$a++) { // Texts only
+	for ($a=0;$a<count_compat($own_data_settings);$a++) { // Texts only
 		$name=$own_data_settings[$a];
 		$sql_query.= secSQL($name)."=".fixStrSQL($own_data[$name]).",";
 	}
@@ -577,7 +577,7 @@ function pageHeader($connectDB=true,$allowLoginForm=true,$autoCloseSession=true,
 		return false;
 	}
 	*/
-	if (is_array($_REQUEST["dbs"]) && count($_REQUEST["dbs"])) { // transform array of dbs into comma-separated list
+	if (is_array($_REQUEST["dbs"]) && count_compat($_REQUEST["dbs"])) { // transform array of dbs into comma-separated list
 		$_REQUEST["dbs"]=@join(",",$_REQUEST["dbs"]);
 	}
 	// session is always started to get session variables
@@ -667,7 +667,7 @@ function pageHeader($connectDB=true,$allowLoginForm=true,$autoCloseSession=true,
 			$_SESSION["other_db_disabled"]=array();
 			
 			// determine remote permissions $other_db_data
-			for ($a=0;$a<count($other_db_data);$a++) {
+			for ($a=0;$a<count_compat($other_db_data);$a++) {
 				$dbObj=getForeignDbObjFromData($other_db_data[$a]);
 				if (!$dbObj) {
 					$_SESSION["other_db_disabled"][]=$other_db_data[$a]["other_db_id"];
@@ -1271,7 +1271,7 @@ function completeDoc() {
 	// schreibt Debug-Informationen ans Ende, schließt DB und Session (eigentlich überflüssig, passiert am Ende sowieso
 	global $db,$other_db_data;
 	// close open connections to other dbs
-	for ($a=0;$a<count($other_db_data);$a++) {
+	for ($a=0;$a<count_compat($other_db_data);$a++) {
 		$conn=& $other_db_data[$a]["connection"];
 		if ($conn) {
 			mysqli_close($conn);

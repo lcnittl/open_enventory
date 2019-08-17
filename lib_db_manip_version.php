@@ -38,7 +38,7 @@ function insertVersionCopy($table,$dbObj,$copyCond,$version_comment,$archive_ent
 	$archive_table=getArchiveTable($table);
 	$archive_pkName=getPkName($archive_table);
 	
-	for ($a=0;$a<count($fields);$a++) {
+	for ($a=0;$a<count_compat($fields);$a++) {
 		$field=$fields[$a];
 		$selectFields[]=$table.".".$field;
 	}
@@ -69,7 +69,7 @@ function performVersion($table,$db_id,$dbObj,$version_comment) {
 	//~ $standardCond=$longPkName."=".$pk;
 	$standardCond=$pkName."=".$pk;
 	
-	for ($a=0;$a<count($fields);$a++) {
+	for ($a=0;$a<count_compat($fields);$a++) {
 		$selectFields[]=$table.".".$fields[$a];
 	}
 	
@@ -111,7 +111,7 @@ function recoverOldVersion($table,$dbObj,$recoverCond) { // recoverCond ist arch
 	$archive_table=getArchiveTable($table);
 	$archive_pkName=getPkName($archive_table);
 	
-	for ($a=0;$a<count($fields);$a++) {
+	for ($a=0;$a<count_compat($fields);$a++) {
 		$field=$fields[$a];
 		$selectFields[]=$archive_table.".".$field;
 	}

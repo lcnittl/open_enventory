@@ -49,7 +49,7 @@ function getCASfromName($molecule_name) {
 		}
 		echo $setting[0];
 		$hitlist=$suppliers[ $setting[0] ]["getHitlist"]($molecule_name,"molecule_name","eq");
-		if (count($hitlist)) {
+		if (count_compat($hitlist)) {
 			$bestHit=$suppliers[ $setting[0] ]["getBestHit"]($hitlist);
 			$molecule=$suppliers[ $setting[0] ]["getInfo"]($hitlist[$bestHit]["catNo"]);
 			return $molecule["cas_nr"];
@@ -67,11 +67,11 @@ while (!feof($handle)) {
 }
 fclose ($handle);
 
-for ($a=1+$_REQUEST["skip"];$a<count($zeilen);$a++) {
+for ($a=1+$_REQUEST["skip"];$a<count_compat($zeilen);$a++) {
 	$molecule=array();
 	$chemical_storage=array();
 	$cells=explode("\t",$zeilen[$a]);
-	for ($b=0;$b<count($cells);$b++) {
+	for ($b=0;$b<count_compat($cells);$b++) {
 		$cells[$b]=trim($cells[$b]);
 	}
 	if (empty($cells[0]) && empty($cells[1])) {

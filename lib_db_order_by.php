@@ -27,7 +27,7 @@ function getUserDefOrderObj($table) {
 	return array(
 		array(
 			"field" => (
-				is_array($settings[$table."_order"]) && count($settings[$table."_order"])
+				is_array($settings[$table."_order"]) && count_compat($settings[$table."_order"])
 			//~ )?"FIELD(".$pkName.",".fixArrayListString(array_values($settings[$table."_order"])).")":""
 			)?"FIELD(".$pkName.",".fixArrayListString(array_reverse(array_values($settings[$table."_order"]))).")":"", // prevent new devices etc to show up at the very top
 			"order" => "DESC", 
@@ -76,7 +76,7 @@ function getOptOrder($crit,$val) {
 }
 
 function reverseOrderObj($order_obj) {
-	for ($a=0;$a<count($order_obj);$a++) {
+	for ($a=0;$a<count_compat($order_obj);$a++) {
 		if ($order_obj[$a]["no_flip"]) {
 			continue;
 		}
@@ -109,7 +109,7 @@ function getOrderObjFromKey($order_key_str,$table) { // check if order_key is su
 		
 		// check if order keys fits to table
 		if (is_array($order_by_keys[$order_key]["for_table"]) && !in_array($table,$order_by_keys[$order_key]["for_table"])) {
-			if (!is_array($query[$table]["joins"]) || !count(array_intersect($order_by_keys[$order_key]["for_table"],$query[$table]["joins"])) ) {
+			if (!is_array($query[$table]["joins"]) || !count_compat(array_intersect($order_by_keys[$order_key]["for_table"],$query[$table]["joins"])) ) {
 				return array();
 			}
 		}
@@ -131,7 +131,7 @@ function getOrderStr($order_obj) {
 		return $order_obj;
 	}
 	$retval="";
-	for ($a=0;$a<count($order_obj);$a++) {
+	for ($a=0;$a<count_compat($order_obj);$a++) {
 		if (!empty($order_obj[$a]["field"])) {
 			$retval.=$order_obj[$a]["field"]." ".$order_obj[$a]["order"].",";
 		}

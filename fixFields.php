@@ -28,7 +28,7 @@ if ($result=mysqli_query($db,"SHOW DATABASES;")) {
 */
 set_time_limit(0);
 
-for ($f=0;$f<count($ret_val);$f++) {
+for ($f=0;$f<count_compat($ret_val);$f++) {
 	//~ $db_name=$ret_val[$f];
 	$db_name=$ret_val[$f]["name"];
 	echo "<h1>".$db_name."</h1>";
@@ -61,7 +61,7 @@ for ($f=0;$f<count($ret_val);$f++) {
 		mysqli_free_result($result);
 	}
 	$sql_query=array();
-	for ($a=0;$a<count($ret_val2);$a++) {
+	for ($a=0;$a<count_compat($ret_val2);$a++) {
 		set_time_limit(0);
 		
 		$sql_query[]="ALTER TABLE ".$ret_val2[$a]["Name"]." ENGINE = InnoDB;";
@@ -82,7 +82,7 @@ for ($f=0;$f<count($ret_val);$f++) {
 		$sql_query[]="ALTER TABLE `reaction_chemical` CHANGE `other_db_id` `other_db_id` INT( 10 ) NULL DEFAULT NULL;";
 		$sql_query[]="ALTER TABLE `person` CHANGE `permissions` `permissions` INT NULL DEFAULT NULL;";
 	}
-	if (count($sql_query)) {
+	if (count_compat($sql_query)) {
 		echo "<pre>".print_r($sql_query,true)."</pre>";
 		if ($_REQUEST["perform"]) {
 			performQueries($sql_query,$db); // ignore errors

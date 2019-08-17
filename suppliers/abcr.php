@@ -169,7 +169,7 @@ $GLOBALS["suppliers"][$code]=array(
 			preg_match_all("/(?ims)<td.*?<\/td>/",$line,$cells,PREG_PATTERN_ORDER);
 			$cells=$cells[0];
 			
-			if (count($cells)<5) {
+			if (count_compat($cells)<5) {
 				continue;
 			}
 			
@@ -214,7 +214,7 @@ $GLOBALS["suppliers"][$code]=array(
 				if (preg_match_all("/(?ims)<tr.*?<\/tr>/",$body,$prod_matches,PREG_PATTERN_ORDER)) foreach ($prod_matches[0] as $prod_match) {
 					preg_match_all("/(?ims)<td.*?<\/td>/",$prod_match,$cells,PREG_PATTERN_ORDER);
 					$cells=$cells[0];
-					if (count($cells)<4) {
+					if (count_compat($cells)<4) {
 						continue;
 					}
 					
@@ -225,7 +225,7 @@ $GLOBALS["suppliers"][$code]=array(
 					if (preg_match_all("/(?ims)<li[^>]*>(.*?)<\/li>/",$cells[3],$price_lines,PREG_PATTERN_ORDER)) foreach ($price_lines[0] as $price_line) {
 						preg_match_all("/(?ims)<span[^>]*>(.*?)<\/span>/",$price_line,$price_cells,PREG_PATTERN_ORDER);
 						$price_cells=$price_cells[0];
-						if (count($price_cells)<3) {
+						if (count_compat($price_cells)<3) {
 							continue;
 						}
 						
@@ -256,7 +256,7 @@ $GLOBALS["suppliers"][$code]=array(
 	return $results;
 '),
 "getBestHit" => create_function('& $hitlist,$name=NULL','
-	if (count($hitlist)>0) {
+	if (count_compat($hitlist)>0) {
 		return 0;
 	}
 ')

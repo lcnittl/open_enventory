@@ -48,7 +48,7 @@ function getSubitemList(& $paramHash) {
 	
 	if ($paramHash["allowCollapse"]) {
 		// insert cell and buttons before 1st "line"
-		for ($a=0;$a<count($fields);$a++) {
+		for ($a=0;$a<count_compat($fields);$a++) {
 			if ($fields[$a]["item"]=="line") {
 				array_splice(
 					$fields,
@@ -65,7 +65,7 @@ function getSubitemList(& $paramHash) {
 		}
 	}
 	
-	for ($a=0;$a<count($fields);$a++) {
+	for ($a=0;$a<count_compat($fields);$a++) {
 		if (!is_array($fields[$a])) {
 			// "br", etc
 			$fields[$a]=array("item" => $fields[$a]);
@@ -74,7 +74,7 @@ function getSubitemList(& $paramHash) {
 	
 	if (!$paramHash["noAutoLinks"]) {
 		// zeilenweise readOnly wird ber JS/Lockname realisiert
-		for ($a=0;$a<count($fields);$a++) {
+		for ($a=0;$a<count_compat($fields);$a++) {
 			if ($fields[$a]["item"]=="links") {
 				$hasLinks=true;
 				break;
@@ -98,7 +98,7 @@ function getSubitemList(& $paramHash) {
 	
 	$quot_list_int_name=htmlspecialchars(fixStr($int_name));
 	
-	for ($a=0;$a<count($fields);$a++) {
+	for ($a=0;$a<count_compat($fields);$a++) {
 		if ($fields[$a]["skip"]) {
 			continue;
 		}
@@ -414,7 +414,7 @@ function getSubitemList(& $paramHash) {
 				$imgAttribs=makeHTMLParams($fields[$a],array("width","height",));
 			}
 			
-			for ($b=0;$b<count($fields[$a]["int_names"]);$b++) {
+			for ($b=0;$b<count_compat($fields[$a]["int_names"]);$b++) {
 				if ($breakAfter>0 && $b % $breakAfter==0) {
 					if (!$roList) {
 						$line_prototype_readOnly.=$lineStart;
@@ -641,7 +641,7 @@ function getSubitemList(& $paramHash) {
 					"<div id=".fixStr($unmasked_name."_div")." style=\"position:absolute;display:none\">".
 					"<select size=\"5\" id=".fixStr($unmasked_name."_select")." onChange=\"".$onChange." SILclickCombo(".$JSitemParams.");\">";
 				
-				for ($b=0;$b<count($fields[$a]["int_names"]);$b++) {
+				for ($b=0;$b<count_compat($fields[$a]["int_names"]);$b++) {
 					if (!isset($fields[$a]["texts"][$b])) {
 						$fields[$a]["texts"][$b]=s($fields[$a]["int_names"][$b]);
 					}
@@ -835,7 +835,7 @@ function getSubitemList(& $paramHash) {
 				$onMouseoutText.
 				">";
 			
-			for ($b=0;$b<count($fields[$a]["int_names"]);$b++) {
+			for ($b=0;$b<count_compat($fields[$a]["int_names"]);$b++) {
 				if (!isset($fields[$a]["texts"][$b])) {
 					$fields[$a]["texts"][$b]=s($fields[$a]["int_names"][$b]);
 				}
@@ -870,7 +870,7 @@ function getSubitemList(& $paramHash) {
 				$onMouseoutText.
 				">";
 			
-			for ($b=0;$b<count($fields[$a]["int_names"]);$b++) {
+			for ($b=0;$b<count_compat($fields[$a]["int_names"]);$b++) {
 				if (!isset($fields[$a]["texts"][$b])) {
 					$fields[$a]["texts"][$b]=s($fields[$a]["int_names"][$b]);
 				}
@@ -1042,7 +1042,7 @@ controls[".fixStr($int_name)."][\"onBeforeDelete\"]=function(list_int_name,UID,p
 		
 		// add buttons for multiple lines
 		if ($paramHash["addMultipleButtons"]) {
-			for ($a=0;$a<count($paramHash["addMultipleButtons"]);$a++) {
+			for ($a=0;$a<count_compat($paramHash["addMultipleButtons"]);$a++) {
 				$rwInput.="</td><td>".
 					SILgetButton(array(
 						"type" => "add_line", 

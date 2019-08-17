@@ -150,7 +150,7 @@ parent.updateButtons();\n";
 }
 
 // daten laden
-if (is_array($_REQUEST["refresh_data"]) && count($_REQUEST["refresh_data"])) {
+if (is_array($_REQUEST["refresh_data"]) && count_compat($_REQUEST["refresh_data"])) {
 	$result=array();
 	foreach ($_REQUEST["refresh_data"] as $db_id_pk_chain) {
 		$pks=explode(",",$db_id_pk_chain);
@@ -161,7 +161,7 @@ if (is_array($_REQUEST["refresh_data"]) && count($_REQUEST["refresh_data"])) {
 	if ($_REQUEST["for_print"] && $baseTable=="reaction" && !empty($person_id) && ($permissions & _lj_read_all)==0) { // make leeching a bit more difficult
 		// filter out all foreign, does not give full safety as datasets may have been loaded before
 		$result=array("-1" => $result["-1"]); // remove all but db_id==-1
-		if (count($result["-1"])) {
+		if (count_compat($result["-1"])) {
 			$allowed=mysql_select_array(array(
 				"dbs" => -1,
 				//~ "table" => $baseTable, 
@@ -169,7 +169,7 @@ if (is_array($_REQUEST["refresh_data"]) && count($_REQUEST["refresh_data"])) {
 				"filter" => getLongPrimary($baseTable)." IN(".fixArrayList($result["-1"]).") AND lab_journal.person_id=".$person_id,
 			));
 			$result["-1"]=array(); // remove also db_id==-1
-			for ($a=0;$a<count($allowed);$a++) { // add allowed again
+			for ($a=0;$a<count_compat($allowed);$a++) { // add allowed again
 				$result["-1"][]=$allowed[$a][$pk_name];
 			}
 		}
@@ -188,7 +188,7 @@ if (is_array($_REQUEST["refresh_data"]) && count($_REQUEST["refresh_data"])) {
 	echo "parent.clearQueue();\n";
 	
 	// daten ausgeben
-	for ($a=0;$a<count($result);$a++) {
+	for ($a=0;$a<count_compat($result);$a++) {
 		echo "parent.cacheDataset(".$result[$a]["db_id"].",".$result[$a][$pk_name].",(".safe_json_encode($result[$a])."));\n";
 	}
 
@@ -213,7 +213,7 @@ if (is_array($_REQUEST["refresh_data"]) && count($_REQUEST["refresh_data"])) {
 			"quick" => true, //2, 
 		));
 		//~ echo "alert(".fixStr($_REQUEST["age_seconds"]).");\n";
-		for ($a=0;$a<count($changed_datasets);$a++) {
+		for ($a=0;$a<count_compat($changed_datasets);$a++) {
 			echo "parent.prepareUpdate(".$changed_datasets[$a]["db_id"].",".$changed_datasets[$a]["pk"].",0);\n"; // was 2
 		}
 	}

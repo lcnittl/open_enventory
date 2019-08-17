@@ -125,7 +125,7 @@ $GLOBALS["suppliers"][$code]=array(
 		preg_match_all("/(?ims)<td.*?<\/td>/",$line,$cells,PREG_PATTERN_ORDER);
 		$cells=$cells[0];
 		
-		if (count($cells)<2) {
+		if (count_compat($cells)<2) {
 			continue;
 		}
 		
@@ -191,11 +191,11 @@ $GLOBALS["suppliers"][$code]=array(
 	$result=array();
 	preg_match_all("/(?ims)<a[^>]*href=\".*?products_id=([^&\"]*).*?\"[^>]*>.*?<img[^>]+alt=\"([^\"]*)\".*?<h(\d)[^>]*>(.*?)<\/h\\\\3>(.*?)<a/",$body,$htmlEntries,PREG_SET_ORDER);
 //~ 	print_r($htmlEntries);die();
-	for ($b=0;$b<count($htmlEntries);$b++) {
+	for ($b=0;$b<count_compat($htmlEntries);$b++) {
 		preg_match_all("/(?ims)>Produktnummer: (.*?) Menge: (.*?) Preis:  (.*?) Lieferzeit: (.*?)</",$htmlEntries[$b][5],$price_matches,PREG_SET_ORDER);
 		$prices=array();
 		$catNo=fixTags($price_match[1]);
-		for ($c=0;$c<count($price_matches);$c++) {
+		for ($c=0;$c<count_compat($price_matches);$c++) {
 			$price_match=$price_matches[$c];
 			list(,$amount,$amount_unit)=getRange(fixTags($price_match[2]));
 			list(,$price,$currency)=getRange(fixTags($price_match[3]));
@@ -221,7 +221,7 @@ $GLOBALS["suppliers"][$code]=array(
 	return $result;
 '),
 "getBestHit" => create_function('& $hitlist,$name=NULL','
-	if (count($hitlist)>0) {
+	if (count_compat($hitlist)>0) {
 		return 0;
 	}
 ')

@@ -186,11 +186,11 @@ $GLOBALS["suppliers"][$code]=array(
 		preg_match_all("/(?ims)<tr.*?<\/tr>/",$match[1],$manyLines,PREG_PATTERN_ORDER);
 		$manyLines=$manyLines[0];
 		//~ var_dump($manyLines);die();
-		for ($b=0;$b<count($manyLines);$b++) {
+		for ($b=0;$b<count_compat($manyLines);$b++) {
 			preg_match_all("/(?ims)<td.*?<\/td>/",$manyLines[$b],$cells,PREG_PATTERN_ORDER);
 			$cells=$cells[0];
 			
-			if (count($cells)<3) {
+			if (count_compat($cells)<3) {
 				continue;
 			}
 			
@@ -247,7 +247,7 @@ $GLOBALS["suppliers"][$code]=array(
 			$cells=$cells[0];
 			//~ var_dump($cells);
 			
-			if (count($cells)>=3 && preg_match("/(?ims)<a[^>]+href=[\'\"].*?ProductsList\.aspx\?CategoryID=([^\'\"&]+)&.*?txtSearch=([^\'\"&]+)[^\'\"]*[\'\"][^>]*>/",$cells[1],$match)) {
+			if (count_compat($cells)>=3 && preg_match("/(?ims)<a[^>]+href=[\'\"].*?ProductsList\.aspx\?CategoryID=([^\'\"&]+)&.*?txtSearch=([^\'\"&]+)[^\'\"]*[\'\"][^>]*>/",$cells[1],$match)) {
 				$results[]=array(
 					"name" => fixTags($cells[2]), 
 					"beautifulCatNo" => fixTags($cells[1]), 
@@ -261,7 +261,7 @@ $GLOBALS["suppliers"][$code]=array(
 	return $results;
 '),
 "getBestHit" => create_function('& $hitlist,$name=NULL','
-	if (count($hitlist)>0) {
+	if (count_compat($hitlist)>0) {
 		return 0;
 	}
 ')

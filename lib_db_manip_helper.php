@@ -140,7 +140,7 @@ function build_reaction_chemical($list_int_name,$UID,$reaction_chemical_id,$int_
 			"chemical_storage_id"
 		);
 	}
-	for ($a=0;$a<count($fields);$a++) {
+	for ($a=0;$a<count_compat($fields);$a++) {
 		$reaction_chemical[ $fields[$a] ]=getValueUID($list_int_name,$UID,$fields[$a],$reaction_chemical_id);
 	}
 	return $reaction_chemical;
@@ -207,7 +207,7 @@ function load_reaction_chemical(& $reaction_chemical,$prototype,$int_name) { // 
 		// do we have to merge data for chemical_storage??
 		if (!empty($reaction_chemical["chemical_storage_id"])) {
 			$something_found=false;
-			for ($v=0;$v<count($molResult["chemical_storage"]);$v++) {
+			for ($v=0;$v<count_compat($molResult["chemical_storage"]);$v++) {
 				if ($molResult["chemical_storage"][$v]["chemical_storage_id"]==$reaction_chemical["chemical_storage_id"]) {
 					select_chemical_for_reaction($molResult,$v);
 					$something_found=true;
@@ -225,7 +225,7 @@ function load_reaction_chemical(& $reaction_chemical,$prototype,$int_name) { // 
 		);
 		
 	}
-	elseif (count($newMolObj["atoms"]) || 
+	elseif (count_compat($newMolObj["atoms"]) || 
 		!empty($reaction_chemical["standard_name"]) || 
 		!empty($reaction_chemical["cas_nr"]) || 
 		!empty($reaction_chemical["package_name"])
@@ -488,7 +488,7 @@ function addConditionalUpdate(& $queryArray,$table,$db_id,$values,$condition) { 
 function hashArray($arr,$now) {
 	$res=hash_init(hash_algo);
 	hash_update($res,$now.":");
-	if (count($arr)) {
+	if (count_compat($arr)) {
 		// exclude order effects
 		ksort($arr);
 		foreach ($arr as $field => $value) { // do not add slashes, waste of time
@@ -718,7 +718,7 @@ function get_mass_from_amount_molal($mass_unit,$amount,$amount_unit,$molal,$mola
 function initUnits() {
 	global $unit_result;
 	
-	if (!count($unit_result)) {
+	if (!count_compat($unit_result)) {
 		$unit_result=mysql_select_array(array("table" => "units", "dbs" => "-1"));
 	}
 }
@@ -727,7 +727,7 @@ function getUnitProperty($unit_name,$property_name) {
 	global $unit_result;
 	
 	initUnits();
-	for ($b=0;$b<count($unit_result);$b++) {
+	for ($b=0;$b<count_compat($unit_result);$b++) {
 		if ($unit_name==$unit_result[$b]["unit_name"]) {
 			return $unit_result[$b][$property_name];
 		}
@@ -746,7 +746,7 @@ function getComparableUnit($unit_name,$target_type,$additional_factor=1) {
 	global $unit_result;
 	$target_factor=getUnitFactor($unit_name)*$additional_factor;
 	
-	for ($b=0;$b<count($unit_result);$b++) {
+	for ($b=0;$b<count_compat($unit_result);$b++) {
 		if ($target_type==$unit_result[$b]["unit_type"]) { // of the target type
 			if ($unit_result[$b]["unit_factor"]==$target_factor) {
 				return $unit_result[$b]["unit_name"];
@@ -832,7 +832,7 @@ function getNewReactionPermit() {
 function getDoubleFindFilter($lab_journal_codes) {
 	$retval=array();
 	$lab_journal_codes=array_unique($lab_journal_codes); // remove double if no - in LJ code
-	for ($a=0;$a<count($lab_journal_codes);$a++) {
+	for ($a=0;$a<count_compat($lab_journal_codes);$a++) {
 		$retval[]="analytical_data_identifier LIKE ".fixStrSQL($lab_journal_codes[$a]."%");
 	}
 	return join(" OR ",$retval);
@@ -878,12 +878,12 @@ function refreshActiveData($db_id,$pk_arr) {
 	if (is_array($pk_arr)) {
 		$pk_arr=join(",",$pk_arr);
 	}
-	for ($a=0;$a<count($_REQUEST["refresh_data"]);$a++) {
+	for ($a=0;$a<count_compat($_REQUEST["refresh_data"]);$a++) {
 		if (startswith($_REQUEST["refresh_data"][$a],$db_id.",")) {
 			$_REQUEST["refresh_data"][$a].=",".$pk_arr;
 		}
 	}
-	if (!count($_REQUEST["refresh_data"])) { // aktuellen Datensatz ggf. aktualisieren
+	if (!count_compat($_REQUEST["refresh_data"])) { // aktuellen Datensatz ggf. aktualisieren
 		$_REQUEST["refresh_data"]=array($db_id.",".$pk_arr);
 	}
 }
@@ -1137,12 +1137,12 @@ function performQueries(& $queryArray,$db,$ignoreErrors=false) {
 function performQueriesDbs(& $dbQueryArray,$ignoreErrors=false) {
 	global $db;
 	
-	if (!is_array($dbQueryArray) || !count($dbQueryArray)) {
+	if (!is_array($dbQueryArray) || !count_compat($dbQueryArray)) {
 		return true;
 	}
 	
 	if (is_array($dbQueryArray)) foreach ($dbQueryArray as $other_db_id => $queryArray) {
-		if (!count($queryArray)) { // ignore empty arrays
+		if (!count_compat($queryArray)) { // ignore empty arrays
 			continue;
 		}
 		if ($other_db_id==-1) {
@@ -1197,7 +1197,7 @@ function getForeignDbObj($idx) {
 
 function getForeignDbObjFromDBid($db_id) {
 	global $other_db_data;
-	for ($a=0;$a<count($other_db_data);$a++) {
+	for ($a=0;$a<count_compat($other_db_data);$a++) {
 		if ($other_db_data[$a]["other_db_disabled"]) {
 			continue;
 		}

@@ -72,8 +72,8 @@ $GLOBALS["suppliers"][$code]=array(
 '),
 "getBestHit" => create_function('& $hitlist,$name=NULL','
 	$a=0;
-	for($i=0;$i<count($hitlist);$i++) {
-		if (count(array_filter($hitlist[$i])) > count(array_filter($hitlist[$a]))) {
+	for($i=0;$i<count_compat($hitlist);$i++) {
+		if (count_compat(array_filter($hitlist[$i])) > count_compat(array_filter($hitlist[$a]))) {
 			$a=$i;
 		}
 	}
@@ -237,7 +237,7 @@ $GLOBALS["suppliers"][$code]=array(
 			$cells=$cells[0];
 			$newEntry=array("supplierCode" => $code);
 			$previous=0; //initialize $previous for switch
-			if (count($cells)) {
+			if (count_compat($cells)) {
 				foreach ($cells as $cell) {
 					$current=fixTags($cell);
 					switch($previous) {
@@ -271,7 +271,7 @@ $GLOBALS["suppliers"][$code]=array(
 				$result[]=$newEntry;
 			}
 		}
-		if (count($result)==1) {
+		if (count_compat($result)==1) {
 			$catNo=$result[0]["catNo"];
 			if($catNo) {
 				$response2=oe_http_get($urls["server"]."/ProductChemicalProperties".$catNo."_EN.htm",$my_http_options);  //get the detailed page
@@ -289,11 +289,11 @@ $GLOBALS["suppliers"][$code]=array(
 "getCASfromName" => create_function('$name',getFunctionHeader().'
 	$name=strtolower($name);
 	$hitlist=$self["getHitlist"]($name,"molecule_name");
-	if (count($hitlist)==1) {
+	if (count_compat($hitlist)==1) {
 		return $hitlist[0]["cas_nr"];
 	}
 	else {
-		for($i=0;$i<count($hitlist);$i++) {
+		for($i=0;$i<count_compat($hitlist);$i++) {
 			extendMoleculeNames($hitlist[$i]);
 			if (preg_match("/".$name."/",strtolower($hitlist[$i]["name"]))) {
 				$res=$hitlist[$i]["addInfo"];

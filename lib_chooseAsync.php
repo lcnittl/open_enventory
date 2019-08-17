@@ -45,7 +45,7 @@ function handleLoadDataForPk() {
 				"flags" => QUERY_EDIT, 
 			));
 			
-			if (count($reaction)) {
+			if (count_compat($reaction)) {
 				procReactionProduct($reaction,$_REQUEST["table"]=="reaction_chemical");
 				// load and set visibility
 				echo "parent.updateFromReaction(".fixStr($_REQUEST["list_int_name"]).",".fixStr($_REQUEST["UID"]).",".fixStr($_REQUEST["field"]).",".fixStr($_REQUEST["group"]).",".json_encode($reaction).");\n";
@@ -162,7 +162,7 @@ parent.SILfocusControl(".fixStr($_REQUEST["list_int_name"]).",UID,\"analytical_d
 			"flags" => QUERY_PK_SEARCH, 
 		));
 		
-		if (count($result)) {
+		if (count_compat($result)) {
 			echo "parent.SILsetValues(".fixStr($_REQUEST["list_int_name"]).",".fixStr($_REQUEST["UID"]).",undefined,".json_encode($result).");\n";
 		}
 	}

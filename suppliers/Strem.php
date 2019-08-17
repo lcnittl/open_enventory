@@ -71,11 +71,11 @@ $GLOBALS["suppliers"][$code]=array(
 		preg_match_all("/(?ims)<tr.*?<\/tr>/",$match[1],$manyLines,PREG_PATTERN_ORDER);
 		$manyLines=$manyLines[0];
 		//~ var_dump($manyLines);die();
-		for ($b=0;$b<count($manyLines);$b++) {
+		for ($b=0;$b<count_compat($manyLines);$b++) {
 			preg_match_all("/(?ims)<td.*?<\/td>/",$manyLines[$b],$cells,PREG_PATTERN_ORDER);
 			$cells=$cells[0];
 			
-			if (count($cells)<3) {
+			if (count_compat($cells)<3) {
 				continue;
 			}
 			
@@ -162,7 +162,7 @@ $GLOBALS["suppliers"][$code]=array(
 	
 	preg_match_all("/(?ims)<div.*?<\/div>/",$body,$manyLines,PREG_PATTERN_ORDER);
 	$manyLines=$manyLines[0];
-	for ($b=0;$b<count($manyLines);$b++) {
+	for ($b=0;$b<count_compat($manyLines);$b++) {
 		// <div class="product_list_header"><div class="catalog_number">07-1655</div>
 		if (strpos($manyLines[$b],"catalog_number")!==FALSE) {
 			$result["catNo"]=fixTags($manyLines[$b]);
@@ -174,7 +174,7 @@ $GLOBALS["suppliers"][$code]=array(
 	$manyLines=$manyLines[0];
 	//~ print_r($manyLines);die();
 	
-	for ($b=0;$b<count($manyLines);$b++) {
+	for ($b=0;$b<count_compat($manyLines);$b++) {
 		// <span id="header_description">4-(Phenylamino)-2-(phenylimino)-3-pentene, min. 98% NacNac</span>
 		if (strpos($manyLines[$b],"header_description")!==FALSE) {
 			cutRange($manyLines[$b],"header_description");
@@ -185,7 +185,7 @@ $GLOBALS["suppliers"][$code]=array(
 	$manyLines=$manyLines[0];
 	//~ print_r($manyLines);die();
 	
-	for ($b=0;$b<count($manyLines);$b++) {
+	for ($b=0;$b<count_compat($manyLines);$b++) {
 		preg_match_all("/(?ims)<td.*?<\/td>/",$manyLines[$b],$cells,PREG_PATTERN_ORDER);
 		$cells=$cells[0];
 		//~ print_r($cells);die();
@@ -283,13 +283,13 @@ $GLOBALS["suppliers"][$code]=array(
 		//~ print_r($manyLines);die();
 		$results=array();
 		
-		for ($b=0;$b<count($manyLines);$b++) {
+		for ($b=0;$b<count_compat($manyLines);$b++) {
 			if (stripos($manyLines[$b],"class=\"structure\"")===FALSE) {
 				continue;
 			}
 			preg_match_all("/(?ims)<td.*?<\/td>/",$manyLines[$b],$cells,PREG_PATTERN_ORDER);
 			$cells=$cells[0];
-			if (!count($cells)) { // column heads use <th ...>
+			if (!count_compat($cells)) { // column heads use <th ...>
 				continue;
 			}
 			//~ print_r($cells);die();
@@ -299,7 +299,7 @@ $GLOBALS["suppliers"][$code]=array(
 	return $results;
 '),
 "getBestHit" => create_function('& $hitlist,$name=NULL','
-	if (count($hitlist)>0) {
+	if (count_compat($hitlist)>0) {
 		return 0;
 	}
 '),

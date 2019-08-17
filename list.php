@@ -122,7 +122,7 @@ if (!empty($_REQUEST["message"])) { // Nachricht über letzte Op anzeigen
 
 if ($_REQUEST["buttons"]=="print_labels") { // Liste der ausgewählten Gebinde
 	//~ echo $message;
-	//~ if (count($settings["selection"][$table])) {
+	//~ if (count_compat($settings["selection"][$table])) {
 	if (getSelectionCount($table)) {
 		$label_formats=array("no_barcode");
 		if ($g_settings["print_barcodes_on_labels"]) {
@@ -201,12 +201,12 @@ echo "<table id=\"tab_bar\" cellspacing=\"0\"><tr>";
 			$per_page_text=$per_page." ";
 		}
 		$per_page_text.=s("results_per_page");
-		if (count($res)) {
+		if (count_compat($res)) {
 			echo getTabLink(array("class" => "tab_light", "url" => "Javascript:void(0)", "onMouseover" => "hideOverlayId(&quot;showColumnOverlay&quot;,1);  showOverlayId(this,&quot;perPageOverlay&quot;,0,0,8)", "onMouseout" => "hideOverlayId(&quot;perPageOverlay&quot;)", "text" => $per_page_text ) );
 		}
 	//~ }
 //~ }
-if (count($res) && count($hidden)) {
+if (count_compat($res) && count_compat($hidden)) {
 	echo getTabLink(array("class" => "tab_light", "url" => "Javascript:void(0)", "onMouseover" => "hideOverlayId(&quot;perPageOverlay&quot;,1); showOverlayId(this,&quot;showColumnOverlay&quot;,0,0,8)", "onMouseout" => "hideOverlayId(&quot;showColumnOverlay&quot;)", "text" => s("show_column") ) );
 }
 echo "</tr></table>";
@@ -236,7 +236,7 @@ if ($baseTable=="message") { // nur Nachrichten, wo person_id==from_person oder 
 //~ print_r($res);
 echo outputList($res,$fields,$paramHash);
 
-if (in_array($baseTable,array("chemical_storage","molecule")) && !count($res)) {
+if (in_array($baseTable,array("chemical_storage","molecule")) && !count_compat($res)) {
 	displayFixedQuery();
 }
 
@@ -254,13 +254,13 @@ $view_options_HTML;
 //~ if ($query[$table]["showPerPageSelect"]) {
 	echo getPerPageOverlay($skip,$per_page);
 //~ }
-if (count($res) && count($hidden)) {
+if (count_compat($res) && count_compat($hidden)) {
 	echo getHiddenColsOverlay($table,$hidden);
 }
 
 echo script;
 $itemData=array();
-for ($a=0;$a<count($res);$a++) { // aus SESSION die selektion in JS speichern
+for ($a=0;$a<count_compat($res);$a++) { // aus SESSION die selektion in JS speichern
 	$itemData[]=array(
 		$res[$a]["db_id"],
 		$res[$a][$pk_name],

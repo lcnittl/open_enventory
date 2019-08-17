@@ -114,7 +114,7 @@ $GLOBALS["suppliers"][$code]=array(
 			$lines=preg_split("/(?ims)<tr[^>]*>/",$entry);
 			//~ print_r($lines);
 			
-			if (count($lines)<5) {
+			if (count_compat($lines)<5) {
 				continue;
 			}
 			
@@ -214,7 +214,7 @@ $GLOBALS["suppliers"][$code]=array(
 			preg_match_all("/(?ims)<td.*?<\/td>/",$info,$cells,PREG_PATTERN_ORDER);
 			$cells=$cells[0];
 			
-			if (count($cells)>=2) {
+			if (count_compat($cells)>=2) {
 				list($name, $casNr)=explode("</b>",$info,2);
 				list($catNo, $name)=explode("<br>",$name,2);
 				

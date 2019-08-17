@@ -56,7 +56,7 @@ $ar_rings=array(
 );
 
 function transformMoleculeForDisplay(& $molecule) { // aus paintMolecule aufrufen, nur orig_bond_order und orig_charge ändern
-	for ($a=0;$a<count($molecule["atoms"]);$a++) {
+	for ($a=0;$a<count_compat($molecule["atoms"]);$a++) {
 		switch ($molecule["atoms"][$a][ATOMIC_SYMBOL]) {
 		case "N":
 			// Nitro: 5-bindigen Stickstoff durch ladungsgetrennte Form ersetzen
@@ -66,7 +66,7 @@ function transformMoleculeForDisplay(& $molecule) { // aus paintMolecule aufrufe
 			// terminalen Nachbarn höchster Bindungsordnung suchen und Bindungsordnung verringern
 			unset($reduce_atom);
 			unset($reduce_order);
-			for ($b=0;$b<count($molecule["atoms"][$a][NEIGHBOURS]);$b++) {
+			for ($b=0;$b<count_compat($molecule["atoms"][$a][NEIGHBOURS]);$b++) {
 				$neighbour_no=$molecule["atoms"][$a][NEIGHBOURS][$b];
 				if ($molecule["atoms"][$neighbour_no][NON_H_NEIGHBOURS]>1) { // terminal?
 					continue;
@@ -88,7 +88,7 @@ function transformMoleculeForDisplay(& $molecule) { // aus paintMolecule aufrufe
 				$molecule["atoms"][$reduce_atom][ORIG_CHARGE]--;
 				$molecule["atoms"][$reduce_atom][ORIG_BONDS]--;
 				// Bindung
-				for ($b=0;$b<count($molecule[BONDS]);$b++) {
+				for ($b=0;$b<count_compat($molecule[BONDS]);$b++) {
 					if (($molecule[BONDS][$b][ATOM1]==$a && $molecule[BONDS][$b][ATOM2]==$reduce_atom) || ($molecule[BONDS][$b][ATOM2]==$a && $molecule[BONDS][$b][ATOM1]==$reduce_atom)) {
 						$molecule[BONDS][$b][ORIG_BOND_ORDER]--;
 						break;
@@ -105,7 +105,7 @@ function transformMoleculeForDisplay(& $molecule) { // aus paintMolecule aufrufe
 			}
 			$neighbour_elements=array();
 			unset($reduce_atom);
-			for ($b=0;$b<count($molecule["atoms"][$a][NEIGHBOURS]);$b++) {
+			for ($b=0;$b<count_compat($molecule["atoms"][$a][NEIGHBOURS]);$b++) {
 				$neighbour_no=$molecule["atoms"][$a][NEIGHBOURS][$b];
 				$neighbour_elements[ $molecule["atoms"][$neighbour_no][ATOMIC_NUMBER] ]++;
 				if ($molecule["atoms"][$neighbour_no][ATOMIC_NUMBER]==8 && $molecule["bondsFromNeighbours"][$a][$neighbour_no][ORIG_BOND_ORDER]>1) { // O
@@ -125,7 +125,7 @@ function transformMoleculeForDisplay(& $molecule) { // aus paintMolecule aufrufe
 				$molecule["atoms"][$reduce_atom][ORIG_BONDS]--;
 				// Bindung
 				// find bond as using bondsFromNeighbours causes undesired corruption
-				for ($b=0;$b<count($molecule[BONDS]);$b++) {
+				for ($b=0;$b<count_compat($molecule[BONDS]);$b++) {
 					if (($molecule[BONDS][$b][ATOM1]==$a && $molecule[BONDS][$b][ATOM2]==$reduce_atom) || ($molecule[BONDS][$b][ATOM2]==$a && $molecule[BONDS][$b][ATOM1]==$reduce_atom)) {
 						$molecule[BONDS][$b][ORIG_BOND_ORDER]--;
 						break;
@@ -157,11 +157,11 @@ function matchRingAtoms($needle,$haystack) {
 
 function isRingInMolecule(& $molecule,$members) { // check if already found
 	// alle Ringe durchgehen
-	$membersCount=count($members);
+	$membersCount=count_compat($members);
 	sort($members,SORT_NUMERIC);
-	for ($b=0;$b<count($molecule[RINGS]);$b++) {
+	for ($b=0;$b<count_compat($molecule[RINGS]);$b++) {
 		// stimmt die Anzahl?, ist atom 1 jew nicht enthalten?
-		if (count($molecule[RINGS][$b]["atoms"])!=$membersCount || !in_array($molecule[RINGS][$b]["atoms"][0],$members) || !in_array($members[0],$molecule[RINGS][$b]["atoms"])) {
+		if (count_compat($molecule[RINGS][$b]["atoms"])!=$membersCount || !in_array($molecule[RINGS][$b]["atoms"][0],$members) || !in_array($members[0],$molecule[RINGS][$b]["atoms"])) {
 			continue;
 		}
 		// könnte identisch sein
@@ -176,7 +176,7 @@ function isRingInMolecule(& $molecule,$members) { // check if already found
 }
 
 function findRings(& $molecule,$path) { // get all possible rings, for naphthalene it should be 3 (6,6,10)
-	$path_length=count($path);
+	$path_length=count_compat($path);
 	if ($path_length>MAX_AROMAT_SIZE) {
 		return;
 	}
@@ -184,7 +184,7 @@ function findRings(& $molecule,$path) { // get all possible rings, for naphthale
 
 	// mark part no
 	if (!isset($molecule["atoms"][$lastAtom][PART])) {
-		$part=count($molecule["parts"])-1;
+		$part=count_compat($molecule["parts"])-1;
 		$molecule["atoms"][$lastAtom][PART]=$part;
 		$molecule["parts"][$part]["atoms"][]=$lastAtom;
 	}
@@ -198,7 +198,7 @@ function findRings(& $molecule,$path) { // get all possible rings, for naphthale
 	}
 
 	// go through neighbours, recurse and check if one has been visited already IN THIS PATH
-	for ($a=0;$a<count($molecule["atoms"][$lastAtom][NEIGHBOURS]);$a++) {
+	for ($a=0;$a<count_compat($molecule["atoms"][$lastAtom][NEIGHBOURS]);$a++) {
 		$nextAtom=$molecule["atoms"][$lastAtom][NEIGHBOURS][$a];
 		if ($nextAtom==$prevAtom) {
 			continue;
@@ -211,7 +211,7 @@ function findRings(& $molecule,$path) { // get all possible rings, for naphthale
 			$members=array_slice($path,$foundAt);
 
 			// check if we had this ring already, maybe with other direction or starting point
-			$membersCount=count($members);
+			$membersCount=count_compat($members);
 			// check if already found
 			if ($membersCount<3 || isRingInMolecule($molecule,$members)) { // sinnlos bzw kein neuer Ring
 				continue;
@@ -220,7 +220,7 @@ function findRings(& $molecule,$path) { // get all possible rings, for naphthale
 				$molecule["maxRingSize"]=$membersCount;
 			}
 			
-			$ringCount=count($molecule[RINGS]);
+			$ringCount=count_compat($molecule[RINGS]);
 			$molecule[RINGS][$ringCount]=array(
 				"atoms" => $members, 
 				"size" => $membersCount, 
@@ -251,7 +251,7 @@ function procRing(& $molecule,$ring_no) {
 	
 	// determine isAro
 	$members=$molecule[RINGS][$ring_no]["atoms"];
-	for ($a=0;$a<count($members);$a++) {
+	for ($a=0;$a<count_compat($members);$a++) {
 		$atomNo0=$members[$a];
 		$atomPiElectrons=getPiElectrons($molecule,$atomNo0);
 
@@ -270,7 +270,7 @@ function procRing(& $molecule,$ring_no) {
 	$isAro=($thisPiElectrons>0 && (($thisPiElectrons-2)%4)==0);
 	$molecule[RINGS][$ring_no][AROMATIC]=$isAro;
 	
-	for ($a=0;$a<count($members);$a++) {
+	for ($a=0;$a<count_compat($members);$a++) {
 		$atomNo0=$members[$a];
 		$atomNo1=$members[ ($a+1)%$membersCount ];
 		$atom0=&$molecule["atoms"][$atomNo0];

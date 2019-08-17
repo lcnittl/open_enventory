@@ -338,7 +338,7 @@ analytics_method_id=".fixNull($_REQUEST["analytics_method_id"]),
 		"limit" => 5,
 	));
 	
-	if (count($retention_time_data)) {
+	if (count_compat($retention_time_data)) {
 		echo "parent.showSimilarOverlay(".fixStr($_REQUEST["id"]).",".json_encode($retention_time_data).");\n";
 	}
 break;
@@ -378,7 +378,7 @@ case "generateNewBESSI":
 		"table" => "max_bessi",
 	));
 	$max_bessi_no=0;
-	for ($a=0;$a<count($max_bessi);$a++) {
+	for ($a=0;$a<count_compat($max_bessi);$a++) {
 		if ($max_bessi_no<$max_bessi[$a]["max_bessi"]) {
 			$max_bessi_no=$max_bessi[$a]["max_bessi"];
 		}
@@ -399,7 +399,7 @@ case "update_custom_view":
 			"hiddenControls" => array(),
 			"hiddenIds" => array(),
 		);
-		for ($a=0;$a<count($view_controls[$table]);$a++) {
+		for ($a=0;$a<count_compat($view_controls[$table]);$a++) {
 			if ($_REQUEST[ $view_controls[$table][$a] ]) {
 				//~ array_push($custom_view["visibleControls"],$a);
 				array_push($custom_view["visibleControls"],$view_controls[$table][$a]);
@@ -409,7 +409,7 @@ case "update_custom_view":
 				array_push($custom_view["hiddenControls"],$view_controls[$table][$a]);
 			}
 		}
-		for ($a=0;$a<count($view_ids[$table]);$a++) {
+		for ($a=0;$a<count_compat($view_ids[$table]);$a++) {
 			if ($_REQUEST[ $view_ids[$table][$a] ]) {
 				//~ array_push($custom_view["visibleIds"],$a);
 				array_push($custom_view["visibleIds"],$view_ids[$table][$a]);
@@ -450,8 +450,8 @@ case "getRetentionTimes":
 	if (!empty($_REQUEST["analytics_method_id"]) && (!empty($_REQUEST["molecule_id"]) || !empty($_REQUEST["smiles_stereo"]) || !empty($_REQUEST["smiles"]) ) ) {
 		$smiles_stereo=explode(",",$_REQUEST["smiles_stereo"]);
 		$smiles=explode(",",$_REQUEST["smiles"]);
-		if (count($smiles_stereo)==count($smiles)) {
-			for ($a=0;$a<count($smiles_stereo);$a++) {
+		if (count_compat($smiles_stereo)==count_compat($smiles)) {
+			for ($a=0;$a<count_compat($smiles_stereo);$a++) {
 				list($retention_time_data)=mysql_select_array(array(
 					"table" => "retention_time", 
 					"dbs" => "-1", 
@@ -486,11 +486,11 @@ case "checkMessage":
 		"table" => "message_new", 
 		"dbs" => "-1", 
 	));
-	echo "parent.updateMessageCount(".fixNull(count($message_results)).");\n";
+	echo "parent.updateMessageCount(".fixNull(count_compat($message_results)).");\n";
 break;
 
 case "parse_doi_txt":
-	if (count($_FILES["load_txt"]) && $_FILES["load_txt"]["error"]==0) { // upload
+	if (count_compat($_FILES["load_txt"]) && $_FILES["load_txt"]["error"]==0) { // upload
 		// datei öffnen
 		$text=@file_get_contents($_FILES["load_txt"]["tmp_name"]);
 		
@@ -499,7 +499,7 @@ case "parse_doi_txt":
 		$dois=getDOIsFromText($text);
 		
 		// in parent-form anhängen
-		if (count($dois)) {
+		if (count_compat($dois)) {
 			echo "if (parent!=self) {
 	var dois=parent.\$(\"dois\");
 	if (dois) {
@@ -542,7 +542,7 @@ case "add_lit_by_doi":
 			set_time_limit(ini_get("max_execution_time"));
 			$literature=getDataForDOI($doi);
 			
-			if (!count($literature)) {
+			if (!count_compat($literature)) {
 				$doi_not_found[]=$doi;
 				continue;
 			}
@@ -565,7 +565,7 @@ case "add_lit_by_doi":
 	}
 	
 	// tell about not found/recognized
-	if (count($doi_not_found)) {
+	if (count_compat($doi_not_found)) {
 		echo "var infoWin=window.open(\"\",Number(new Date()),\"height=450,width=300,scrollbars=yes\");
 infoWin.document.open();
 infoWin.document.write(".fixStr("<html><head>".stylesheet."</head><body>").");
@@ -601,7 +601,7 @@ case "loadDataForSearch":
 		"limit" => 1, 
 	));
 	
-	if (count($result)) {
+	if (count_compat($result)) {
 		echo "parent.SILsetValues(".fixStr($_REQUEST["list_int_name"]).",".fixStr($_REQUEST["UID"]).",undefined,".json_encode($result).");\n";
 	}
 break;
@@ -660,7 +660,7 @@ $emptyMolecule=array( // make sure no bogus values remain
 
 // create temp GIFs
 // print_r($_REQUEST);
-if (count($_REQUEST["molecule_UID"])) {
+if (count_compat($_REQUEST["molecule_UID"])) {
 	foreach($_REQUEST["molecule_UID"] as $UID) {
 		$imgUID=uniqid();
 		
@@ -710,7 +710,7 @@ if (count($_REQUEST["molecule_UID"])) {
 								)); // search packages as well for reactants, but not for products
 								// smiles LIKE BINARY ".fixStr($thisMolecule["smiles"]
 								
-								if (!count($structure_data["molecule"])) {
+								if (!count_compat($structure_data["molecule"])) {
 									$structure_data["molecule"][0]=array(
 										"molfile_blob" => addPipes($molfile_single), 
 										"smiles" => $thisMolecule["smiles"], 
@@ -750,7 +750,7 @@ if (count($_REQUEST["molecule_UID"])) {
 					// "molecule.smiles LIKE BINARY ".fixStrSQL($molecule["smiles"])
 					
 					// if nothing found, try non-stereo SMILES
-					if (!count($structure_data["molecule"])) {
+					if (!count_compat($structure_data["molecule"])) {
 						$structure_data["molecule"]=mysql_select_array(array(
 							"table" => "molecule_for_reaction", 
 							//~ "dbs" => "-1", 
@@ -760,7 +760,7 @@ if (count($_REQUEST["molecule_UID"])) {
 					}
 					
 					// absolutely nothing found
-					if (!count($structure_data["molecule"])) {
+					if (!count_compat($structure_data["molecule"])) {
 						$structure_data["molecule"][0]=array(
 							"molfile_blob" => $molfile, 
 							"smiles" => $molecule["smiles"], 
@@ -795,7 +795,7 @@ parent.updateMolSelect(".fixStr($_REQUEST["int_name_".$UID]).",".fixStr($UID).",
 					));
 					
 					// "molecule.smiles LIKE BINARY ".fixStr($molecule["smiles"])
-					if (!count($structure_data["molecule"])) {
+					if (!count_compat($structure_data["molecule"])) {
 						$structure_data["molecule"][0]=array(
 							"molfile_blob" => $molfile, 
 							"smiles" => $molecule["smiles"], 

@@ -53,7 +53,7 @@ function showOrderCompForm($paramHash) {
 			"br", 
 			array("item" => "input", "int_name" => "order_identifier", "size" => 10, ), 
 			"br", 
-			array("item" => "text", "text" => "<a id=\"btn_discount\" href=\"javascript:void askGlobalDiscount();\" class=\"imgButtonSm\"><img src=\"lib/discount_sm.png\" border=\"0\"".getTooltip("calc_discount")."></a>", ), 
+			array("item" => "text", "text" => "<a id=\"btn_discount\" href=\"javascript:void askGlobalDiscount_compat();\" class=\"imgButtonSm\"><img src=\"lib/discount_sm.png\" border=\"0\"".getTooltip("calc_discount")."></a>", ), 
 			array("item" => "tableStart", TABLEMODE => "hl"), 
 			array("item" => "input", "int_name" => "fixed_costs", "size" => 4,"maxlength" => 20, "onChange" => "updateTotalOrder(&quot;accepted_order&quot;); ", "doEval" => true, ), 
 			array("item" => "select", "int_name" => "currency", SPLITMODE => true, "int_names" => $price_currency_list, "texts" => $price_currency_list, "defVal" => $defaultCurrency, "onChange" => "updateCurrencyOrder(&quot;chemical_order&quot;); "), // wir müssen für alles die gleiche Währung fordern!! Datensätze in einer anderen Währung werden ausgeblendet und DÜRFEN NICHT bestellt werden!!

@@ -352,7 +352,7 @@ function showReactionEditForm($paramHash) { // gibt es nur im editMode. Beim Neu
 					$fieldsArray[]=$prop;
 				}
 			}
-			if (count($additionalProps)) {
+			if (count_compat($additionalProps)) {
 				array_unshift($additionalProps,array("item" => "text", "text" => "</td><td rowspan=\"2\" style=\"vertical-align:top\">"),"tableStart");
 				$additionalProps[]="tableEnd";
 			}
@@ -421,7 +421,7 @@ function showReactionEditForm($paramHash) { // gibt es nur im editMode. Beim Neu
 			"text" => "", 
 			"onChange" => "updateSel();", 
 			"onDblClick" => "addTemplateToInput(&quot;realisation_templates&quot;,&quot;realization_text&quot;); ", 
-			"skip" => (count($realisation_templates_names)==0), 
+			"skip" => (count_compat($realisation_templates_names)==0), 
 		), 
 		
 		array("item" => "text", "text" => "</td></tr></tbody></table></td></tr><tr id=\"block_observation\"><td colspan=\"3\"><table style=\"width:100%\"><tbody><tr><td>"), 
@@ -441,7 +441,7 @@ function showReactionEditForm($paramHash) { // gibt es nur im editMode. Beim Neu
 			"text" => "", 
 			"onChange" => "updateSel();", 
 			"onDblClick" => "addTemplateToInput(&quot;observation_templates&quot;,&quot;realization_observation&quot;); ", 
-			"skip" => (count($observation_templates_names)==0), 
+			"skip" => (count_compat($observation_templates_names)==0), 
 		), 
 
 

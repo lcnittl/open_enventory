@@ -28,10 +28,10 @@ function getSelectionCount($table) {
 	}
 	$dbs=array_keys($settings["selection"][$table]);
 	$retval=0;
-	for ($a=0;$a<count($dbs);$a++) {
+	for ($a=0;$a<count_compat($dbs);$a++) {
 		$db_id=$dbs[$a];
 		$pks=@array_keys($settings["selection"][$table][$db_id]);
-		for ($b=0;$b<count($pks);$b++) {
+		for ($b=0;$b<count_compat($pks);$b++) {
 			$pk=$pks[$b];
 			if ($settings["selection"][$table][$db_id][$pk]) {
 				$retval++;
@@ -51,10 +51,10 @@ function clearSelection($table="") {
 		return;
 	}
 	$dbs=array_keys($settings["selection"][$table]);
-	for ($a=0;$a<count($dbs);$a++) {
+	for ($a=0;$a<count_compat($dbs);$a++) {
 		$db_id=$dbs[$a];
 		$pks=array_keys($settings["selection"][$table][$db_id]);
-		if (!count($pks)) {
+		if (!count_compat($pks)) {
 			unset($settings["selection"][$table][$db_id]);
 			continue;
 		}
@@ -66,13 +66,13 @@ function clearSelection($table="") {
 			"quick" => true, //2, 
 			"hierarchicalResults" => RESULTS_PK_ONLY, 
 		));
-		if (!count($result["db"][$db_id])) { // garnix mehr da
+		if (!count_compat($result["db"][$db_id])) { // garnix mehr da
 			unset($settings["selection"][$table][$db_id]);
 			continue;
 		}
 		// rest is eliminated
 		$remove_pks=array_diff($pks,$result["db"][$db_id]);
-		for ($b=0;$b<count($remove_pks);$b++) {
+		for ($b=0;$b<count_compat($remove_pks);$b++) {
 			$pk=$remove_pks[$b];
 			unset($settings["selection"][$table][$db_id][$pk]);
 		}
@@ -86,10 +86,10 @@ function getSelectionFlat($table) {
 		return $retval;
 	}
 	$dbs=array_keys($settings["selection"][$table]);
-	for ($a=0;$a<count($dbs);$a++) {
+	for ($a=0;$a<count_compat($dbs);$a++) {
 		$db_id=$dbs[$a];
 		$pks=array_keys($settings["selection"][$table][$db_id]);
-		for ($b=0;$b<count($pks);$b++) {
+		for ($b=0;$b<count_compat($pks);$b++) {
 			$pk=$pks[$b];
 			if ($settings["selection"][$table][$db_id][$pk]) {
 				$retval[]=array("db_id" => $db_id, "pk" => $pk);
@@ -106,10 +106,10 @@ function getSelectionHier($table) {
 		return $retval;
 	}
 	$dbs=array_keys($settings["selection"][$table]);
-	for ($a=0;$a<count($dbs);$a++) {
+	for ($a=0;$a<count_compat($dbs);$a++) {
 		$db_id=$dbs[$a];
 		$pks=array_keys($settings["selection"][$table][$db_id]);
-		for ($b=0;$b<count($pks);$b++) {
+		for ($b=0;$b<count_compat($pks);$b++) {
 			$pk=$pks[$b];
 			if (!$settings["selection"][$table][$db_id][$pk]) {
 				unset($settings["selection"][$table][$db_id][$pk]);

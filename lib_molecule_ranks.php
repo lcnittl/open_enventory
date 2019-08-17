@@ -22,11 +22,11 @@ along with open enventory.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 function SMisHigherThan(& $a1,& $a2,$orEqual=false) { // ist a1 "höher" als a2?
-	if (!count($a2)) {
+	if (!count_compat($a2)) {
 		return true;
 	}
-	$rc1=count($a1[RANKS])-2;
-	$rc2=count($a2[RANKS])-2;
+	$rc1=count_compat($a1[RANKS])-2;
+	$rc2=count_compat($a2[RANKS])-2;
 	if ($rc1!=$rc2) { // should not happen
 		return ($rc1>$rc2);
 	}
@@ -84,7 +84,7 @@ function iterateRanks(& $molecule) {
 		}
 		$newRank=$atom[RANKS][ $molecule["rankLevel"]-1 ];
 		$neighbours=& $atom[NEIGHBOURS];
-		for ($b=0;$b<count($neighbours);$b++) {
+		for ($b=0;$b<count_compat($neighbours);$b++) {
 			$c=$neighbours[$b];
 			if (!$molecule["atoms"][$c]["SMimplH"]) {
 				$newRank+=$molecule["atoms"][$c][RANKS][ $molecule["rankLevel"]-1 ];
@@ -95,7 +95,7 @@ function iterateRanks(& $molecule) {
 		$ranks[]=$newRank;
 	}
 	$molecule["rankLevel"]++;
-	return count(array_unique($ranks));
+	return count_compat(array_unique($ranks));
 }
 
 function getMassInvar($mass) {
@@ -135,14 +135,14 @@ function addStereoToRank(& $molecule) {
 	$atoms=$molecule["atoms"];
 	/*
 	$stereo_tick=array();
-	for ($a=0;$a<count($atoms);$a++) {
+	for ($a=0;$a<count_compat($atoms);$a++) {
 		$atom=$atoms[$a];
 		
-		if (count($atom[RINGS]) && count($atom[NEIGHBOURS])>2) { // maybe pseudo-chiral, but handle only once
+		if (count_compat($atom[RINGS]) && count_compat($atom[NEIGHBOURS])>2) { // maybe pseudo-chiral, but handle only once
 			$ringAtoms=array();
 			$nonRingAtoms=array();
 			// get neighbours which are members of THE SAME ring and which are not
-			for ($d=0;$d<count($atom[NEIGHBOURS]);$d++) {
+			for ($d=0;$d<count_compat($atom[NEIGHBOURS]);$d++) {
 				$neighbourAtomNo=$atom[NEIGHBOURS][$d];
 				if (array_intersect($atom[RINGS],$atoms[$neighbourAtomNo][RINGS])) {
 					$ringAtoms[]=$neighbourAtomNo;
@@ -155,15 +155,15 @@ function addStereoToRank(& $molecule) {
 			
 			// are the ring neighbours identical, if no, out
 			if (
-				count($ringAtoms)==2 && 
+				count_compat($ringAtoms)==2 && 
 				SMisEqual($atoms[ $ringAtoms[0] ],$atoms[ $ringAtoms[1] ]) && 
 				!SMisEqual($atoms[ $nonRingAtoms[0] ],$atoms[ $nonRingAtoms[1] ])
 			) {
 				$highestNeighbours=array($nonRingAtoms[0]);
 				// add $nonRingAtoms by decreasing rank
-				for ($b=1;$b<count($nonRingAtoms);$b++) {
+				for ($b=1;$b<count_compat($nonRingAtoms);$b++) {
 					$neighbourAtomNo=$nonRingAtoms[$b];
-					for ($c=0;$c<=count($highestNeighbours);$c++) { // push if no lower is found
+					for ($c=0;$c<=count_compat($highestNeighbours);$c++) { // push if no lower is found
 						if (!isset($highestNeighbours[$c]) || SMisHigherThan($molecule["atoms"][$neighbourAtomNo][RINGS],$atoms[$highestNeighbours[$c]])) {
 							array_splice($highestNeighbours,$c,0,array($neighbourAtomNo));
 							break;
@@ -177,7 +177,7 @@ function addStereoToRank(& $molecule) {
 				if ($tripleProd==0) {
 					$tempMolAtoms=getFake3DAtoms($molecule,$a,$highestNeighbours);
 					//~ print_r($tempMolAtoms);
-					if (count($tempMolAtoms)) {
+					if (count_compat($tempMolAtoms)) {
 						$tripleProd=getChiral2($tempMolAtoms,$a,$highestNeighbours);
 					}
 				}
@@ -192,9 +192,9 @@ function addStereoToRank(& $molecule) {
 		}
 	}*/
 	
-	for ($a=0;$a<count($atoms);$a++) {
+	for ($a=0;$a<count_compat($atoms);$a++) {
 		$atom=$atoms[$a];
-		$rankCount=count($atom[RANKS]);
+		$rankCount=count_compat($atom[RANKS]);
 		if ($rankCount==0 || $atom["SMimplH"]) {
 			continue;
 		}
@@ -210,16 +210,16 @@ function addStereoToRank(& $molecule) {
 function markExHs(& $molecule) {
 	// expl Hs entfernen
 	$molecule["nonHatoms"]=0;
-	for ($a=0;$a<count($molecule["atoms"]);$a++) {
+	for ($a=0;$a<count_compat($molecule["atoms"]);$a++) {
 		if (isExplH($molecule,$a)) {
 			continue;
 		}
 		//~ $molecule["maxatom"]=$a;
 		$molecule["atoms"][$a][H_NEIGHBOURS]=$molecule["atoms"][$a][IMPLICIT_H];
 		//~ $molecule["atoms"][$a][NON_H_BONDS]=$molecule["atoms"][$a][BONDS];
-		$molecule["atoms"][$a][NON_H_NEIGHBOURS]=count($molecule["atoms"][$a][NEIGHBOURS]);
+		$molecule["atoms"][$a][NON_H_NEIGHBOURS]=count_compat($molecule["atoms"][$a][NEIGHBOURS]);
 		$bonds=0;
-		for ($b=0;$b<count($molecule["atoms"][$a][NEIGHBOURS]);$b++) { // otherwise zero-bonds are not correctly handled
+		for ($b=0;$b<count_compat($molecule["atoms"][$a][NEIGHBOURS]);$b++) { // otherwise zero-bonds are not correctly handled
 			$neighbour_atom=$molecule["atoms"][$a][NEIGHBOURS][$b];
 			$bonds+=$molecule["bondsFromNeighbours"][$a][$neighbour_atom][BOND_ORDER];
 		}
@@ -227,11 +227,11 @@ function markExHs(& $molecule) {
 		$molecule["atoms"][$a][NON_H_BONDS]=$bonds;
 		$molecule["nonHatoms"]++;
 	}
-	for ($a=0;$a<count($molecule["atoms"]);$a++) {
+	for ($a=0;$a<count_compat($molecule["atoms"]);$a++) {
 		if (!isExplH($molecule,$a)) {
 			continue;
 		}
-		for ($b=0;$b<count($molecule["atoms"][$a][NEIGHBOURS]);$b++) {
+		for ($b=0;$b<count_compat($molecule["atoms"][$a][NEIGHBOURS]);$b++) {
 			$c=$molecule["atoms"][$a][NEIGHBOURS][$b];
 			$molecule["atoms"][$c][H_NEIGHBOURS]++;
 			$molecule["atoms"][$c][NON_H_BONDS]--;
@@ -251,14 +251,14 @@ function getAtomRanks(& $molecule,$paramHash=array() ) {
 // (5) absolute charge
 // (6) number of attached-hydrogens
 // dann Morgan algo
-	if (count($molecule["atoms"])==0) {
+	if (count_compat($molecule["atoms"])==0) {
 		return;
 	}
 	
 	$Honly=true;
 	$invars=array();
 	
-	for ($a=0;$a<count($molecule["atoms"]);$a++) {
+	for ($a=0;$a<count_compat($molecule["atoms"]);$a++) {
 		unset($molecule["atoms"][$a][RANKS]); // ggf alte ranks entfernen, komplett neu
 		//~ unset($molecule["atoms"][$a]["SMdone"]);
 		unset($molecule["atoms"][$a]["SMchirStereo"]);
@@ -277,13 +277,13 @@ function getAtomRanks(& $molecule,$paramHash=array() ) {
 	$invars=array_unique($invars);
 	sort($invars,SORT_NUMERIC);
 	// durch index+1 ersetzen
-	for  ($a=0;$a<count($molecule["atoms"]);$a++) {
+	for  ($a=0;$a<count_compat($molecule["atoms"]);$a++) {
 		$molecule["atoms"][$a][RANKS]=array( (1+array_search($molecule["atoms"][$a][INVARIANT],$invars))*16 );
 		//~ $molecule["atoms"][$a][RANKS]=array( (1+array_search($molecule["atoms"][$a][INVARIANT],$invars))*64 );
 	}
 	
 	if ($Honly) { // dont use molcopy as it is empty
-		for ($a=0;$a<count($molecule["atoms"]);$a++) { // H or H2
+		for ($a=0;$a<count_compat($molecule["atoms"]);$a++) { // H or H2
 			// $molecule["atoms"][$a]["prev_rank"]=1;
 			$molecule["atoms"][$a][RANKS]=array(1);
 			
@@ -295,7 +295,7 @@ function getAtomRanks(& $molecule,$paramHash=array() ) {
 		//~ $molecule["maxatom"]=0;
 	}
 	else {
-		if (count($molecule["atoms"])>1) {
+		if (count_compat($molecule["atoms"])>1) {
 			// achirale ranks
 			$newRanks=performRanking($molecule);
 			do {
@@ -315,7 +315,7 @@ function getAtomRanks(& $molecule,$paramHash=array() ) {
 			} while ($oldRanks<$newRanks && $newRanks<$molecule["nonHatoms"]); // prev_ranks sind die ECHTEN
 		}
 		
-		//~ for  ($a=0;$a<count($molecule["atoms"]);$a++) {
+		//~ for  ($a=0;$a<count_compat($molecule["atoms"]);$a++) {
 			//~ if (!isset($molecule["maxatom"]) || SMisHigherThan($molecule["atoms"][$a], $molecule["atoms"][ $molecule["maxatom"] ])) {
 				//~ $molecule["maxatom"]=$a;
 			//~ }

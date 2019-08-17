@@ -65,7 +65,7 @@ function prepareChromaGraph($values,& $paramHash) {
 function getChromaGraphImg($values,$paramHash=array(),$peak_block_list=array()) {
 	global $ttffontsize,$ttffontname;
 		
-	if (!count($values)) {
+	if (!count_compat($values)) {
 		return getEmptyImage($paramHash["format"]);
 	}
 	
@@ -190,7 +190,7 @@ function getChromaGraphImg($values,$paramHash=array(),$peak_block_list=array()) 
 			unset($prevxpos);
 			unset($prevypos);
 			$xpos=$x0;
-			$x_fac=($shift_x*$x1)/count($this_values);
+			$x_fac=($shift_x*$x1)/count_compat($this_values);
 			foreach ($this_values as $yval) {
 				$xpos+=$x_fac;
 				$ypos=$y0*(($paramHash["min_y"]-$yval)*$fac+1);
@@ -211,7 +211,7 @@ function getChromaGraphImg($values,$paramHash=array(),$peak_block_list=array()) 
 		}
 		// ticks
 		foreach ($peak_block_list as $idx => $this_peak_block_list) {
-			$block_count=count($values[$idx]);
+			$block_count=count_compat($values[$idx]);
 			if (is_array($this_peak_block_list)) foreach ($this_peak_block_list as $block_no) {
 				// get ypos for this block
 				$xpos=$x0+$shift_x*$x1*$block_no/$block_count;
@@ -416,9 +416,9 @@ class specImage extends gdImage {
 	function calcXYData($type,$idx=0) {
 		switch ($type) {
 		case "ir":
-			$fac=($this->max_x-$this->min_x)/count($this->values[$idx]);
+			$fac=($this->max_x-$this->min_x)/count_compat($this->values[$idx]);
 			
-			for ($a=0;$a<count($this->values[$idx]);$a++) {
+			for ($a=0;$a<count_compat($this->values[$idx]);$a++) {
 				if ($values[$idx][$a]>10) { // only relevant peaks
 					$this->xy_data[]=array(
 						"x" => $this->min_x+$fac*$a, 
@@ -428,7 +428,7 @@ class specImage extends gdImage {
 			}
 		break;
 		case "ms":
-			for ($a=0;$a<count($this->values["y"]);$a++) {
+			for ($a=0;$a<count_compat($this->values["y"]);$a++) {
 				if ($values["y"][$a]>10) { // only relevant peaks
 					$this->xy_data[]=array(
 						"x" => $this->values["x"][$a], 
@@ -444,7 +444,7 @@ class specImage extends gdImage {
 		$peaks_interpretation=array();
 		switch ($type) {
 		case "ir":
-			$fac=($this->max_x-$this->min_x)/count($this->values[$idx]);
+			$fac=($this->max_x-$this->min_x)/count_compat($this->values[$idx]);
 			foreach ($this->peaks[$idx] as $peak_idx) {
 				$x=round($this->min_x+$fac*$peak_idx,0);
 				$peaks_interpretation[]=$x." (".getIRInt($this->values[$idx][ $peak_idx ]).")";
@@ -472,7 +472,7 @@ class specImage extends gdImage {
 			return;
 		}
 		$fac=100/$this->max_y;
-		for ($idx=0;$idx<count($this->values);$idx++) {
+		for ($idx=0;$idx<count_compat($this->values);$idx++) {
 			array_mult_byref($this->values[$idx],$fac);
 		}
 		$this->max_y=100;
@@ -595,7 +595,7 @@ class specImage extends gdImage {
 	}
 
 	function drawChroma($idx,$color_index) {
-		$count=count($this->values[$idx]);
+		$count=count_compat($this->values[$idx]);
 		if (!$count) {
 			return;
 		}
@@ -621,7 +621,7 @@ class specImage extends gdImage {
 		$delta_y=$this->max_y-$this->min_y;
 		
 		// ticks
-		$block_count=count($this->values[$idx]);
+		$block_count=count_compat($this->values[$idx]);
 		
 		if (is_array($this->peaks[$idx])) foreach ($this->peaks[$idx] as $block_no) {
 			// get ypos for this block
@@ -661,7 +661,7 @@ class specImage extends gdImage {
 	function drawChromas() {
 		$legend_x=0;
 		$legend_y=10;
-		for ($idx=0;$idx<count($this->values);$idx++) {
+		for ($idx=0;$idx<count_compat($this->values);$idx++) {
 			$this->drawChroma($idx,$idx);
 			
 			// draw legend
@@ -683,7 +683,7 @@ class specImage extends gdImage {
 		
 		$y0=$this->getRelY(0);
 		
-		for ($a=0;$a<count($this->values["y"]);$a++) {
+		for ($a=0;$a<count_compat($this->values["y"]);$a++) {
 			$xval=$this->values["x"][$a];
 			$yval=$this->values["y"][$a];
 			$xpos=$this->getRelX(($xval-$this->min_x)/$delta_x);

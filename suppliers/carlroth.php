@@ -76,11 +76,11 @@ $GLOBALS["suppliers"][$code]=array(
 		$product_idx=-1;
 		$purity_idx=-1;
 		
-		for ($b=0;$b<count($manyLines);$b++) {
+		for ($b=0;$b<count_compat($manyLines);$b++) {
 			preg_match_all("/(?ims)<t[dh].*?<\/t[dh]>/",$manyLines[$b],$cells,PREG_PATTERN_ORDER);
 			$cells=$cells[0];
 			
-			if (count($cells)<5) {
+			if (count_compat($cells)<5) {
 				continue;
 			}
 			$beautifulCatNo=fixTags($cells[1]);
@@ -289,7 +289,7 @@ $GLOBALS["suppliers"][$code]=array(
 	return $results;
 '),
 "getBestHit" => create_function('& $hitlist,$name=NULL','
-	if (count($hitlist)>0) {
+	if (count_compat($hitlist)>0) {
 		return 0;
 	}
 ')

@@ -243,7 +243,7 @@ if ($permissions & _admin) {
 		$g_settings[$list_int_name]=getSubitemlistObject($list_int_name,array("molfile_blob","template_name","template_shortcuts"));
 		
 		// add name, shortcuts into molfile	
-		for ($a=0;$a<count($g_settings[$list_int_name]);$a++) { // vorerst 0 0 einfügen
+		for ($a=0;$a<count_compat($g_settings[$list_int_name]);$a++) { // vorerst 0 0 einfügen
 			$molecule=readMolfile($g_settings[$list_int_name][$a]["molfile_blob"]);
 			moleculeAddTemplateLine($molecule,$g_settings[$list_int_name][$a]["template_name"],$g_settings[$list_int_name][$a]["template_shortcuts"]);
 			$g_settings[$list_int_name][$a]["molfile_blob"]=writeMolfile($molecule);
@@ -337,7 +337,7 @@ if ($permissions & _admin) {
 		$g_settings["supplier_order"]=$defaults["supplier_order"];
 	}
 	
-	for ($a=count($g_settings["supplier_order"])-1;$a>=0;$a--) {
+	for ($a=count_compat($g_settings["supplier_order"])-1;$a>=0;$a--) {
 		$code=$g_settings["supplier_order"][$a]["code"];
 		if (!isset($suppliers[$code])) {
 			// remove, file no longer exists

@@ -25,7 +25,7 @@ function SMstereoDoublePossible(& $molecule,$atom_no) {
 	if (!empty($molecule["atoms"][$atom_no]["SMdblStereo"])) { // already detected
 		return array();
 	}
-	if (count($molecule["atoms"][$atom_no][NEIGHBOURS])<2) { // no neighbours
+	if (count_compat($molecule["atoms"][$atom_no][NEIGHBOURS])<2) { // no neighbours
 		return array();
 	}
 	$dblFollows=false;
@@ -34,7 +34,7 @@ function SMstereoDoublePossible(& $molecule,$atom_no) {
 	$diffNeighbours=false;
 	$nonHNeighbours=false;
 	
-	for ($a=0;$a<count($molecule["atoms"][$atom_no][NEIGHBOURS]);$a++) {
+	for ($a=0;$a<count_compat($molecule["atoms"][$atom_no][NEIGHBOURS]);$a++) {
 		$neighbourAtomNo=$molecule["atoms"][$atom_no][NEIGHBOURS][$a];
 		$order=SMgetOrder($molecule,$neighbourAtomNo,$atom_no);
 		if (!$molecule["atoms"][$neighbourAtomNo]["SMdone"] && $order==2) {
@@ -52,7 +52,7 @@ function SMstereoDoublePossible(& $molecule,$atom_no) {
 			}
 			if (isExplH($molecule,$neighbourAtomNo)) {
 				// nicht =CH[H] und auch nicht C[H][H] und auch nicht O[H]
-				if ($iHyd==0 && count($molecule["atoms"][$atom_no][NEIGHBOURS])==2 && $molecule["atoms"][$atom_no][BONDS]==3 ) {
+				if ($iHyd==0 && count_compat($molecule["atoms"][$atom_no][NEIGHBOURS])==2 && $molecule["atoms"][$atom_no][BONDS]==3 ) {
 					// =N[H]
 					$diffNeighbours=true;
 					// mark H atom
@@ -69,13 +69,13 @@ function SMstereoDoublePossible(& $molecule,$atom_no) {
 			// stereo=4 führt zu Abbruch, stereochemie undefiniert
 			if (!isset($lowestNeighbour) || SMisHigherThan($molecule["atoms"][$lowestNeighbour],$molecule["atoms"][$neighbourAtomNo])) {
 				$lowestNeighbour=$neighbourAtomNo;
-				if (count($molecule["atoms"][$atom_no][NEIGHBOURS])==2) { // nur 1 Neighbour, zB C=NOH
+				if (count_compat($molecule["atoms"][$atom_no][NEIGHBOURS])==2) { // nur 1 Neighbour, zB C=NOH
 					$diffNeighbours=true;
 					// break; // Nein, wir brauchen dblAtom
 				}
 			}
 			if (!$diffNeighbours) {
-				for ($b=$a+1;$b<count($molecule["atoms"][$atom_no][NEIGHBOURS]);$b++) {
+				for ($b=$a+1;$b<count_compat($molecule["atoms"][$atom_no][NEIGHBOURS]);$b++) {
 					$neighbourAtomNo2=$molecule["atoms"][$atom_no][NEIGHBOURS][$b];
 					$order2=SMgetOrder($molecule,$neighbourAtomNo2,$atom_no);
 					if ($order2==1 && !SMisEqual($molecule["atoms"][$neighbourAtomNo],$molecule["atoms"][$neighbourAtomNo2])) { // 2 unterschiedliche Nachbarn
@@ -135,7 +135,7 @@ function getDihedralAngle(& $a1,& $a2,& $a3,& $a4) {
 
 function markStereoDoubleBonds(& $molecule) {
 	// 1. alle Atome durchgehen und Stereo-Doppelbindungen suchen, rel. Orientierung der jew highAtoms speichern
-	for ($atom_no=0;$atom_no<count($molecule["atoms"]);$atom_no++) {
+	for ($atom_no=0;$atom_no<count_compat($molecule["atoms"]);$atom_no++) {
 		// hat Atom eine stereo-Doppelbindung?
 		// 1. kommt als nächstes Doppelbindung?
 		// 2. hat Atom eine ungerade Zahl WEITERER Substituenten, zwei unterschiedliche Substituenten oder nur einen!=H ?

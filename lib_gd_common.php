@@ -322,7 +322,7 @@ function imgline(& $im,$x1,$y1,$x2,$y2,$color,$width=1,$format="gif") {
 }
 
 function imgfilledpolygon(& $im,$xypairs,$color,$format="gif") {
-	$numpairs=count($xypairs);
+	$numpairs=count_compat($xypairs);
 	if ($numpairs==0 || $numpairs%2) {
 		return;
 	}

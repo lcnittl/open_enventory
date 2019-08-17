@@ -89,7 +89,7 @@ function getSelfRef($suppress=array(),$call_transparent_params=array()) {
 
 function keepParams($paramsArray,$suppress=array()) {
 	// gibt &-getrennt name=value-Paare aller in paramsArray enthaltenen Parameter zurück, wenn diese nicht den Wert "" besitzen oder in suppress sind
-	if (count($paramsArray)==0) {
+	if (count_compat($paramsArray)==0) {
 		return "";
 	}
 	foreach ($paramsArray as $name) {

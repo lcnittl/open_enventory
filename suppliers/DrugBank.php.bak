@@ -158,7 +158,7 @@ $GLOBALS["suppliers"][$code]=array(
 	return $result;
 '),
 "getBestHit" => create_function('& $hitlist,$name=NULL','
-	if (count($hitlist)>0) {
+	if (count_compat($hitlist)>0) {
 		return 0;
 	}
 '),
@@ -177,7 +177,7 @@ $GLOBALS["suppliers"][$code]=array(
 '),
 "getCAS" => create_function('& $smiles',getFunctionHeader().'
 	$result=$self["strSearch"]($smiles,"se");
-	if (count($result)>1) {
+	if (count_compat($result)>1) {
 		$a=$self["getBestHit"]($result);
 		$result[0]=$self["getInfo"]($result[$a]["catNo"]);
 		$result[0]["supplierCode"]=$code;

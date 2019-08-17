@@ -29,7 +29,7 @@ function readJCamp($jdx) {
 	$jdx=fixLineEnd($jdx);
 	$lines=explode("\n",$jdx);
 	// cut comment
-	for ($a=0;$a<count($lines);$a++) {
+	for ($a=0;$a<count_compat($lines);$a++) {
 		$comment_start=strpos($lines[$a],"\$\$");
 		if ($comment_start!==FALSE) {
 			$lines[$a]=substr($lines[$a],0,$comment_start);
@@ -51,7 +51,7 @@ function parseJCampData(& $data,& $lines,& $a,& $persistent) {
 	
 	$retval=true; // assume no error
 	do {
-		$lastLine=($a+1==count($lines) || startswith($lines[$a+1],"##")); // to finish processing
+		$lastLine=($a+1==count_compat($lines) || startswith($lines[$a+1],"##")); // to finish processing
 		$emptyLine=(trim($lines[$a])=="");
 		switch ($persistent["varname"]) { // peaktable,xydata,...
 		case "peaktable":
@@ -112,13 +112,13 @@ function parseJCampData(& $data,& $lines,& $a,& $persistent) {
 			if ($mode>=2) {
 				$lines[$a]=str_replace($sqz,$sqznum,$lines[$a]); // make PAC out of SQZ
 			}
-			$data_count=count($data);
+			$data_count=count_compat($data);
 			if ($mode>=3) {
 				$line=str_replace($difdup,$difdupnum,$lines[$a]);
 				$values=explode(" ",$line); // gives X Y1 DY2 DY3...
 				$newvalues=array();
-				for ($b=0;$b<count($values);$b++) {
-					$idx=count($newvalues);
+				for ($b=0;$b<count_compat($values);$b++) {
+					$idx=count_compat($newvalues);
 					$firstLett=$values[$b]{0};
 					$restStr=substr($values[$b],1);
 					if ($firstLett=="D") { // DIF
@@ -156,8 +156,8 @@ function parseJCampData(& $data,& $lines,& $a,& $persistent) {
 				$newvalues=spaceSplit($lines[$a]);
 			}
 			$x_val=$newvalues[0];
-			$this_line_count=count($newvalues)-1;
-			for ($b=1;$b<count($newvalues);$b++) {
+			$this_line_count=count_compat($newvalues)-1;
+			for ($b=1;$b<count_compat($newvalues);$b++) {
 				$data[]=$newvalues[$b];
 			}
 			// check for x consistency
@@ -219,7 +219,7 @@ function parseJCampNTuples(& $lines,& $a,& $persistent) {
 			parseJCampData($jcamp[$idx][ $persistent["varname"] ]["data"],$lines,$a,$persistent);
 		}
 		$a++;
-	} while($a<count($lines));
+	} while($a<count_compat($lines));
 	return $jcamp;
 }
 
@@ -259,7 +259,7 @@ function parseJCampBlock(& $lines,& $a) {
 			parseJCampData($jcamp[ $persistent["varname"] ]["data"],$lines,$a,$persistent);
 		}
 		$a++;
-	} while($a<count($lines));
+	} while($a<count_compat($lines));
 	return $jcamp;
 }
 
@@ -273,7 +273,7 @@ function getMolfile($molecule) {
 $$        AN        AS        NH
 
 END;
-	for ($a=0;$a<count($molecule["atoms"]);$a++) {
+	for ($a=0;$a<count_compat($molecule["atoms"]);$a++) {
 		$retval.=leftSpace("",10).rightSpace($a+1,10).rightSpace($molecule["atoms"][$a][ATOMIC_SYMBOL],10).$molecule["atoms"][$a][ORIG_IMPLICIT_H]."\n";
 	}
 	
@@ -282,7 +282,7 @@ END;
 $$        AN1       AN2       BT
 
 END;
-	for ($a=0;$a<count($molecule[BONDS]);$a++) {
+	for ($a=0;$a<count_compat($molecule[BONDS]);$a++) {
 		if ($molecule[BONDS][$a][ATOM1]!=$molecule["bonds"][$a][ATOM2]) {
 			$retval.=leftSpace("",10).rightSpace($molecule["bonds"][$a][ATOM1],10).rightSpace($molecule["bonds"][$a][ATOM2],10).$bondLetter[ $molecule["bonds"][$a][ORIG_BOND_ORDER] ]."\n";
 		}
@@ -293,7 +293,7 @@ END;
 $$        AN        X         Y         Z
 
 END;
-	for ($a=0;$a<count($molecule["atoms"]);$a++) { // Koordinaten zu Ganzzahlen machen
+	for ($a=0;$a<count_compat($molecule["atoms"]);$a++) { // Koordinaten zu Ganzzahlen machen
 		$retval.=leftSpace("",10).rightSpace($a+1,10).rightSpace($molecule["atoms"][$a]["x"],10).rightSpace($molecule["atoms"][$a]["y"],10).$molecule["atoms"][$a]["z"]."\n";
 	}
 	
@@ -335,7 +335,7 @@ function getDIF($num) {
 
 function createDIF($data,$low_hz,$high_hz,$factor=1) {
 // for bruker data, no conversion necessary (already integer), for ACD we multiply the float values by (max_float-min_float) to keep max precision, JCamp in principle is BS
-	$data_count=count($data);
+	$data_count=count_compat($data);
 	if ($data_count<=0 || $high_hz==$low_hz || $factor<=0) {
 		// echo $high_hz." ".$low_hz." ".$factor;
 		return "";
@@ -382,7 +382,7 @@ function createData($paramHash,$real_data,$imag_data=array(),$molecule=array()) 
 	procSweep($paramHash);
 	// DIF format
 	// structure block
-	if (count($molecule)) {
+	if (count_compat($molecule)) {
 		$retval.='
 ##TITLE=                             $$ Begin of the structure block
 ##JCAMP-CS=3.7
@@ -399,7 +399,7 @@ $$$$
 	// peak block lassen wir auch erstmal weg, auto peak picking dürfte im ACD recht leicht gehen 	
 	// $factor=pow(2,31)/($result["dataHash"]["y_max"]-$result["dataHash"]["y_min"]); // maximise precision for float values
 	$factor=1; 
-	if (count($imag_data)) { // make ntuples structure
+	if (count_compat($imag_data)) { // make ntuples structure
 		$retval.='
 ##TITLE=                             $$ Begin of the data block
 ##JCAMP-DX=5.00
@@ -424,7 +424,7 @@ $$$$
 ##VAR_DIM=        '.multStr( rightSpace($paramHash["npoints"]."," ,15),3).'2
 ##UNITS=          HZ,            ARBITRARY UNITS,ARBITRARY UNITS
 ##FIRST=          '.rightSpace($paramHash["hz_max"].",",15).rightSpace($real_data[0].",",15).rightSpace($imag_data[0].",",15).'1
-##LAST=           '.rightSpace($paramHash["hz_min"].",",15).rightSpace($real_data[count($real_data)-1].",",15).rightSpace($imag_data[count($imag_data)-1].",",15).'2
+##LAST=           '.rightSpace($paramHash["hz_min"].",",15).rightSpace($real_data[count_compat($real_data)-1].",",15).rightSpace($imag_data[count_compat($imag_data)-1].",",15).'2
 ##MIN=            '.rightSpace($paramHash["hz_min"].",",15).rightSpace($paramHash["y_min"].",",15).rightSpace($paramHash["i_min"].",",15).'1
 ##MAX=            '.rightSpace($paramHash["hz_max"].",",15).rightSpace($paramHash["y_max"].",",15).rightSpace($paramHash["i_max"].",",15).'2
 ##FACTOR=         1.0000000000,'.multStr( rightSpace($factor."," ,15),3).'1

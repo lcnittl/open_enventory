@@ -73,12 +73,12 @@ case "helper": // no real table, the fill level commands instead
 	// Masse, Volumen, %
 	$dataset_commands=array(0 => "delete", 1 => "cancel", 2 => "inventory_on", 3 => "inventory_off", );
 	
-	$max=max(count($chemical_storage_sizes),count($chemical_storage_levels));
+	$max=max(count_compat($chemical_storage_sizes),count_compat($chemical_storage_levels));
 	$res=array();
 	for ($a=0;$a<$max;$a++) {
 		$num=$a;
 		fillZero($num,3);
-		if ($a<count($chemical_storage_sizes)) {
+		if ($a<count_compat($chemical_storage_sizes)) {
 			$res[]=array("num" => "01".$num, "text" => $chemical_storage_sizes[$a]." g");
 			$res[]=array("num" => "02".$num, "text" => $chemical_storage_sizes[$a]." ml");
 		}
@@ -86,12 +86,12 @@ case "helper": // no real table, the fill level commands instead
 			$res[]=array();
 			$res[]=array();
 		}
-		if ($a<count($chemical_storage_levels)) {
+		if ($a<count_compat($chemical_storage_levels)) {
 			$res[]=array("num" => "03".$num, "text" => $chemical_storage_levels[$a]."%");
 		}
 		else {
-			$num=$a-count($chemical_storage_levels);
-			if ($num<count($dataset_commands)) {
+			$num=$a-count_compat($chemical_storage_levels);
+			if ($num<count_compat($dataset_commands)) {
 				fillZero($num,3);
 				$res[]=array("num" => "04".$num, "text" => s($dataset_commands[intval($num)]), );
 			}
@@ -141,7 +141,7 @@ else {
 	$pkName=getShortPrimary($table);
 }
 
-for ($a=0;$a<count($res);$a++){
+for ($a=0;$a<count_compat($res);$a++){
 	if ($c%($labels_per_row*$labels_per_col)==0) { // neue Seite
 		echo "<table cellspacing=\"30\" class=\"label\" style=\"table-layout:fixed;".($c>0?"page-break-before:always":"")."\">"; // cellspacing is to avoid ambigous scans
 	}

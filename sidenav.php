@@ -155,7 +155,7 @@ dependent={\"dbs\":[\"val32\"],\"val32\":[\"val0\"],\"val0\":[\"val1\"],\"val1\"
 					"table" => "other_db", 
 					"order_obj" => getUserDefOrderObj("other_db"), 
 					//~ "order_obj" => array(
-						//~ array("field" => (is_array($settings["other_db_order"]) && count($settings["other_db_order"]))?"FIELD(other_db_id,".fixArrayListString(array_values($settings["other_db_order"])).")":""), 
+						//~ array("field" => (is_array($settings["other_db_order"]) && count_compat($settings["other_db_order"]))?"FIELD(other_db_id,".fixArrayListString(array_values($settings["other_db_order"])).")":""), 
 					//~ ),  
 					"filterDisabled" => true, 
 					"allowNone" => true, 

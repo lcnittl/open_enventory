@@ -66,7 +66,7 @@ $GLOBALS["suppliers"][$code]=array(
 	addWildcards($searchText,$mode,"%");
 	$filterText=$filter."=".fixStrSQL($searchText);
 	array_shift($paramHash["db_list"]); // remove -1
-	if (!count($paramHash["db_list"])) { // no other db
+	if (!count_compat($paramHash["db_list"])) { // no other db
 		return array();
 	}
 	
@@ -77,7 +77,7 @@ $GLOBALS["suppliers"][$code]=array(
 		"flags" => QUERY_CUSTOM, 
 	));
 	
-	for ($a=0;$a<count($results);$a++) {
+	for ($a=0;$a<count_compat($results);$a++) {
 		// catNos generieren
 		$results[$a]["catNo"]=($results[$a]["db_id"]+1)."_".($results[$a]["molecule_id"]);
 		unset($results[$a]["db_id"]);
@@ -98,7 +98,7 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 '),
 "getBestHit" => create_function('& $hitlist,$name=NULL','
-	if (count($hitlist)>0) {
+	if (count_compat($hitlist)>0) {
 		return 0;
 	}
 '),

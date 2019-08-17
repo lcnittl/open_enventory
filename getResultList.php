@@ -59,7 +59,7 @@ case "post":
 		if (isset($form_data["target"])) {
 			$targetText=" target=".fixStr($form_data["target"]);
 		}
-		elseif ($num+1<count($request["forms"])) { // auto-activate comm
+		elseif ($num+1<count_compat($request["forms"])) { // auto-activate comm
 			$targetText=" target=\"comm\"";
 		}
 		echo "<form name=\"autosubmit".$num."\" action=".fixStr($form_data["action"])." method=\"post\"".$targetText.">";

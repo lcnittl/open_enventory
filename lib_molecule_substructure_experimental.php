@@ -63,16 +63,16 @@ function matchPathsRecursive(& $needle,& $haystackMolecule,$needlePath,$haystack
 	//~ }
 	// prüft rekursiv zwei Pfade in needle und haystack gegeneinander, mit Matrixprüfung
 	// **Fehler mit langen Ketten, die in Ringe passen**
-	//~ echo "P".count($needlePath)."<br>";
+	//~ echo "P".count_compat($needlePath)."<br>";
 	// echo "N".join(",",$needlePath)."H".join(",",$haystackPath)."\n";
-	if (count($needlePath)!=count($haystackPath)) {
+	if (count_compat($needlePath)!=count_compat($haystackPath)) {
 		return false;
 	}
 	$lastNeedle=end($needlePath);
 	$lastHaystack=end($haystackPath);
-	$path_length=count($needlePath);
+	$path_length=count_compat($needlePath);
 	if (!matchAtoms($needle["atoms"][ $lastNeedle ]["s"],$haystackMolecule["atoms"][ $lastHaystack ]["s"])
-	 || count($needle["atoms"][$lastNeedle]["n"])>count($haystackMolecule["atoms"][$lastHaystack]["n"])) { // Atome passen nicht oder Haystack hat zuwenige Nachbarn, um für needle zu passen
+	 || count_compat($needle["atoms"][$lastNeedle]["n"])>count_compat($haystackMolecule["atoms"][$lastHaystack]["n"])) { // Atome passen nicht oder Haystack hat zuwenige Nachbarn, um für needle zu passen
 		// echo "(".$lastNeedle.")(".$lastHaystack."): Atome passen nicht\n";		
 		return false;
 	}
@@ -93,20 +93,20 @@ function matchPathsRecursive(& $needle,& $haystackMolecule,$needlePath,$haystack
 		$oldNeighbours=0; // Zahl der bereits besuchten Nachbarn
 	}
 	// noSubst
-	if ($needle["atoms"][ $lastNeedle ]["noSubst"] && count($needle["atoms"][ $lastNeedle ]["n"])+$needle["atoms"][ $lastNeedle ]["h"]!=count($haystackMolecule["atoms"][ $lastHaystack ]["n"])) {
+	if ($needle["atoms"][ $lastNeedle ]["noSubst"] && count_compat($needle["atoms"][ $lastNeedle ]["n"])+$needle["atoms"][ $lastNeedle ]["h"]!=count_compat($haystackMolecule["atoms"][ $lastHaystack ]["n"])) {
 		return false;
 	}
 	// Ende erreicht
-	if (count($needle["atoms"][ $lastNeedle ]["n"])==$oldNeighbours) { // nur das atom wo wir herkommen
+	if (count_compat($needle["atoms"][ $lastNeedle ]["n"])==$oldNeighbours) { // nur das atom wo wir herkommen
 		return true;
 	}
 	// Ringprüfung, wenn ja return true
-	for ($a=count($haystackPath)-2;$a>=0;$a--) {
+	for ($a=count_compat($haystackPath)-2;$a>=0;$a--) {
 		if ($haystackPath[$a]==$lastHaystack) {
 			$haystackRingPos=$a;
 		}
 	}
-	for ($a=count($needlePath)-2;$a>=0;$a--) {
+	for ($a=count_compat($needlePath)-2;$a>=0;$a--) {
 		if ($needlePath[$a]==$lastNeedle) {
 			$needleRingPos=$a;
 		}
@@ -120,14 +120,14 @@ function matchPathsRecursive(& $needle,& $haystackMolecule,$needlePath,$haystack
 	
 	// rekursiv alle jeweiligen Nachbarn miteinander vergleichen
 	$ndlMatSub=0;
-	for ($a=0;$a<count($needle["atoms"][ $lastNeedle ]["n"]);$a++) { // Needle neighbours
+	for ($a=0;$a<count_compat($needle["atoms"][ $lastNeedle ]["n"]);$a++) { // Needle neighbours
 		// echo "A".$a." pn".$prevNeedle."\n";
 		$thisNeedleAtom=$needle["atoms"][ $lastNeedle ]["n"][$a];
 		if ($thisNeedleAtom!=$prevNeedle) { // ist es NICHT das atom, von dem wir kommen
    			$needlePath[$path_length]=$thisNeedleAtom; // ans Ende des Pfads setzen
    			$somethingFound=false;
 			$hstMatSub=0;
-			for ($b=0;$b<count($haystackMolecule["atoms"][ $lastHaystack ]["n"]);$b++) { // Haystack neighbours
+			for ($b=0;$b<count_compat($haystackMolecule["atoms"][ $lastHaystack ]["n"]);$b++) { // Haystack neighbours
 					// echo "B".$b.": ".join(",",$haystackPath)."\n";
 				$thisHaystackAtom=$haystackMolecule["atoms"][ $lastHaystack ]["n"][$b];
 				if ($thisHaystackAtom!=$prevHaystack) { // ist es NICHT das atom, von dem wir kommen
@@ -156,13 +156,13 @@ function matchPathsRecursive(& $needle,& $haystackMolecule,$needlePath,$haystack
 	}
 	// echo "MC\n";
 	// echo "N".join(",",$needlePath)."H".join(",",$haystackPath)."\n";
-	if (!matrixCheck($matchmat,count($needle["atoms"][ $lastNeedle ]["n"])-$oldNeighbours,count($haystackMolecule["atoms"][ $lastHaystack ]["n"])-$oldNeighbours)) {
+	if (!matrixCheck($matchmat,count_compat($needle["atoms"][ $lastNeedle ]["n"])-$oldNeighbours,count_compat($haystackMolecule["atoms"][ $lastHaystack ]["n"])-$oldNeighbours)) {
 		return false;
 	}
 	
 	// nächsten Teil anfangen
 	$checkpart++;
-	if ($checkpart>=count($needle["parts"])) {
+	if ($checkpart>=count_compat($needle["parts"])) {
 		return true;
 	}
 	//~ echo "Part".$checkpart."<br>";
@@ -170,12 +170,12 @@ function matchPathsRecursive(& $needle,& $haystackMolecule,$needlePath,$haystack
 	//~ print_r($haystackPath);
 	$needle_maxatom=$needle["parts"][$checkpart]["maxatom"];
 	$needlePath[]=$needle_maxatom; // nächstes maxatom
-	$haystackPathLen=count($haystackPath);
-	for ($a=0;$a<count($haystackMolecule["atoms"]);$a++) { // $a may be higher than atom number in original molecule due to explicit hydrogens
+	$haystackPathLen=count_compat($haystackPath);
+	for ($a=0;$a<count_compat($haystackMolecule["atoms"]);$a++) { // $a may be higher than atom number in original molecule due to explicit hydrogens
 		if (in_array($a,$haystackPath)) {
 			continue;
 		}
-		if (count($needle["atoms"][ $needle_maxatom ]["n"])<=count($haystackMolecule["atoms"][$a]["n"]) && $needle["atoms"][ $needle_maxatom ]["b"]<=$haystackMolecule["atoms"][$a]["b"]) {
+		if (count_compat($needle["atoms"][ $needle_maxatom ]["n"])<=count_compat($haystackMolecule["atoms"][$a]["n"]) && $needle["atoms"][ $needle_maxatom ]["b"]<=$haystackMolecule["atoms"][$a]["b"]) {
 			$haystackPath[$haystackPathLen]=$a;
 			if (matchPathsRecursive($needle,$haystackMolecule,$needlePath,$haystackPath,$checkpart,$paramHash)) {
 				return true;
@@ -193,8 +193,8 @@ function matrixCheck($matrix,$dimNeedle,$dimHaystack) {
 		return false;
 	}
 	if ($dimNeedle==1) {
-		/* if ($dimHaystack!=count($matrix[0])) {
-			echo $dimHaystack."A".count($matrix[0])."<br>";
+		/* if ($dimHaystack!=count_compat($matrix[0])) {
+			echo $dimHaystack."A".count_compat($matrix[0])."<br>";
 		}
 		else {
 			echo "B";
@@ -231,7 +231,7 @@ function getSubstMatch($needle,$haystackMolecule,$paramHash=array()) {
 	checkSettings($paramHash,"su");
 	
 	// gibt true zurück, wenn needle eine Substruktur von haystackMolecule ist, auch Multipart mit Matrixprüfung
-	if (count($needle["atoms"])==0 || count($haystackMolecule["atoms"])==0) {
+	if (count_compat($needle["atoms"])==0 || count_compat($haystackMolecule["atoms"])==0) {
 		return false;
 	}
 	
@@ -240,7 +240,7 @@ function getSubstMatch($needle,$haystackMolecule,$paramHash=array()) {
 	}
 	
 	// add implicit hydrogens in haystack explicitly
-	for ($a=0;$a<count($haystackMolecule["atoms"]);$a++) {
+	for ($a=0;$a<count_compat($haystackMolecule["atoms"]);$a++) {
 		for ($b=0;$b<$haystackMolecule["atoms"][$a]["h"];$b++) {
 			addAtomToGroup($haystackMolecule,"H",$a,1);
 		}
@@ -261,8 +261,8 @@ function getSubstMatch($needle,$haystackMolecule,$paramHash=array()) {
 	$checkpart=0;
 	$needle_maxatom=$needle["parts"][$checkpart]["maxatom"];
 	$needle_matchpath[0]=$needle_maxatom; // am maxatom wird angefangen. Wenn das nicht gefunden wird - tschüß
-	for ($a=0;$a<count($haystackMolecule["atoms"]);$a++) { // $a may be higher than atom number in original molecule due to explicit hydrogens
-		if (count($needle["atoms"][ $needle_maxatom ]["n"])<=count($haystackMolecule["atoms"][$a]["n"]) && $needle["atoms"][ $needle_maxatom ]["b"]<=$haystackMolecule["atoms"][$a]["b"]) {
+	for ($a=0;$a<count_compat($haystackMolecule["atoms"]);$a++) { // $a may be higher than atom number in original molecule due to explicit hydrogens
+		if (count_compat($needle["atoms"][ $needle_maxatom ]["n"])<=count_compat($haystackMolecule["atoms"][$a]["n"]) && $needle["atoms"][ $needle_maxatom ]["b"]<=$haystackMolecule["atoms"][$a]["b"]) {
 			$haystack_matchpath[0]=$a;
 			if (matchPathsRecursive($needle,$haystackMolecule,$needle_matchpath,$haystack_matchpath,$checkpart,$paramHash)) {
 				return true;
@@ -275,7 +275,7 @@ function getSubstMatch($needle,$haystackMolecule,$paramHash=array()) {
 function getSubEmpFormulaMatch($needle,$haystackMolecule,$paramHash=array()) {
 	checkSettings($paramHash,"sf");
 	// prüft, ob needle im Hinblick auf die Summenformel eine Substruktur von haystackMolecule ist
-	if (count($needle["emp_formula"])==0) { // no formula given
+	if (count_compat($needle["emp_formula"])==0) { // no formula given
 		return false;
 	}
 	foreach($needle["emp_formula"] as $sym => $number) {

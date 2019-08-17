@@ -56,7 +56,7 @@ function performOrder() {
 Kto-Nr./Proj.-Nr. ".$_REQUEST["order_acc_no"]."<br><br>";
 	
 	$list_int_name="order_alternative";
-	$alternatives=count($_REQUEST[$list_int_name]);
+	$alternatives=count_compat($_REQUEST[$list_int_name]);
 	if ($alternatives>1) {
 		$eMailText.=$alternatives." ".s("order_alternative_pl")."<br>";
 	}

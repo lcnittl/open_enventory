@@ -147,7 +147,7 @@ function readSumFormulaPart($emp_formulaStr) { // only real atoms, no groups
 	$emp_formula=array();
 	preg_match_all("/([A-Z%][a-z]*)(\d*)/",$emp_formulaStr,$formula,PREG_SET_ORDER);
 	// Formel lesen
-	for ($a=0;$a<count($formula);$a++) {
+	for ($a=0;$a<count_compat($formula);$a++) {
 		if (empty($formula[$a][2])) { // Anzahl
 			$formula[$a][2]=1;
 		}
@@ -205,13 +205,13 @@ function readSumFormula($emp_formulaStr,$paramHash=array()) { // keine Klammern,
 	
 	$molecule=array();
 	// Formel lesen
-	for ($a=0;$a<count($formula);$a++) {
+	for ($a=0;$a<count_compat($formula);$a++) {
 		if (empty($formula[$a][2])) { // Anzahl
 			$formula[$a][2]=1;
 		}
 		$molecule["emp_formula"][ $formula[$a][1] ]+=$formula[$a][2];
 	}
-	if (!count($molecule["emp_formula"])) {
+	if (!count_compat($molecule["emp_formula"])) {
 		return $molecule;
 	}
 	// Massenberechnung
@@ -245,7 +245,7 @@ function getEmpFormularPart(& $molecule,$sym,$fill=0) {
 }
 
 function getEmpFormula(& $molecule,$fill=0) { // Hill, CHABCDEFG
-	if (!count($molecule["emp_formula"])) {
+	if (!count_compat($molecule["emp_formula"])) {
 		return;
 	}
 	ksort($molecule["emp_formula"]);
@@ -263,7 +263,7 @@ function getEmpFormula(& $molecule,$fill=0) { // Hill, CHABCDEFG
 
 /* function getEmpFormulaStrsort(& $molecule) { // number for whole periodic table, only zerofilled three digit numbers
 	global $pse;
-	if (!count($molecule["emp_formula"])) {
+	if (!count_compat($molecule["emp_formula"])) {
 		return;
 	}
 	$sort_pse=$pse;
@@ -274,7 +274,7 @@ function getEmpFormula(& $molecule,$fill=0) { // Hill, CHABCDEFG
 	array_unshift($sort_pse,"H");
 	array_unshift($sort_pse,"C");
 	$retval="";
-	for ($a=0;$a<count($sort_pse);$a++) {
+	for ($a=0;$a<count_compat($sort_pse);$a++) {
 		$retval.=str_pad($molecule["emp_formula"][ $sort_pse[$a] ],3,"0",STR_PAD_LEFT);
 	}
 	return $retval;

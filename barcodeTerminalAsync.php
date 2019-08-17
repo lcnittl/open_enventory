@@ -77,7 +77,7 @@ elseif (!empty($_REQUEST["barcode"])) {
 		echo "window.open(".fixStr($url).");\n";
 	break;
 	case "person":
-		if (count($barcodeData["result"])) {
+		if (count_compat($barcodeData["result"])) {
 			echo "parent.setActivePerson(".json_encode($barcodeData["result"]).");\n"; // may also come from other db
 			$output.=getSound("login");
 		}

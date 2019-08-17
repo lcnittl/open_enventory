@@ -392,7 +392,7 @@ function getPathListing($paramHash) {
 		$body=@$response->getBody();
 		preg_match_all("/(?ims)<td.*?<\/td>/",$body,$cells,PREG_PATTERN_ORDER);
 		$cells=$cells[0];
-		for ($b=0;$b<count($cells);$b++) {
+		for ($b=0;$b<count_compat($cells);$b++) {
 			if (strpos($cells[$b],"Results")!==FALSE) {
 				$url=getHref($cells[$b]);
 				break;
@@ -409,7 +409,7 @@ function getPathListing($paramHash) {
 		
 		preg_match_all("/(?ims)(<select[^>]*?>)(.*?)<\/select>/",$body,$selects,PREG_SET_ORDER);
 		
-		for ($b=0;$b<count($selects);$b++) {
+		for ($b=0;$b<count_compat($selects);$b++) {
 			if (strpos($selects[$b][1],"user")!==FALSE) {
 				preg_match_all("/(?ims)<option[^>]*value=\"([^\"]+)\"[^>]*>([^<]*)/",$selects[$b][2],$users,PREG_SET_ORDER);
 				break;
@@ -417,7 +417,7 @@ function getPathListing($paramHash) {
 		}
 		//~ var_dump($users);die();
 		
-		for ($b=0;$b<count($users);$b++) {
+		for ($b=0;$b<count_compat($users);$b++) {
 			if (!empty($user) && $user!=$users[$b][2]) {
 				continue;
 			}
@@ -441,7 +441,7 @@ function getPathListing($paramHash) {
 			// get links to other pages
 			cutRange($body,"</table>"); // remove all shit
 			preg_match_all("/(?ims)(<a[^>]*?>)(.*?)<\/a>/",$body,$other_pages,PREG_SET_ORDER);
-			for ($c=0;$c<count($other_pages);$c++) {
+			for ($c=0;$c<count_compat($other_pages);$c++) {
 				$text=trim(strip_tags($other_pages[$c][2]));
 				if (!is_numeric($text)) {
 					continue;
@@ -531,7 +531,7 @@ function BiotageGetEntries($body,$user) { // these bast** cannot get ftp to run
 	$manyLines=$manyLines[0];
 	$retval=array();
 	
-	for ($b=0;$b<count($manyLines);$b++) {
+	for ($b=0;$b<count_compat($manyLines);$b++) {
 		if (preg_match_all("/(?ims)<td.*?<\/td>/",$manyLines[$b],$cells,PREG_PATTERN_ORDER)) {
 			$cells=$cells[0];
 			//~ $date_time=strptime(strip_tags($cells[1]),"%Y.%m.%d %H:%M:%S");
@@ -545,7 +545,7 @@ function BiotageGetEntries($body,$user) { // these bast** cannot get ftp to run
 function BiotageFindExp(& $zip,$host,$cookies,& $entries,$path) {
 	global $tar_stat;
 	
-	for ($b=0;$b<count($entries);$b++) {
+	for ($b=0;$b<count_compat($entries);$b++) {
 		if ($entries[$b]["filename"]!=$path) {
 			continue;
 		}
@@ -561,7 +561,7 @@ function BiotageFindExp(& $zip,$host,$cookies,& $entries,$path) {
 
 		preg_match_all("/(?ims)<h3>(.*?)<\/h3>.*?(<img[^>]*?>)/",$body,$images,PREG_SET_ORDER);
 		
-		for ($c=0;$c<count($images);$c++) {
+		for ($c=0;$c<count_compat($images);$c++) {
 			list($img_text)=explode(" ",strip_tags($images[$c][1]));
 			$img_link=getImgSrc($images[$c][2]);
 			$img_response=oe_http_get($host.$img_link,array("redirect" => maxRedir, "cookies" => $cookies, "useragent" => uA));
@@ -572,7 +572,7 @@ function BiotageFindExp(& $zip,$host,$cookies,& $entries,$path) {
 		
 		// CSV
 		preg_match_all("/(?ims)(<a[^>]*?>)(.*?)<\/a>/",$body,$links,PREG_SET_ORDER);
-		for ($c=0;$c<count($links);$c++) {
+		for ($c=0;$c<count_compat($links);$c++) {
 			$text=strip_tags($links[$c][2]);
 			if (strpos($text,"CSV")!==FALSE) {
 				$csv_response=oe_http_get($host.getHref($links[$c][1]),array("redirect" => maxRedir, "cookies" => $cookies, "useragent" => uA));

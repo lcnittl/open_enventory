@@ -62,8 +62,8 @@ res.appendChild(newElement);";
 	if ($cache["supplier"]=="all") {
 		do {
 			$step++;
-		} while ($suppliers[$code]["noExtSearch"] && $step<count($steps));
-		if ($step<count($steps)) {
+		} while ($suppliers[$code]["noExtSearch"] && $step<count_compat($steps));
+		if ($step<count_compat($steps)) {
 			echo "self.location.href=\"searchExtAsync.php?".keepParams(array("cached_query"))."&step=".$step."\";\n";
 		}
 	}

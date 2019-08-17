@@ -55,7 +55,7 @@ function findInCASEntries(& $entries,$text,$type) {
 	foreach ($entries as $idx => $entry) {
 		$parts=preg_split("/(?ims)<br\/?>/",$entry);
 		
-		if (count($parts)<2) {
+		if (count_compat($parts)<2) {
 			continue;
 		}
 		
@@ -172,7 +172,7 @@ function getDataForDOI($doi) {
 	if (is_array($publisher)) foreach (array_keys($publisher) as $code) {
 		$result=$publisher[$code]["init"]();
 		$result=$publisher[$code]["readPage"]($body,$cookies,$eff_url);
-		if (count($result)) {
+		if (count_compat($result)) {
 			// clean $result
 			$retval["authors"]=trim(str_replace("*","",removeHtmlParts($retval["authors"],"sup"))); // get rid of stars etc
 			$retval["literature_title"]=strip_tags($retval["literature_title"]);
@@ -198,7 +198,7 @@ function getDataForDOI($doi) {
 			$result["sci_journal_name"]=getNameFromCAS($result["sci_journal_abbrev"]);
 		}
 	}
-	if (count($filter)) {
+	if (count_compat($filter)) {
 		list($sci_journal)=mysql_select_array(array(
 			"table" => "sci_journal", 
 			"dbs" => -1, 

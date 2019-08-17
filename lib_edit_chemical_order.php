@@ -103,8 +103,8 @@ function showChemicalOrderForm($paramHash) {
 				"table" => "chemical_storage",
 				"filter" => "cas_nr=".fixStrSQL($cas_nr)."", 
 			));
-			if (count($db_result)) {
-				$result[0]["customer_comment"]="We still have ".count($db_result)." container(s) of this chemical, but I want to order it because [please specify]";
+			if (count_compat($db_result)) {
+				$result[0]["customer_comment"]="We still have ".count_compat($db_result)." container(s) of this chemical, but I want to order it because [please specify]";
 			}
 		}
 	}

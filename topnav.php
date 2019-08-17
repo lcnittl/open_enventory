@@ -110,7 +110,7 @@ echo "</tr></table><div id=\"path\">".s("more_databases").": ";
 
 $other_db_names=array();
 $disabled_db_names=array();
-for ($a=0;$a<count($other_db_data);$a++) { // Anzeige der verfügbaren Fremddatenbanken
+for ($a=0;$a<count_compat($other_db_data);$a++) { // Anzeige der verfügbaren Fremddatenbanken
 	if (in_array($other_db_data[$a]["other_db_id"],$_SESSION["other_db_disabled"])) {
 		$disabled_db_names[]=$other_db_data[$a]["db_beauty_name"];
 	}
@@ -119,13 +119,13 @@ for ($a=0;$a<count($other_db_data);$a++) { // Anzeige der verfügbaren Fremddate
 	}
 }
 
-if (count($other_db_names)) {
+if (count_compat($other_db_names)) {
 	echo join(",",$other_db_names);
 }
 else {
 	echo s("no_databases");
 }
-if (count($disabled_db_names)) {
+if (count_compat($disabled_db_names)) {
 	echo s("disabled_databases").": ".join(",",$disabled_db_names);
 }
 

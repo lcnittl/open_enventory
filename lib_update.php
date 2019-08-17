@@ -86,7 +86,7 @@ function updateFrom($oldVersion) {
 		));
 		$sql_query=array();
 		$pks=array();
-		for ($a=0;$a<count($persons);$a++) {
+		for ($a=0;$a<count_compat($persons);$a++) {
 			if (($persons[$a]["permissions"] & 1)==1) { // & _admin (1) => $permissions_list_value["admin"]
 				$pks["admin"][]=$persons[$a]["person_id"];
 			}
@@ -152,12 +152,12 @@ function updateFrom($oldVersion) {
 		));
 		
 		$ref_amount_units_reaction=array();
-		for ($a=0;$a<count($ref_amount_units);$a++) {
+		for ($a=0;$a<count_compat($ref_amount_units);$a++) {
 			$ref_amount_units_reaction[ $ref_amount_units[$a]["reaction_id"] ]=$ref_amount_units[$a]["reaction_property_value"];
 		}
 		unset($ref_amount_units);
 		
-		for ($a=0;$a<count($ref_amounts);$a++) {
+		for ($a=0;$a<count_compat($ref_amounts);$a++) {
 			// write values
 			$sql_query="UPDATE reaction SET ref_amount=(".fixNull($ref_amounts[$a]["reaction_property_value"])." * (SELECT unit_factor FROM units WHERE unit_name LIKE BINARY ".fixStrSQL($ref_amount_units_reaction[ $ref_amounts[$a]["reaction_id"] ])." LIMIT 1)),".
 				"ref_amount_unit=".fixStrSQL($ref_amount_units_reaction[ $ref_amounts[$a]["reaction_id"] ])." WHERE reaction_id=".fixNull($ref_amounts[$a]["reaction_id"]).";";
@@ -173,7 +173,7 @@ function updateFrom($oldVersion) {
 			"table" => "person", 
 		));
 		
-		for ($a=0;$a<count($persons);$a++) {
+		for ($a=0;$a<count_compat($persons);$a++) {
 			$person_settings=unserialize($persons[$a]["preferences"]);
 			
 			if (is_array($person_settings["include_in_auto_transfer"]) && !is_array($person_settings["include_in_auto_transfer"][0])) {
@@ -201,12 +201,12 @@ function updateFrom($oldVersion) {
 		
 		// find reactions and reaction _archives with mixed % and mol/l and set reactants_rc_conc_unit to indiv
 		$fix_reactions=mysql_select_array_from_dbObj("DISTINCT reaction.reaction_id FROM reaction LEFT OUTER JOIN reaction_chemical AS a ON reaction.reaction_id=a.reaction_id AND a.role IN(1,2) LEFT OUTER JOIN reaction_chemical AS b ON reaction.reaction_id=b.reaction_id AND b.role IN(1,2) WHERE a.rc_conc_unit!=b.rc_conc_unit;",$db);
-		for ($a=0;$a<count($fix_reactions);$a++) {
+		for ($a=0;$a<count_compat($fix_reactions);$a++) {
 			$sql_query[]="DELETE FROM reaction_property WHERE reaction_id=".fixNull($fix_reactions[$a]["reaction_id"])." AND reaction_property_name LIKE \"reactants_rc_conc_unit\";";
 			$sql_query[]="INSERT INTO reaction_property (reaction_property_name,reaction_property_value,reaction_id) VALUES (\"reactants_rc_conc_unit\",\"\",".fixNull($fix_reactions[$a]["reaction_id"]).");";
 		}
 		$fix_reactions=mysql_select_array_from_dbObj("DISTINCT reaction.reaction_id,reaction.reaction_archive_id AS archive_entity_id FROM reaction_archive AS reaction LEFT OUTER JOIN reaction_chemical_archive AS a ON reaction.reaction_id=a.reaction_id AND reaction.reaction_archive_id=a.archive_entity_id AND a.role IN(1,2) LEFT OUTER JOIN reaction_chemical_archive AS b ON reaction.reaction_id=b.reaction_id AND reaction.reaction_archive_id=b.archive_entity_id AND b.role IN(1,2) WHERE a.rc_conc_unit!=b.rc_conc_unit;",$db);
-		for ($a=0;$a<count($fix_reactions);$a++) {
+		for ($a=0;$a<count_compat($fix_reactions);$a++) {
 			$sql_query[]="DELETE FROM reaction_property_archive WHERE reaction_id=".fixNull($fix_reactions[$a]["reaction_id"])." AND archive_entity_id=".fixNull($fix_reactions[$a]["archive_entity_id"])." AND reaction_property_name LIKE \"reactants_rc_conc_unit\";"; //  OR reaction_property_value=\"\"
 			$sql_query[]="INSERT INTO reaction_property_archive (reaction_property_name,reaction_property_value,reaction_id,archive_entity_id) 
 				VALUES (\"reactants_rc_conc_unit\",\"\",".fixNull($fix_reactions[$a]["reaction_id"]).",".fixNull($fix_reactions[$a]["archive_entity_id"]).");";
@@ -214,12 +214,12 @@ function updateFrom($oldVersion) {
 		
 		// insert reactants_rc_conc_unit=% for all reactions that do not have reactants_rc_conc_unit set
 		$fix_reactions=mysql_select_array_from_dbObj("DISTINCT reaction.reaction_id FROM reaction LEFT OUTER JOIN reaction_property ON reaction.reaction_id=reaction_property.reaction_id AND reaction_property_name LIKE \"reactants_rc_conc_unit\" WHERE (reaction_property_value IS NULL);",$db); //  OR reaction_property_value=\"\" // indiv should remain
-		for ($a=0;$a<count($fix_reactions);$a++) {
+		for ($a=0;$a<count_compat($fix_reactions);$a++) {
 			$sql_query[]="DELETE FROM reaction_property WHERE reaction_id=".fixNull($fix_reactions[$a]["reaction_id"])." AND reaction_property_name LIKE \"reactants_rc_conc_unit\" AND (reaction_property_value IS NULL);"; //  OR reaction_property_value=\"\" // indiv should remain
 			$sql_query[]="INSERT INTO reaction_property (reaction_property_name,reaction_property_value,reaction_id) VALUES (\"reactants_rc_conc_unit\",\"%\",".fixNull($fix_reactions[$a]["reaction_id"]).");";
 		}
 		$fix_reactions=mysql_select_array_from_dbObj("DISTINCT reaction.reaction_id,reaction.reaction_archive_id AS archive_entity_id FROM reaction_archive AS reaction LEFT OUTER JOIN reaction_property_archive AS reaction_property ON reaction.reaction_id=reaction_property.reaction_id AND reaction.reaction_archive_id=reaction_property.archive_entity_id AND reaction_property_name LIKE \"reactants_rc_conc_unit\" WHERE (reaction_property_value IS NULL);",$db); //  OR reaction_property_value=\"\"
-		for ($a=0;$a<count($fix_reactions);$a++) {
+		for ($a=0;$a<count_compat($fix_reactions);$a++) {
 			$sql_query[]="DELETE FROM reaction_property_archive WHERE reaction_id=".fixNull($fix_reactions[$a]["reaction_id"])." AND archive_entity_id=".fixNull($fix_reactions[$a]["archive_entity_id"])." AND reaction_property_name LIKE \"reactants_rc_conc_unit\" AND (reaction_property_value IS NULL);"; //  OR reaction_property_value=\"\"
 			$sql_query[]="INSERT INTO reaction_property_archive (reaction_property_name,reaction_property_value,reaction_id,archive_entity_id) 
 				VALUES (\"reactants_rc_conc_unit\",\"%\",".fixNull($fix_reactions[$a]["reaction_id"]).",".fixNull($fix_reactions[$a]["archive_entity_id"]).");";
@@ -231,7 +231,7 @@ function updateFrom($oldVersion) {
 			"table" => "person_quick", 
 		));
 		
-		for ($a=0;$a<count($persons);$a++) {
+		for ($a=0;$a<count_compat($persons);$a++) {
 			$new_permissions=insertBit($persons[$a]["permissions"],11);
 			$sql_query[]="UPDATE person SET permissions=".fixNull($new_permissions)." WHERE person_id=".fixNull($persons[$a]["person_id"]).";";
 		}
@@ -258,7 +258,7 @@ function updateFrom($oldVersion) {
 			
 			// proc
 			$sql_query=array();
-			for ($a=0;$a<count($result);$a++) {
+			for ($a=0;$a<count_compat($result);$a++) {
 				$sql_query[]="UPDATE reaction SET ".
 					"realization_text_fulltext=".fixStrSQL(makeHTMLSearchable($result[$a]["realization_text"])).",".
 					"realization_observation_fulltext=".fixStrSQL(makeHTMLSearchable($result[$a]["realization_observation"])).
@@ -267,7 +267,7 @@ function updateFrom($oldVersion) {
 			performQueries($sql_query,$db);
 			//~ print_r($sql_query);
 			
-		} while (count($result));
+		} while (count_compat($result));
 		
 		
 		// index PDFs
@@ -285,7 +285,7 @@ function updateFrom($oldVersion) {
 			
 			// proc
 			$sql_query=array();
-			for ($a=0;$a<count($result);$a++) {
+			for ($a=0;$a<count_compat($result);$a++) {
 				if (isPDF($result[$a]["literature_blob"])) {
 					$txt=data_convert($result[$a]["literature_blob"],"pdf",array("txt"));
 					$sql_query[]="UPDATE literature SET ".
@@ -296,7 +296,7 @@ function updateFrom($oldVersion) {
 			performQueries($sql_query,$db);
 			//~ print_r($sql_query);
 			
-		} while (count($result));
+		} while (count_compat($result));
 		
 		// SQL only
 		$newVersion=0.5;

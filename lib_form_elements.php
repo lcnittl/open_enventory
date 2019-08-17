@@ -84,7 +84,7 @@ function showCommFrame($paramHash=array()) {
 	else {
 		$int_names=array(-1);
 		$texts=array(s("own_database"));
-		for ($a=0;$a<count($other_db_data);$a++) {
+		for ($a=0;$a<count_compat($other_db_data);$a++) {
 			$db_id=$other_db_data[$a]["other_db_id"];
 			if ($paramHash["mayWrite"][$db_id]) {
 				continue;
@@ -142,7 +142,7 @@ function getFormElements($paramHash,$elements) {
 	$paramHashFiltered=array_key_filter($paramHash,array(READONLY,VISIBLE,LOCKED,TABLEMODE,"class","noInputHighlight","prefix")); // das wird vererbt
 	$loadBlind=array();
 	
-	for ($a=0;$a<count($elements);$a++) {
+	for ($a=0;$a<count_compat($elements);$a++) {
 		if (!is_array($elements[$a])) {
 			// "br", etc
 			$elements[$a]=array("item" => $elements[$a]);
@@ -176,7 +176,7 @@ function getFormElements($paramHash,$elements) {
 		
 		// sind die nachfolgenden Elemente splitMode?
 		// bis zum ersten nicht-splitMode gehen
-		for ($b=$a+1;$b<count($elements);$b++) {
+		for ($b=$a+1;$b<count_compat($elements);$b++) {
 			if (!is_array($elements[$b])) {
 				break;
 			}
@@ -659,7 +659,7 @@ function getInput(& $paramHash) { // tableMode done
 			$paramHash["registerControls"].="controlData[".fixStr($int_name)."]={};controlData[".fixStr($int_name)."][\"rawResults\"]=".json_encode($paramHash["rawResults"]).";\n";
 		}
 		
-		for ($b=0;$b<count($paramHash["int_names"]);$b++) {
+		for ($b=0;$b<count_compat($paramHash["int_names"]);$b++) {
 			if (!isset($paramHash["texts"][$b])) {
 				$paramHash["texts"][$b]=s($paramHash["int_names"][$b]);
 			}
@@ -817,7 +817,7 @@ function getCheckSet(& $paramHash) { // rw: list_multiselect-mode, ro: list-mode
 	
 	if (!isset($paramHash["texts"])) {
 		$paramHash["texts"]=array();
-		for ($a=0;$a<count($paramHash["int_names"]);$a++) {
+		for ($a=0;$a<count_compat($paramHash["int_names"]);$a++) {
 			$paramHash["texts"][$a]=s($paramHash["int_names"][$a]);
 		}
 	}
@@ -838,7 +838,7 @@ function getCheckSet(& $paramHash) { // rw: list_multiselect-mode, ro: list-mode
 		$multiCheckText=getMultiCheck($int_name);
 	}
 	
-	for ($a=0;$a<count($int_names);$a++) {
+	for ($a=0;$a<count_compat($int_names);$a++) {
 		if ($breakAfter>0 && $a % $breakAfter==0) {
 			if (!$roList) {
 				$roInput.=$lineStart;
@@ -937,7 +937,7 @@ function getSelect(& $paramHash) {
 	
 	// calc int_names from langKeys
 	if (!isset($paramHash["int_names"])) { // mit Zahlen fr ENUM fllen
-		$paramHash["int_names"]=range(1,count($paramHash["langKeys"]));
+		$paramHash["int_names"]=range(1,count_compat($paramHash["langKeys"]));
 	}
 	
 	if (!isset($paramHash["texts"])) {
@@ -1005,7 +1005,7 @@ function getSelect(& $paramHash) {
 	$rwInput.="<select".getNameId($paramHash).$onChangeText.$onDblClickText.$classTextRw.$tabText." size=".fixStr($size).$multiText.">"; //  style=\"position:absolute;left:0px;top:0px;display:none;z-index:2\"
 	// $paramHash["registerControls"].="addHideOverlayIdHandler(".fixStr($int_name).");\n";
 
-	for ($a=0;$a<count($int_names);$a++) {
+	for ($a=0;$a<count_compat($int_names);$a++) {
 		$newText=removeWbr($texts[$a]);
 		$rwInput.="<option id=".fixStr($int_name."_".$int_names[$a])." value=".fixStr($int_names[$a])." title=".fixStr($newText);
 		if (isset($paramHash["value"]) && $int_names[$a]==$paramHash["value"]) {
@@ -1077,7 +1077,7 @@ function getLanguageSelect(& $paramHash) {
 	$int_names=array_keys($localizedString);
 	$texts=array();
 	
-	for ($a=0;$a<count($int_names);$a++) {
+	for ($a=0;$a<count_compat($int_names);$a++) {
 		array_push($texts,$localizedString[$int_names[$a]]["language_name"]);
 	}
 	if ($allowDefault) {
@@ -1345,7 +1345,7 @@ controlData[".fixStr($int_name)."]=".json_encode(array("data" => $static_data, )
 	
 	$rwInput.="<select".getNameId($paramHash).$onChangeText.$classTextRw.$tabText.$sizeText.$multiText.">";
 	
-	for ($a=0;$a<count($paramHash["int_names"]);$a++) {
+	for ($a=0;$a<count_compat($paramHash["int_names"]);$a++) {
 		if (isset($paramHash["defaultValue"])) {
 			$checkText=($paramHash["int_names"][$a]==$paramHash["defaultValue"]?" selected=\"selected\"":"");
 		}

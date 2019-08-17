@@ -33,7 +33,7 @@ function getSafetyGif($strSym,$size=30) {
 	else {
 		$arrSym=explode(",",$strSym);
 	}
-	for ($a=0;$a<count($arrSym);$a++) {
+	for ($a=0;$a<count_compat($arrSym);$a++) {
 		// handle GHS
 		$text=trim($arrSym[$a],"\xc2\a0");
 		$title=$text.": ".s("safety_".$text);
@@ -100,7 +100,7 @@ function computeWirkfaktor($safety_r,$safety_cancer,$safety_mutagen,$safety_mak,
 	elseif (multi_in_array(array("36","37","38","65","67"),$safety_r)) {
 		$retval=5;
 	}
-	elseif (count($safety_r)) {
+	elseif (count_compat($safety_r)) {
 		$retval=1;
 	}
 	return max($retval,$W_mak);
@@ -116,7 +116,7 @@ function getSchutzklasseKL($safety_sym,$safety_r) {
 		$arrSym=explode(" ",$safety_sym);
 	}
 	// search for cancerogenic, etc
-	for ($b=0;$b<count($arrR);$b++) {
+	for ($b=0;$b<count_compat($arrR);$b++) {
 		switch ($arrR[$b]) {
 		case "39":
 		case "40":

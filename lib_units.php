@@ -140,7 +140,7 @@ function getValueInStdUnit($type,$value,$unit) {
 		return array();
 	}
 	$typeInformation=& $phys_quantities[$type];
-	if (count($typeInformation)==0) { // type not defined
+	if (count_compat($typeInformation)==0) { // type not defined
 		return array();
 	}
 	if (isset($typeInformation["expUnits"][$unit])) { // nach expUnits suchen

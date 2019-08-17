@@ -34,35 +34,35 @@ END;
 
 // simple DOI
 $simple_doi_data=getDataForDOI("10.1002/ange.200705127");
-if (!count($simple_doi_data)) {
+if (!count_compat($simple_doi_data)) {
 	echo "Problem with simple DOI<br/>";
 }
 
 // DOI with < >
 $doi_with_brackets_a_data=getDataForDOI("10.1002/1521-3757(20020402)114:7<1285::AID-ANGE1285>3.0.CO;2-Y");
-if (!count($doi_with_brackets_a_data)) {
+if (!count_compat($doi_with_brackets_a_data)) {
 	echo "Problem with DOI having brackets (not encoded)<br/>";
 }
 $doi_with_brackets_b_data=getDataForDOI("10.1002/1521-3757(20020402)114:7%3C1285::AID-ANGE1285%3E3.0.CO;2-Y");
-if (!count($doi_with_brackets_b_data)) {
+if (!count_compat($doi_with_brackets_b_data)) {
 	echo "Problem with DOI having brackets (encoded)<br/>";
 }
 
 // DOI-URL
 $doi_url_data=getDataForDOI("http://dx.doi.org/10.1002/adsc.200800508");
-if (!count($doi_url_data)) {
+if (!count_compat($doi_url_data)) {
 	echo "Problem with DOI URL<br/>";
 }
 
 // DOI-URL with < >
 $doi_with_brackets_c_data=getDataForDOI("http://dx.doi.org/10.1002/1521-3757(20020402)114:7%3C1285::AID-ANGE1285%3E3.0.CO;2-Y");
-if (!count($doi_with_brackets_c_data)) {
+if (!count_compat($doi_with_brackets_c_data)) {
 	echo "Problem with DOI URL having brackets (encoded)<br/>";
 }
 
 // other URL
 $other_url_data=getDataForDOI("http://onlinelibrary.wiley.com/doi/10.1002/adsc.201000798/abstract");
-if (!count($other_url_data)) {
+if (!count_compat($other_url_data)) {
 	echo "Problem with abstract URL<br/>";
 }
 

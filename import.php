@@ -170,13 +170,13 @@ activateSearch(false);
 			fclose ($handle);
 			//~ var_dump($zeilen);die();
 		
-			for ($a=0;$a<count($zeilen);$a++) {
+			for ($a=0;$a<count_compat($zeilen);$a++) {
 				$molecule=array();
 				$chemical_storage=array();
 				$supplier_offer=array();
 				
 				$cells=$zeilen[$a];
-				for ($b=0;$b<count($cells);$b++) {
+				for ($b=0;$b<count_compat($cells);$b++) {
 					$cells[$b]=trim(autodecode($cells[$b]),$trimchars);
 				}
 				if (empty($cells[$_REQUEST["col_molecule_name"]]) && empty($cells[$_REQUEST["col_cas_nr"]])) {
@@ -423,7 +423,7 @@ activateSearch(false);
 	break;
 	case "load_file":
 		// file there?
-		if (count($_FILES["import_file_upload"]) && $_FILES["import_file_upload"]["error"]==0) {
+		if (count_compat($_FILES["import_file_upload"]) && $_FILES["import_file_upload"]["error"]==0) {
 			$tmpdir=oe_get_temp_dir();
 			$tmpname=oe_tempnam($tmpdir,"oe");
 			@unlink($tmpname);
@@ -441,11 +441,11 @@ activateSearch(false);
 					$buffer=fgets($handle,16384);
 					$line++;
 					$cells=explode("\t",$buffer);
-					$size=count($cells);
+					$size=count_compat($cells);
 					$max_cells=max($max_cells,$size);
 					$line_sizes[]=$size;
-					if ($line>=$_REQUEST["skip_lines"] && count($preview)<$_REQUEST["number_lines_preview"]) {
-						for ($b=0;$b<count($cells);$b++) {
+					if ($line>=$_REQUEST["skip_lines"] && count_compat($preview)<$_REQUEST["number_lines_preview"]) {
+						for ($b=0;$b<count_compat($cells);$b++) {
 							$cells[$b]=trim(autodecode($cells[$b]),$trimchars);
 						}
 						$preview[]=$cells;
@@ -460,12 +460,12 @@ activateSearch(false);
 				}
 				
 				$error_lines=array();
-				for ($a=0;$a<count($line_sizes);$a++) { // leave heading alone
+				for ($a=0;$a<count_compat($line_sizes);$a++) { // leave heading alone
 					if ($line_sizes[$a]!=$max_cells) {
 						$error_lines[]=array($a+1,$line_sizes[$a]);
 					}
 				}
-				if (count($error_lines)) {
+				if (count_compat($error_lines)) {
 					echo s("error_line_size1").getTable($error_lines,array(s("line"),s("number_columns"))).s("error_line_size2").$max_cells.s("error_line_size3");
 				}
 				
@@ -476,7 +476,7 @@ activateSearch(false);
 						$col_hits=array();
 						$col_lines_with_content=array();
 						for ($col_no=0;$col_no<$max_cells;$col_no++) { // in the preview column by column
-							for ($line=0;$line<count($preview);$line++) { // line by line
+							for ($line=0;$line<count_compat($preview);$line++) { // line by line
 								if (!isEmptyStr($preview[$line][$col_no])) {
 									if (preg_match("/".$re."/",$preview[$line][$col_no])) {
 										$col_hits[$col_no]++;
@@ -485,7 +485,7 @@ activateSearch(false);
 								}
 							}
 						}
-						if (count($col_hits)) {
+						if (count_compat($col_hits)) {
 							for ($col_no=0;$col_no<$max_cells;$col_no++) {
 								if ($col_lines_with_content[$col_no]>0) {
 									$col_hits[$col_no]/=$col_lines_with_content[$col_no];
@@ -566,7 +566,7 @@ activateSearch(false);
 				
 				// build table of sample data
 				//~ var_dump($preview);die();
-				echo s("number_lines").": ".count($line_sizes)."<br>".getTable($preview,$cell_texts);
+				echo s("number_lines").": ".count_compat($line_sizes)."<br>".getTable($preview,$cell_texts);
 			}
 		}
 	break;

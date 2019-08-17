@@ -148,7 +148,7 @@ $query["open_chemical_order"]["procFilter"]="removeAccepted"; // we must filter 
 $query["open_chemical_order"]["cache_mode"]=CACHE_OFF; // time consuming, but most accurate
 
 function removeAccepted(& $resultset) { // visible to all groups
-	for ($a=count($resultset)-1;$a>=0;$a--) { // reverse order
+	for ($a=count_compat($resultset)-1;$a>=0;$a--) { // reverse order
 		// search for matching entry in accepted_order
 		list($accepted_order)=mysql_select_array(array(
 			"table" => "accepted_order", 
@@ -170,7 +170,7 @@ function removeOtherCostCentres(& $resultset) {
 	));
 	$cost_centres=array_get_col($cost_centres,"cost_centre");
 	
-	for ($a=count($resultset)-1;$a>=0;$a--) { // reverse order
+	for ($a=count_compat($resultset)-1;$a>=0;$a--) { // reverse order
 		// eigene DB ODER eigene Kst: ok
 		if ($resultset[$a]["db_id"]==-1 || in_array($resultset[$a]["order_cost_centre_cp"],$cost_centres)) {
 			continue;
@@ -207,12 +207,12 @@ $query["order_alternative"]=array(
 function procOrderComp(& $resultset) { // berechnet die Gesamtsumme
 	//~ print_r($resultset);die();
 	$list_int_name="accepted_order";
-	for ($a=0;$a<count($resultset);$a++) {
+	for ($a=0;$a<count_compat($resultset);$a++) {
 		$sum=$resultset[$a]["fixed_costs"];
 		$items=0;
 		$packages=0;
 		$currency=$resultset[$a]["currency"];
-		for ($b=0;$b<count($resultset[$a][$list_int_name]);$b++) {
+		for ($b=0;$b<count_compat($resultset[$a][$list_int_name]);$b++) {
 			if ($currency!=$resultset[$a][$list_int_name][$b]["price_currency"]) {
 				continue;
 			}

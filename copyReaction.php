@@ -209,7 +209,7 @@ else {
 		}
 		
 		// Einträge in Vorlage durchgehen
-		for ($a=0;$a<count($result[$int_name]);$a++) {
+		for ($a=0;$a<count_compat($result[$int_name]);$a++) {
 			$groupName=$result[$int_name][$a]["reaction_chemical_id"];
 			$loadArray["global_factor"]=1;
 			$loadArray["copy_realization_text"]=true;

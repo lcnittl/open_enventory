@@ -50,7 +50,7 @@ function getSubitemlistObject0($list_int_name,$fields,$index,$allowSomeHtml) {
 	$retval=array();
 	if (is_array($_REQUEST[$list_int_name])) foreach ($_REQUEST[$list_int_name] as $no => $UID) {
 		$item=array();
-		if (is_array($fields) && count($fields)) {
+		if (is_array($fields) && count_compat($fields)) {
 			foreach ($fields as $field) {
 				$item[$field]=selectiveStrip(getValueUID($list_int_name,$UID,$field),$allowSomeHtml);
 			}

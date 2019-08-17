@@ -275,7 +275,7 @@ function handleDesiredAction() { // return array(success,message_text,message_da
 					$refresh_data=array(); // nur db_id=-1
 					$transfer_settings=intval($_REQUEST["settings"]);
 					
-					if (count($settings["include_in_auto_transfer"][$transfer_settings])) {
+					if (count_compat($settings["include_in_auto_transfer"][$transfer_settings])) {
 					
 						$gc_result=getDeviceResult($transfer_settings);
 						
@@ -288,12 +288,12 @@ function handleDesiredAction() { // return array(success,message_text,message_da
 							"dbs" => -1, 
 							"filter" => getDoubleFindFilter($lab_journal_codes), 
 						));
-						for ($a=0;$a<count($existing_identifiers);$a++) {
+						for ($a=0;$a<count_compat($existing_identifiers);$a++) {
 							$existing_identifiers[$a]=$existing_identifiers[$a]["analytical_data_identifier"];
 						} */
 						
 						//~ $ad_double=mysql_select_array(array( "table" => "analytical_data_double", "dbs" => -1, "filter" => "analytical_data.analytics_type_id=".fixNull($gc_result["analytics_type_id"]) ));
-						for ($a=0;$a<count($gc_result);$a++) { // device by device
+						for ($a=0;$a<count_compat($gc_result);$a++) { // device by device
 							if (empty($gc_result[$a]["analytics_device_url"])) {
 								continue;
 							}
@@ -305,7 +305,7 @@ function handleDesiredAction() { // return array(success,message_text,message_da
 								"dbs" => -1, 
 								"filter" => "analytical_data.analytics_device_id=".fixNull($gc_result[$a]["analytics_device_id"])." AND ".getDoubleFindFilter($lab_journal_codes), 
 							));
-							for ($b=0;$b<count($existing_identifiers);$b++) {
+							for ($b=0;$b<count_compat($existing_identifiers);$b++) {
 								$existing_identifiers[$b]=$existing_identifiers[$b]["analytical_data_identifier"];
 							}
 							
@@ -316,16 +316,16 @@ function handleDesiredAction() { // return array(success,message_text,message_da
 							
 							//~ print_r($paramHash);
 							$dirList=getPathListing($paramHash);
-							//~ var_dump(count($dirList["data"]));
+							//~ var_dump(count_compat($dirList["data"]));
 							//~ print_r($lab_journal_codes);
-							if (is_array($dirList) && is_array($dirList["data"])) for ($b=0;$b<count($dirList["data"]);$b++) {
+							if (is_array($dirList) && is_array($dirList["data"])) for ($b=0;$b<count_compat($dirList["data"]);$b++) {
 								// dirs only // NO
 								$file=& $dirList["data"][$b];
 								//~ if (!$file["dir"]) {
 									//~ continue;
 								//~ }
 								// beginnt mit $lab_journal_codes?
-								for ($c=0;$c<count($lab_journal_codes);$c++) {
+								for ($c=0;$c<count_compat($lab_journal_codes);$c++) {
 									$this_filename=cutFilename($file["filename"]); // remove path if there is any, normally not, but Biotage crap
 									if (startswith($this_filename,$lab_journal_codes[$c])) {
 										// found something!
@@ -383,7 +383,7 @@ function handleDesiredAction() { // return array(success,message_text,message_da
 					refreshActiveData(-1,$refresh_data);
 					
 					$retText=$transfer_count.s("transfer_complete2");
-					if (count($successfully_checked)) {
+					if (count_compat($successfully_checked)) {
 						$retText.=" ".s("transfer_complete2b")." ".join(", ",$successfully_checked);
 					}
 					if ($failure_count) { // show error only if
@@ -555,13 +555,13 @@ function handleDesiredAction() { // return array(success,message_text,message_da
 						"dbs" => -1, // hardcoded for the moment, we need from_db_id and db_id (which is then the target)
 						"filter" => "reaction.lab_journal_id=".fixNull($_REQUEST["lab_journal_id"]), 
 						"quick" => true, //1, 
-						"limit" => min($_REQUEST["overwrite_entries"],count($_REQUEST["copyTable"])), 
+						"limit" => min($_REQUEST["overwrite_entries"],count_compat($_REQUEST["copyTable"])), 
 						"order_obj" => array(
 							array("field" => "nr_in_lab_journal", "order" => "DESC"), 
 						), 
 					));
 					// remove closed ones
-					for ($a=count($overwrite_reactions)-1;$a>=0;$a--) { // from end
+					for ($a=count_compat($overwrite_reactions)-1;$a>=0;$a--) { // from end
 						if ($overwrite_reactions[$a]["status"]>reaction_open) {
 							array_splice($overwrite_reactions,$a,1); // remove
 						}
@@ -609,7 +609,7 @@ function handleDesiredAction() { // return array(success,message_text,message_da
 				// molecules parsen
 				//~ print_r($prototype);echo "BB";
 				foreach ($reaction_chemical_lists as $c => $int_name) {
-					for ($d=0;$d<count($prototype[$int_name]);$d++) {
+					for ($d=0;$d<count_compat($prototype[$int_name]);$d++) {
 						// read info from db, place or borrow status may have changed meanwhile
 						$molecules[ $prototype[$int_name][$d]["reaction_chemical_id"] ]=load_reaction_chemical($prototype[$int_name][$d],array(),$int_name);
 					}
@@ -620,7 +620,7 @@ function handleDesiredAction() { // return array(success,message_text,message_da
 				$list_int_name="copyTable";
 				unset($_REQUEST["analytical_data"]); // make sure no analytics is being copied
 				
-				if (count($_REQUEST[$list_int_name])) {
+				if (count_compat($_REQUEST[$list_int_name])) {
 					list($success,$message,$left)=getNewReactionPermit();
 					if ($success!=1) {
 						return array($success,$message);
@@ -699,7 +699,7 @@ function handleDesiredAction() { // return array(success,message_text,message_da
 							$newReaction[$int_name]=array();
 							$deleted=0;
 							
-							for ($d=0;$d<count($prototype[$int_name]);$d++) {
+							for ($d=0;$d<count_compat($prototype[$int_name]);$d++) {
 								if ($idx==0 && $_REQUEST["db_id"]!=-1) { // only first pass
 									unset($prototype[$int_name][$d]["molecule_id"]);
 									unset($prototype[$int_name][$d]["chemical_storage_id"]);
@@ -800,7 +800,7 @@ function handleDesiredAction() { // return array(success,message_text,message_da
 								);
 							}
 							
-							for ($a=0;$a<count($fields);$a++) {
+							for ($a=0;$a<count_compat($fields);$a++) {
 								$reaction_chemical[ $fields[$a] ]=getValueUID($list_int_name,$UID,$fields[$a],$prefix);
 							}
 							//~ print_r($reaction_chemical);die();
@@ -815,7 +815,7 @@ function handleDesiredAction() { // return array(success,message_text,message_da
 								!empty($reaction_chemical["standard_name"]) || 
 								!empty($reaction_chemical["package_name"]) || 
 								!empty($reaction_chemical["cas_nr"]) || 
-								count($newMolObj["atoms"])
+								count_compat($newMolObj["atoms"])
 							)) {
 								/*
 								// add to equation
@@ -849,7 +849,7 @@ function handleDesiredAction() { // return array(success,message_text,message_da
 						//~ print_r($newReaction);die();
 						
 						// start overwrite-operation from the end to get the correct order
-						if (count($overwrite_reactions)) {
+						if (count_compat($overwrite_reactions)) {
 							$overwrite_this=array_pop($overwrite_reactions);
 							// delete (backup old)
 							$_REQUEST["pk"]=$overwrite_this["pk"];

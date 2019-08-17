@@ -107,7 +107,7 @@ function addReactionToPDF($pdf,$rxn,$paramHash=array()) {
 	addReactionComponentTable($pdf,$rxn,"products");
 	
 	// table of analytical data
-	if (count($rxn["analytical_data"])) {
+	if (count_compat($rxn["analytical_data"])) {
 		// prepare reaction_chemical_id map
 		$list_int_names=array("reactant","reagent","product");
 		$reaction_chemical_map=array();

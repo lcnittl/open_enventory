@@ -57,7 +57,7 @@ $query["change_notify"]=array(
 );
 
 function procClass(& $resultset) { // stellt die lokalisierten Texte für class bereit
-	for ($a=0;$a<count($resultset);$a++) {
+	for ($a=0;$a<count_compat($resultset);$a++) {
 		$resultset[$a]["class_name_local"]=s($resultset[$a]["class_name"]);
 	}
 }

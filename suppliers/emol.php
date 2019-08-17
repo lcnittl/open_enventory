@@ -87,7 +87,7 @@ $GLOBALS["suppliers"][$code]=array(
 	// take as name the 1st one which is contained in at least 3 others (case insenstive), otherwise the 1st
 	preg_match_all("/(?ims)<td.*?<\/td>/",$body,$cells,PREG_PATTERN_ORDER);
 	$cells=$cells[0];
-	for ($e=0;$e<count($cells)-1;$e++) {
+	for ($e=0;$e<count_compat($cells)-1;$e++) {
 		$name=strip_tags($cells[$e]);
 		if (!in_array($name,array("Name:","CAS:"))) {
 			continue;
@@ -105,13 +105,13 @@ $GLOBALS["suppliers"][$code]=array(
 			$cas_nrs[]=makeCAS($value);
 		}
 	}
-	for ($d=0;$d<count($names);$d++) {
+	for ($d=0;$d<count_compat($names);$d++) {
 		$found=0;
 		$search=strtolower($names[$d]);
 		if ($search=="") {
 			continue;
 		}
-		for ($e=0;$e<count($names);$e++) {
+		for ($e=0;$e<count_compat($names);$e++) {
 			if ($e==$d) {
 			
 			}
@@ -143,7 +143,7 @@ $GLOBALS["suppliers"][$code]=array(
 	
 	// go through lines
 	$maxlines=0;
-	for ($b=0;$b<count($manyLines);$b++) {
+	for ($b=0;$b<count_compat($manyLines);$b++) {
 		// indentify "View compound info"
 		if (strpos($manyLines[$b],"view_compound_info_button")!==FALSE) {
 			// handle old catNo
@@ -169,7 +169,7 @@ $GLOBALS["suppliers"][$code]=array(
 	return array($self["getInfo"]($catNo)); // only best hit
 '),
 "getBestHit" => create_function('& $hitlist,$name=NULL','
-	if (count($hitlist)>0) {
+	if (count_compat($hitlist)>0) {
 		return 0;
 	}
 '),

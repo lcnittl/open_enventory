@@ -42,7 +42,7 @@ function getViews($table,$listMode=true) { //  Listen- und Detailansicht => List
 	$views=arr_merge($g_settings["views"][$table],$settings["views"][$table]);
 	//~ $retval.="<div class=\"tab_container\">";
 	// custom
-	if (count($views)) {
+	if (count_compat($views)) {
 		if (!$listMode && !empty($_REQUEST["fields"])) {
 			$retval.=getTabLink(array(
 				"url" => "javascript:activateView()", 

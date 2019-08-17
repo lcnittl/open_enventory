@@ -83,7 +83,7 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	
 	preg_match_all("/(?ims)<th[^>]*>(.*?)<\/th>\s*<td[^>]*>(.*?)<\/td>/",$body,$manyLines,PREG_SET_ORDER);
-	for ($b=0;$b<count($manyLines);$b++) {
+	for ($b=0;$b<count_compat($manyLines);$b++) {
 		$name=fixTags($manyLines[$b][1]);
 		$value=fixTags($manyLines[$b][2]);
 		
@@ -174,7 +174,7 @@ $GLOBALS["suppliers"][$code]=array(
 			$results=array();
 			$remove="/shop/products/";
 			$removeLen=strlen($remove);
-			for ($b=0;$b<count($productList);$b++) {
+			for ($b=0;$b<count_compat($productList);$b++) {
 				$catNo=$productList[$b]["productUrl"];
 				$prefixPos=stripos($catNo,$remove);
 				
@@ -187,7 +187,7 @@ $GLOBALS["suppliers"][$code]=array(
 				}
 				
 				$beautifulCatNos=$productList[$b]["itemCatalogNo"];
-				for ($c=0;$c<count($beautifulCatNos);$c++) {
+				for ($c=0;$c<count_compat($beautifulCatNos);$c++) {
 					$beautifulCatNos[$c]=fixTags($beautifulCatNos[$c]);
 				}
 				
@@ -203,7 +203,7 @@ $GLOBALS["suppliers"][$code]=array(
 	return $results;
 '),
 "getBestHit" => create_function('& $hitlist,$name=NULL','
-	if (count($hitlist)>0) {
+	if (count_compat($hitlist)>0) {
 		return 0;
 	}
 ')

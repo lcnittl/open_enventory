@@ -52,7 +52,7 @@ function getSelfView($user,$username,$person_id) {
 	$selfViewName=getSelfViewName($username);
 	$selfViewUpdateFields=getSelfViewUpdateFields();
 	$retval[]="CREATE OR REPLACE ALGORITHM = MERGE VIEW ".$selfViewName." AS SELECT * FROM person WHERE person_id=".$person_id.";";
-	if (count($selfViewUpdateFields)) {
+	if (count_compat($selfViewUpdateFields)) {
 		$retval[]="GRANT SELECT,UPDATE (".join(",",$selfViewUpdateFields).") ON ".$selfViewName." TO ".$user.";";
 	}
 	return $retval;
@@ -71,7 +71,7 @@ function getGrantArray($requested_permissions,$user,$username,$person_id,$db_nam
 			//~ "GRANT SELECT ON mysql.* TO ".$user." WITH GRANT OPTION;",
 		);
 	}
-	elseif (count($tables)) {
+	elseif (count_compat($tables)) {
 		foreach ($tables as $table_name => $table) {
 			// remote
 			if ($requested_permissions && $table["writePermRemote"]) { // remote writing (for order management)
@@ -193,7 +193,7 @@ function usernameExists($username) {
 	// fix for MySQL servers 5.7+
 	fixPasswordQuery();
 	
-	return count(mysql_select_array(array(
+	return count_compat(mysql_select_array(array(
 		"table" => "password_hash", 
 		"filter" => "User=".fixStrSQLSearch($username), 
 	))
@@ -204,7 +204,7 @@ function usernameAccessExists($reading_db,$username) {
 	global $db;
 	
 	switchDB($reading_db,$db); // to check for entry in other_db
-	return count(mysql_select_array(array(
+	return count_compat(mysql_select_array(array(
 		"table" => "other_db", 
 		"dbs" => -1, 
 		"filter" => "db_user=".fixStrSQLSearch($username), 

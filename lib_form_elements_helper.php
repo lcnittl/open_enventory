@@ -265,7 +265,7 @@ function pk_select_getList(& $paramHash) { // einflechten der Daten in paramHash
 		$paramHash["rawResults"]=$results;
 	}
 	
-	for ($a=0;$a<count($results);$a++) {
+	for ($a=0;$a<count_compat($results);$a++) {
 		$int_names=$results[$a][ $paramHash["pkName"] ];
 		if ($paramHash["table"]=="other_db" 
 			&& $paramHash["filterDisabled"] 
@@ -301,7 +301,7 @@ function handleColumnCount(& $paramHash) { // Warum? Damit man auch die 1. Zeile
 	$col_count=0;
 	$active_line=0;
 	
-	for ($a=0;$a<count($paramHash["fields"]);$a++) {
+	for ($a=0;$a<count_compat($paramHash["fields"]);$a++) {
 		switch($paramHash["fields"][$a]["item"]) {
 		case "cell":
 			// colspan
@@ -342,7 +342,7 @@ function handleColumnCount(& $paramHash) { // Warum? Damit man auch die 1. Zeile
 	$paramHash["cols"]=max($line_col_counts);
 	$paramHash["lineCount"]=$active_line+1;
 	// immer die letzte Zelle einer Zeile auffüllen
-	for ($b=0;$b<count($line_field_indices);$b++) {
+	for ($b=0;$b<count_compat($line_field_indices);$b++) {
 		// letzte cell suchen, die nur in einer zeile ist
 		$a=$line_field_indices[$b]-1;
 		while ($paramHash["fields"][$a]["item"]!="cell" || isset($paramHash["fields"][$a]["rowspan"]) || isset($paramHash["fields"][$a]["colspan"])) {
@@ -357,7 +357,7 @@ function handleColumnCount(& $paramHash) { // Warum? Damit man auch die 1. Zeile
 
 function getFormFunctions(& $paramHash) { // byref to unset the definitions
 	global $formFunctions;
-	for ($a=0;$a<count($formFunctions);$a++) {
+	for ($a=0;$a<count_compat($formFunctions);$a++) {
 		$name=& $formFunctions[$a]["name"];
 		$parameters=& $formFunctions[$a]["parameters"];
 		$postCode=& $formFunctions[$a]["postCode"];
@@ -372,7 +372,7 @@ function getFormFunctions(& $paramHash) { // byref to unset the definitions
 
 function getControlFunctions(& $paramHash) { // byref to unset the definitions
 	global $controlFunctions;
-	for ($a=0;$a<count($controlFunctions);$a++) {
+	for ($a=0;$a<count_compat($controlFunctions);$a++) {
 		$name=& $controlFunctions[$a]["name"];
 		$parameters=& $controlFunctions[$a]["parameters"];
 		$postCode=& $controlFunctions[$a]["postCode"];

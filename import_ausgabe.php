@@ -38,12 +38,12 @@ while (!feof($handle)) {
 }
 fclose ($handle);
 
-for ($a=1;$a<count($zeilen);$a++) {
+for ($a=1;$a<count_compat($zeilen);$a++) {
 	
 	$molecule=array();
 	$supplier_offer=array();
 	$cells=explode("\t",$zeilen[$a]);
-	for ($b=0;$b<count($cells);$b++) {
+	for ($b=0;$b<count_compat($cells);$b++) {
 		$cells[$b]=trim($cells[$b]);
 	}
 	

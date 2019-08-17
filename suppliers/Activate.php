@@ -93,7 +93,7 @@ $GLOBALS["suppliers"][$code]=array(
 	preg_match_all("/(?ims)<tr[^>]*>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<\/tr>/",$body,$manyLines,PREG_SET_ORDER);
 	//~ print_r($manyLines);die();
 	
-	for ($b=0;$b<count($manyLines);$b++) {
+	for ($b=0;$b<count_compat($manyLines);$b++) {
 		$name=fixTags($manyLines[$b][1]);
 		$rawValue=$manyLines[$b][2];
 		$value=fixTags($rawValue);
@@ -129,11 +129,11 @@ $GLOBALS["suppliers"][$code]=array(
 	preg_match_all("/(?ims)<form[^>]+class=\"buybox--form\"[^>]*>(.*?)<\/form>/",$body,$manyLines,PREG_PATTERN_ORDER);
 	$manyLines=$manyLines[0];
 
-	for ($b=0;$b<count($manyLines);$b++) {
+	for ($b=0;$b<count_compat($manyLines);$b++) {
 		preg_match_all("/(?ims)<div[^>]*>(.*?)<\/div>/",$manyLines[$b],$cells,PREG_PATTERN_ORDER);
 		$cells=$cells[0];
 		
-		if (count($cells)<4) {
+		if (count_compat($cells)<4) {
 			continue;
 		}
 		
@@ -175,7 +175,7 @@ $GLOBALS["suppliers"][$code]=array(
 	return $results;
 '),
 "getBestHit" => create_function('& $hitlist,$name=NULL','
-	if (count($hitlist)>0) {
+	if (count_compat($hitlist)>0) {
 		return 0;
 	}
 '),

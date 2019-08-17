@@ -55,7 +55,7 @@ function readCache($cache_id="") {
 	//~ print_r($result);
 	$retval=array();
 	
-	if (count($result)>0) {
+	if (count_compat($result)>0) {
 		$retval=unserialize($result[0]["cache_blob"]);
 		$retval["created"]=$result[0]["created"];
 		$retval["last_update"]=$result[0]["last_update"];

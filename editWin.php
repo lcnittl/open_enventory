@@ -282,7 +282,7 @@ case "custom_list": // edit custom list of columns for list view, in settings
 	
 	$list_data=array();
 	$list_data["fields"]=array();
-	for ($a=0;$a<count($fields);$a++) {
+	for ($a=0;$a<count_compat($fields);$a++) {
 		$list_data["fields"][$a]=array("field" => $fields[$a], "localized_field" => s($fields[$a]), );
 	}
 	
@@ -370,7 +370,7 @@ if (opener) {
 break;
 
 case "archive_version": // create new snapshot(s)
-	$template_count=count($settings["archive_comments"]);
+	$template_count=count_compat($settings["archive_comments"]);
 	$min_size=2;
 	$max_size=8;
 	$size=constrainVal($template_count,$min_size,$max_size);
@@ -542,7 +542,7 @@ break;
 break; */
 
 case "sds": // show list of available safety data sheets
-	if (count($_FILES["load_sds"]) && $_FILES["load_sds"]["error"]==0) { // upload
+	if (count_compat($_FILES["load_sds"]) && $_FILES["load_sds"]["error"]==0) { // upload
 		// move to temp dir
 		$tmpdir=oe_get_temp_dir();
 		$filename=oe_tempnam($tmpdir,"sds");
@@ -1042,7 +1042,7 @@ function setMolfile(molfile) {
 if (opener) {
 	var int_name=".fixStr($_REQUEST["int_name"]).",UID=".fixStr($_REQUEST["UID"]).",field=".fixStr($_REQUEST["field"]).",group=".fixStr($_REQUEST["group"]).";
 ";
-	if (count($_FILES["load_molfile"])) {
+	if (count_compat($_FILES["load_molfile"])) {
 		// print_r($_FILES);
 		/*
 	    [load_molfile] => Array

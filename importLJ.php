@@ -159,7 +159,7 @@ function folderNotEmpty($dir) {
 	if (!is_dir($dir)) {
 		return false;
 	}
-	if (count(scandir($dir))>2) {
+	if (count_compat(scandir($dir))>2) {
 		return true;
 	}
 }
@@ -168,15 +168,15 @@ function getMoleculeResult(& $molecule) {
 	global $db;
 	list($molecule_result)=mysql_select_array(array("table" => "molecule_for_reaction", "dbs" => "-1", "filter" => "smiles_stereo LIKE BINARY ".fixStrSQLSearch($molecule["smiles_stereo"]), "limit" => 1),$db);
 	
-	if (!count($molecule_result)) {
+	if (!count_compat($molecule_result)) {
 		list($molecule_result)=mysql_select_array(array("table" => "molecule_for_reaction", "dbs" => "-1", "filter" => "smiles LIKE BINARY ".fixStrSQLSearch($molecule["smiles"]), "limit" => 1),$db);
 	}
 	
-	if ($molecule["has_transition_metal"] && !count($molecule_result)) { // helps with coordinative structures
+	if ($molecule["has_transition_metal"] && !count_compat($molecule_result)) { // helps with coordinative structures
 		list($molecule_result)=mysql_select_array(array("table" => "molecule_for_reaction", "dbs" => "-1", "filter" => "emp_formula LIKE BINARY ".fixStrSQLSearch($molecule["emp_formula_string"]), "limit" => 1),$db);
 	}
 	
-	if (!count($molecule_result)) {
+	if (!count_compat($molecule_result)) {
 		$molecule_result["mw"]=$molecule["mw"];
 		$molecule_result["emp_formula"]=$molecule["emp_formula_string"];
 	}
@@ -288,14 +288,14 @@ foreach ($ljs as $lj_name) {
 	}
 
 	// skip 1st line
-	for ($a=1+$skip_lines;$a<count($zeilen);$a++) {// count($zeilen)
+	for ($a=1+$skip_lines;$a<count_compat($zeilen);$a++) {// count_compat($zeilen)
 		set_time_limit(60);
 		$fields=explode("\t",$zeilen[$a]);
-		for ($b=0;$b<count($fields);$b++) {
+		for ($b=0;$b<count_compat($fields);$b++) {
 			$fields[$b]=trim($fields[$b]);
 		}
 		
-		if ($fields[0]!=$reaction_no || $a+1==count($zeilen)) {
+		if ($fields[0]!=$reaction_no || $a+1==count_compat($zeilen)) {
 			if (isset($reaction_no)) {
 				// $_REQUEST zum Einfügen von GC, HNMR, CNMR, GCMS zusammenbauen
 				// Y als /mnt/y mounten
@@ -312,14 +312,14 @@ foreach ($ljs as $lj_name) {
 					$_REQUEST["analytical_data_analytical_data_interpretation_1"]=fixLineEnd(utf8_encode(@file_get_contents($dirname."/report.txt")));
 					$lines=explode("\n",$_REQUEST["analytical_data_analytical_data_interpretation_1"]);
 					
-					for ($b=0;$b<count($lines);$b++) {
+					for ($b=0;$b<count_compat($lines);$b++) {
 						if (startswith($lines[$b],"Method")) {
 							$method_name=$lines[$b];
 							$start=strrpos($method_name,"\\")+1;
 							$end=strrpos($method_name,".");
 							$method_name=substr($method_name,$start,$end-$start);
 							list($method_result)=mysql_select_array(array( "table" => "analytics_method", "dbs" => -1, "filter" => "analytics_method_name LIKE ".fixStrSQL($method_name), "limit" => 1 ));
-							if (count($method_result)) {
+							if (count_compat($method_result)) {
 								$_REQUEST["analytics_method_id"]=$method_result["analytics_method_id"];
 							}
 							else {
@@ -637,7 +637,7 @@ foreach ($ljs as $lj_name) {
 						$pure[]=$fields[15+$c];
 					}
 				}
-				for ($b=0;$b<count($reaction["molecules"]);$b++) {
+				for ($b=0;$b<count_compat($reaction["molecules"]);$b++) {
 					if ($b<$reaction["reactants"]) {
 						$list_int_name="reactants";
 					}
@@ -703,7 +703,7 @@ foreach ($ljs as $lj_name) {
 		
 		if ($import_type=="new") {
 			// Reaktanten
-			$line=count($_REQUEST["reactants"]);
+			$line=count_compat($_REQUEST["reactants"]);
 			if ($line<$reaction["reactants"]) {
 				$_REQUEST["reactants"][]=$a;
 				$_REQUEST["desired_action_reactants_".$a]="add";
@@ -737,7 +737,7 @@ foreach ($ljs as $lj_name) {
 			}
 			
 			// Produkte
-			$line=count($_REQUEST["products"]);
+			$line=count_compat($_REQUEST["products"]);
 			if ($reaction["products"]==0) {
 				unset($prod1uid);
 			}

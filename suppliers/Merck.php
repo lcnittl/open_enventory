@@ -135,11 +135,11 @@ $GLOBALS["suppliers"][$code]=array(
 	
 	$manyLines=explode("<tr",$body);
 	//~ print_r($manyLines);die();
-	for ($b=0;$b<count($manyLines);$b++) {
+	for ($b=0;$b<count_compat($manyLines);$b++) {
 		$cells=explode("<td",$manyLines[$b]);
 		//~ print_r($cells);
 		
-		if (count($cells)!=3) {
+		if (count_compat($cells)!=3) {
 			continue;
 		}
 		array_shift($cells);
@@ -311,7 +311,7 @@ $GLOBALS["suppliers"][$code]=array(
 		preg_match_all("/(?ims)<section[^>]*class=\"product\"[^>]*>(.*?)<\/section>/",$body,$sections,PREG_PATTERN_ORDER);
 		$sections=$sections[1];
 //~ 		print_r($sections);
-		for ($b=0;$b<count($sections);$b++) {
+		for ($b=0;$b<count_compat($sections);$b++) {
 			preg_match("/(?ims)<div[^>]*class=\"container-serp\"[^>]*>.*?<a[^>]*href=\"([^\"]+)\"[^>]*>(.*?)<\/a>(.*?)<\/span>(.*?)<\/h2>(.*?)<\/span>/",$sections[$b],$data_match);
 			
 			$slashpos=strrpos($data_match[1],"/");
@@ -337,7 +337,7 @@ $GLOBALS["suppliers"][$code]=array(
 	return $results;
 '),
 "getBestHit" => create_function('& $hitlist,$name=NULL','
-	if (count($hitlist)>0) {
+	if (count_compat($hitlist)>0) {
 		return 0;
 	}
 ')

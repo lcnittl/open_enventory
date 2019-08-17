@@ -28,7 +28,7 @@ function showPersonEditForm($paramHash) { // ergänzen: Kostenstelle, Kontonumme
 	$pre_perm_texts=array_keys($permissions_list_value);
 	$pre_perm_int_names[]="";
 	$pre_perm_texts[]="user_def";
-	for ($a=0;$a<count($pre_perm_texts);$a++) {
+	for ($a=0;$a<count_compat($pre_perm_texts);$a++) {
 		$pre_perm_texts[$a]=s($pre_perm_texts[$a]);
 	}
 	

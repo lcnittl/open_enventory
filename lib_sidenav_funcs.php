@@ -98,7 +98,7 @@ function getFieldTypeFromDef($col_def) {
 	$col_def=strtoupper($col_def);
 	cutRange($col_def,"","("); // dont get confused by enums or sets
 	foreach($SQLtypes as $name => $identifiers) {
-		for ($a=0;$a<count($identifiers);$a++) {
+		for ($a=0;$a<count_compat($identifiers);$a++) {
 			if (strpos($col_def,$identifiers[$a])!==FALSE) { // have it
 				return $name;
 			}
@@ -111,7 +111,7 @@ function getOpSelect($type) { // generiert JS-Code
 	$retval=<<<END
 return "<select name=\"op"+element+"\" id=\"op"+element+"\">
 END;
-	for ($a=0;$a<count($searchModes[$type]);$a++) {
+	for ($a=0;$a<count_compat($searchModes[$type]);$a++) {
 		$retval.=addslashes("<option value=\"".$searchModes[$type][$a]."\">").s($searchModes[$type][$a]);
 	}
 	$retval.=<<<END
@@ -181,7 +181,7 @@ function getSearchFields($table) {
 	$searchFields=array();
 	// tabellen nach suchfeldern scannen
 	if (is_array($join_tables)) foreach ($join_tables as $join_table) {
-		if (count($tables[$join_table]["fields"])) { // gibt es die Tabelle?
+		if (count_compat($tables[$join_table]["fields"])) { // gibt es die Tabelle?
 			foreach ($tables[$join_table]["fields"] as $name => $data) {
 				addSearchField($searchFields,$default_priority,$join_table,$name,$data);
 			}
@@ -206,7 +206,7 @@ function getSearchFields($table) {
 					// make query to build list
 					$entry_data=mysql_select_array(array("dbs" => "-1", "table" => $data["fieldListTable"]));
 					//~ print_r($entry_data);die();
-					for ($b=0;$b<count($entry_data);$b++) {
+					for ($b=0;$b<count_compat($entry_data);$b++) {
 						// go through result list and add to $searchFields
 						$default_priority++;
 						$searchFields[]=array("tableName" => $join_table, "fieldNamePrefix" => $name."/", "fieldName" => $entry_data[$b][ $data["fieldListCol"] ], "priority" => $default_priority, "type" => $entry_data[$b][ $data["fieldTypeCol"] ], "allowedClasses" => array($entry_data[$b][ $data["fieldTypeUnitTypeCol"] ]) );
@@ -217,7 +217,7 @@ function getSearchFields($table) {
 				}
 			}
 		}
-		elseif (count($virtual_tables[$join_table]["fields"])) { // zB Suche bei Anbietern
+		elseif (count_compat($virtual_tables[$join_table]["fields"])) { // zB Suche bei Anbietern
 			foreach ($virtual_tables[$join_table]["fields"] as $name => $data) {
 			       $thisTable=$virtual_tables[$join_table]["forTable"];
 			       if (strpos($name,".")!==FALSE) {
@@ -278,8 +278,8 @@ switch (thisTable) {
 		$critFunc.="case ".fixStr($table).":\n";
 		$searchFields=getSearchFields($table);
 		$options="";
-		if (count($searchFields)) {
-			for ($b=0;$b<count($searchFields);$b++) { // search_fields: fieldName tableName priority
+		if (count_compat($searchFields)) {
+			for ($b=0;$b<count_compat($searchFields);$b++) { // search_fields: fieldName tableName priority
 				$searchField=& $searchFields[$b];
 				$searchText=s($searchField["fieldName"]);
 				if (empty($searchText)) {

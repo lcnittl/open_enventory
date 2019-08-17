@@ -91,7 +91,7 @@ function getOtherDBInfo() {
 	global $db_info,$db;
 	
 	$other_db_info=array();
-	for ($a=0;$a<count($db_info);$a++) {
+	for ($a=0;$a<count_compat($db_info);$a++) {
 		$reading_db=$db_info[$a]["name"];
 		switchDB($reading_db,$db);
 		
@@ -101,7 +101,7 @@ function getOtherDBInfo() {
 		));
 		//~ var_dump($other_dbs);
 		
-		if (count($other_dbs)) {
+		if (count_compat($other_dbs)) {
 			$pw_map=array();
 			foreach ($other_dbs as $other_db_entry) {
 				$pw_map[ $other_db_entry["db_name"]."_".$other_db_entry["db_user"] ]=$other_db_entry["db_pass"];
@@ -148,7 +148,7 @@ function dropAllLinkUsernames($db_info,$keep_usernames=array()) {
 	$other_db_filter=ifNotEmpty(" AND db_user NOT IN(",$quoted_list,")");
 	
 	// go through all databases and query for auto_users and delete them FIXME
-	for ($a=0;$a<count($db_info);$a++) {
+	for ($a=0;$a<count_compat($db_info);$a++) {
 		switchDB($db_info[$a]["name"],$db);
 		
 		// get auto_users
@@ -158,7 +158,7 @@ function dropAllLinkUsernames($db_info,$keep_usernames=array()) {
 			"dbs" => -1, 
 			"filter" => "username LIKE ".fixStrSQL(auto_prefix."%").$person_filter,
 		));
-		for ($b=0;$b<count($auto_users);$b++) {
+		for ($b=0;$b<count_compat($auto_users);$b++) {
 			$_REQUEST["pk"]=$auto_users[$b]["person_id"];
 			performDel($table,-1,$db);
 		}
@@ -169,14 +169,14 @@ function dropAllLinkUsernames($db_info,$keep_usernames=array()) {
 			"dbs" => -1, 
 			"filter" => "db_user LIKE ".fixStrSQL(auto_prefix."%").$other_db_filter,
 		));
-		for ($b=0;$b<count($other_dbs);$b++) {
+		for ($b=0;$b<count_compat($other_dbs);$b++) {
 			$_REQUEST["pk"]=$other_dbs[$b]["other_db_id"];
 			performDel($table2,-1,$db);
 		}
 	}
 	
 	$auto_users=getLinkUsernames(); // remaining ones, if any
-	for ($a=0;$a<count($auto_users);$a++) {
+	for ($a=0;$a<count_compat($auto_users);$a++) {
 		if (!in_array($auto_users[$a]["user"],$keep_usernames)) {
 			mysqli_query($db,"GRANT USAGE ON *.* TO ".fixStrSQL($auto_users[$a]["user"])."@".fixStrSQL($auto_users[$a]["host"]).";");
 			mysqli_query($db,"DROP USER ".fixStrSQL($auto_users[$a]["user"])."@".fixStrSQL($auto_users[$a]["host"]).";");
@@ -234,12 +234,12 @@ function getSharedViewDefinition($tabname,$tabdata) {
 	
 	if (isset($tabdata["remoteFields"])) { // only some fields, fill rest with NULL values
 		$fields=array();
-		for ($a=0;$a<count($tabdata["remoteFields"]);$a++) {
+		for ($a=0;$a<count_compat($tabdata["remoteFields"]);$a++) {
 			$fields[]=$tabname.".".$tabdata["remoteFields"][$a];
 		}
 		
 		$null_fields=array_values(array_diff(array_keys($tabdata["fields"]),$tabdata["remoteFields"]));
-		for ($a=0;$a<count($null_fields);$a++) {
+		for ($a=0;$a<count_compat($null_fields);$a++) {
 			$fields[]="NULL AS ".$null_fields[$a];
 		}
 		
@@ -356,7 +356,7 @@ function getFieldDefinition(& $field_data,$force_update_collation=false) {
 function getSQLFromFieldArray($fieldArray) {
 	$retval=array();
 	// durchgehen
-	for ($a=0;$a<count($fieldArray);$a++) {
+	for ($a=0;$a<count_compat($fieldArray);$a++) {
 		$retval[]=getFieldDefinition($fieldArray[$a]);
 	}
 	return joinIfNotEmpty($retval,", ");
@@ -454,7 +454,7 @@ function createTables() {
 function createView($tabname) {
 	global $db,$tables;
 	$tabdata=& $tables[$tabname];
-	if (count($tabdata)==0 || !tableExists($tabname,$db)) {
+	if (count_compat($tabdata)==0 || !tableExists($tabname,$db)) {
 		return;
 	}
 	if (hasTableRemote($tabname)) {
@@ -581,7 +581,7 @@ function refreshUsers($createNew=true) {
 		}
 		$olduser=getFullUsername($oldusername,$oldremote_host);
 		
-		for ($a=0;$a<count($mysql_data);$a++) {
+		for ($a=0;$a<count_compat($mysql_data);$a++) {
 			if ($mysql_data[$a]["user"]==$oldusername && $mysql_data[$a]["host"]==$oldremote_host) {
 				$password=$mysql_data[$a]["password"];
 				break;
@@ -712,7 +712,7 @@ function updateCurrentDatabaseFormat($perform=false) {
 			for($a=0;$a<$totalCount;$a++) {
 				$temp=mysqli_fetch_array($result,MYSQLI_ASSOC);
 				$found=false;
-				for ($b=0;$b<count($field_list);$b++) {
+				for ($b=0;$b<count_compat($field_list);$b++) {
 					if ($field_list[$b]["type"]!="field" && $field_list[$b]["type"]!="pk") {
 						continue;
 					}
@@ -769,7 +769,7 @@ function updateCurrentDatabaseFormat($perform=false) {
 				if (in_array($temp["Key_name"],$more_indices)) {
 					$found=true;
 				}
-				if (!$found) for ($b=0;$b<count($field_list);$b++) {
+				if (!$found) for ($b=0;$b<count_compat($field_list);$b++) {
 					if (!in_array($field_list[$b]["type"],array("index","unique"))) {
 						continue;
 					}
@@ -843,7 +843,7 @@ function updateCurrentDatabaseFormat($perform=false) {
 		}
 		unset($create_fields);
 		
-		if (count($alter_commands)) {
+		if (count_compat($alter_commands)) {
 			$sql="ALTER TABLE ".$table_name." ".join(", ",$alter_commands).";";
 			echo $sql."<br>";
 			if ($perform) {

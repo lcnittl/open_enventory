@@ -66,7 +66,7 @@ setGlobalVars();
 list($fields,$hidden)=getFields($columns["molecule_double"]);
 $fields[]="links_double_smiles";
 list($res,$dataArray,$sort_hints)=handleQueryRequest(2);
-for ($a=0;$a<count($res);$a++) {
+for ($a=0;$a<count_compat($res);$a++) {
 	$res[$a]["double_count"]=intval($counts[ $res[$a]["molecule_id"] ]);
 }
 
@@ -87,7 +87,7 @@ $_REQUEST["val1"]=join(",",array_get_col($double_res,"molecule_id"));
 list($fields,$hidden)=getFields($columns["molecule_double"]);
 $fields[]="links_double_cas";
 list($res,$dataArray,$sort_hints)=handleQueryRequest(2);
-for ($a=0;$a<count($res);$a++) {
+for ($a=0;$a<count_compat($res);$a++) {
 	$res[$a]["double_count"]=intval($counts[ $res[$a]["molecule_id"] ]);
 }
 

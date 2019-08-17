@@ -146,9 +146,9 @@ $GLOBALS["suppliers"][$code]=array(
 	
 	preg_match_all("/(?ims)<div[^>]*class=\"chemicalDataTable\"[^>]*>(.*?)<\/table>/",$body,$chem_data,PREG_PATTERN_ORDER);
 	$chem_data=$chem_data[1];
-	for ($b=0;$b<count($chem_data);$b++) {
+	for ($b=0;$b<count_compat($chem_data);$b++) {
 		$parts=preg_split("/(?ims)<(:?br|td)[^<>]*>/",$chem_data[$b]);
-		for ($c=0;$c<count($parts);$c++) {
+		for ($c=0;$c<count_compat($parts);$c++) {
 			$part=trim(strip_tags($parts[$c]));
 			if (strpos($part,": ")!==FALSE) {
 				list($name,$value)=explode(": ",$part,2);
@@ -202,7 +202,7 @@ $GLOBALS["suppliers"][$code]=array(
 	
 	preg_match("/(?ims)<div[^>]*class=\"substanceSpecifications\"[^>]*>(.*?)<\/div>/",$body,$safety_data);
 	$safety_entries=explode("<br>",$safety_data[1]);
-	for ($b=0;$b<count($safety_entries);$b++) {
+	for ($b=0;$b<count_compat($safety_entries);$b++) {
 		list($name,$value)=explode(": ",fixTags($safety_entries[$b]),2);
 		
 		switch ($name) {
@@ -253,7 +253,7 @@ $GLOBALS["suppliers"][$code]=array(
 		"4760634" => "GHS08", 
 		"4760635" => "GHS09", 
 	);
-	for ($b=0;$b<count($safety_images);$b++) {
+	for ($b=0;$b<count_compat($safety_images);$b++) {
 		$temp=$safety_sym_dict[ $safety_images[$b] ];
 		if (!empty($temp)) {
 			$safety_sym[]=$temp;
@@ -308,12 +308,12 @@ $GLOBALS["suppliers"][$code]=array(
 		
 		$result=array();
 		preg_match_all("/(?ims)<tr[^>]*>.*?<a[^>]+href=\"\/store\/catalog\/product\.jsp\?catalog_number=([^\"]+)\".*?<img.*?<\/a>(.*?)<\/a>(.*?)<option[^>]+value=\"([^\"]+)\"/",$body,$manyLines,PREG_SET_ORDER);
-		for ($b=0;$b<count($manyLines);$b++) {
+		for ($b=0;$b<count_compat($manyLines);$b++) {
 			$result[$b]=$self["getResult"]($manyLines[$b][2]);
 			$result[$b]["catNo"]=fixTags($manyLines[$b][1]);
 			$result[$b]["supplierCode"]=$code;
 			
-			if (count($priceData)) {
+			if (count_compat($priceData)) {
 				$skuID=$manyLines[$b][4];
 				foreach ($priceData as $idx => $priceEntry) {
 					if ($priceEntry->skuId==$skuID) {
@@ -329,7 +329,7 @@ $GLOBALS["suppliers"][$code]=array(
 					preg_match_all("/(?ims)<td.*?<\/td>/",$subLine,$cells,PREG_PATTERN_ORDER);
 					$cells=$cells[0];
 					
-					if (count($cells)<2) {
+					if (count_compat($cells)<2) {
 						continue;
 					}
 					
@@ -345,7 +345,7 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 '),
 "getBestHit" => create_function('& $hitlist,$name=NULL','
-	if (count($hitlist)>0) {
+	if (count_compat($hitlist)>0) {
 		return 0;
 	}
 '),

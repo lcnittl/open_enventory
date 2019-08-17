@@ -152,7 +152,7 @@ $GLOBALS["suppliers"][$code]=array(
 			preg_match_all("/(?ims)<td.*?<\/td>/",$line,$cells,PREG_PATTERN_ORDER);
 			$cells=$cells[0];
 			
-			if (count($cells)<4) {
+			if (count_compat($cells)<4) {
 				continue;
 			}
 			
@@ -245,7 +245,7 @@ $GLOBALS["suppliers"][$code]=array(
 			preg_match_all("/(?ims)<td.*?<\/td>/",$info,$cells,PREG_PATTERN_ORDER);
 			$cells=$cells[0];
 			
-			if (count($cells)>=3) {
+			if (count_compat($cells)>=3) {
 				$catNo=fixTags($cells[0]);
 				$results[]=array(
 					"name" => fixTags($cells[1]), 
@@ -260,7 +260,7 @@ $GLOBALS["suppliers"][$code]=array(
 	return $results;
 '),
 "getBestHit" => create_function('& $hitlist,$name=NULL','
-	if (count($hitlist)>0) {
+	if (count_compat($hitlist)>0) {
 		return 0;
 	}
 ')

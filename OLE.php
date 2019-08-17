@@ -334,7 +334,7 @@ class OLE extends PEAR
             $pps->Time2nd = OLE::OLE2LocalDate(fread($fh, 8));
             $pps->_StartBlock = $this->_readInt4($fh);
             $pps->Size = $this->_readInt4($fh);
-            $pps->No = count($this->_list);
+            $pps->No = count_compat($this->_list);
             $this->_list[] = $pps;
 
             // check if the PPS tree (starting from root) is complete
@@ -423,7 +423,7 @@ class OLE extends PEAR
     */
     function ppsTotal()
     {
-        return count($this->_list);
+        return count_compat($this->_list);
     }
 
     /**

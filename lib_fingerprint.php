@@ -28,7 +28,7 @@ function addAtomToGroup(& $group,$symbol,$attachedToAtom,$bond,$noFurtherSubstit
 	// fürs Fingerprinting
 	global $pse;
 	if ($attachedToAtom>=0) { // 1st atom attached to -1, zu gruppe hinzufügen
-		$newIdx=count($group["atoms"]);
+		$newIdx=count_compat($group["atoms"]);
 		$group["atoms"][$newIdx]=array(
 			ATOMIC_SYMBOL => $symbol, 
 			ATOMIC_NUMBER => $pse[$symbol], 
@@ -37,7 +37,7 @@ function addAtomToGroup(& $group,$symbol,$attachedToAtom,$bond,$noFurtherSubstit
 			PART => 0, 
 		);
 		$group["atoms"][$attachedToAtom][NEIGHBOURS][]=$newIdx;
-		$bond_count=count($group[BONDS]);
+		$bond_count=count_compat($group[BONDS]);
 		$group[BONDS][$bond_count]=array(
 			BOND_ORDER => $bond, 
 			ORIG_BOND_ORDER => $bond, 
@@ -60,7 +60,7 @@ function addBondToGroup(&$group,$atom1,$atom2,$bond) {
 	// fügt eine Bindung zu einer byRef übergebenen Gruppe hinzu (nur für Ringe erforderlich)
 	$group["atoms"][$atom1][NEIGHBOURS][]=$atom2;
 	$group["atoms"][$atom2][NEIGHBOURS][]=$atom1;
-	$bond_count=count($group[BONDS]);
+	$bond_count=count_compat($group[BONDS]);
 	$group[BONDS][$bond_count]=array(
 		BOND_ORDER => $bond, 
 		ORIG_BOND_ORDER => $bond, 
@@ -111,7 +111,7 @@ define("BITS_PER_BLOCK",31);
 function FP3single(& $molecule,$atoms_arr,$loose_order=false) { // gibt 0-127 zurück oder -1 für Fehler/ungültig/...
 	global $bondPatterns;
 	
-	$atoms_arr_count=count($atoms_arr);
+	$atoms_arr_count=count_compat($atoms_arr);
 	if ($atoms_arr_count!=FP3_BOND_ATOMS) {
 		return array();
 	}
@@ -140,8 +140,8 @@ function FP3single(& $molecule,$atoms_arr,$loose_order=false) { // gibt 0-127 zu
 	
 	$retval=array();
 	if ($loose_order) {
-		for ($a=0;$a<count($bondPatterns);$a++) {
-			for ($b=0;$b<count($bondPatterns[$a]);$b++) {
+		for ($a=0;$a<count_compat($bondPatterns);$a++) {
+			for ($b=0;$b<count_compat($bondPatterns[$a]);$b++) {
 				if ($bondPatterns[$a][$b]!=$thisBondPattern[$b] && $bondPatterns[$a][$b]!=$thisOrigBondPattern[$b]) {
 					continue 2;
 				}
@@ -157,13 +157,13 @@ function FP3single(& $molecule,$atoms_arr,$loose_order=false) { // gibt 0-127 zu
 		}
 	}
 	
-	if (!count($retval)) {
+	if (!count_compat($retval)) {
 		return array(); // Bond pattern not found, either super exotic or super common
 	}
 	$shift=3;
 	for ($a=0;$a<$atoms_arr_count;$a++) { // 4x
 		if ($molecule["atoms"][ $atoms_arr[$a] ][ATOMIC_NUMBER]==6) {
-			for ($b=0;$b<count($retval);$b++) {
+			for ($b=0;$b<count_compat($retval);$b++) {
 				$retval[$b]|=(1 << $shift);
 			}
 		}
@@ -177,7 +177,7 @@ function FP3single(& $molecule,$atoms_arr,$loose_order=false) { // gibt 0-127 zu
 /*function FP4single(& $molecule,$atoms_arr) { // gibt 0-31 zurück oder -1 für Fehler/ungültig/...
 	// 5 bit durch C/nicht-C
 	
-	$atoms_arr_count=count($atoms_arr);
+	$atoms_arr_count=count_compat($atoms_arr);
 	if ($atoms_arr_count!=FP4_BOND_ATOMS) {
 		return -1;
 	}
@@ -216,7 +216,7 @@ function FP3single(& $molecule,$atoms_arr,$loose_order=false) { // gibt 0-127 zu
 function FP5single(& $molecule,$atoms_arr) { // gibt 0-127 zurück oder -1 für Fehler/ungültig/...
 	// 7 bit durch C/nicht-C, 1x falten
 	
-	$atoms_arr_count=count($atoms_arr);
+	$atoms_arr_count=count_compat($atoms_arr);
 	if ($atoms_arr_count!=FP5_BOND_ATOMS) {
 		return -1;
 	}
@@ -238,14 +238,14 @@ function FP5single(& $molecule,$atoms_arr) { // gibt 0-127 zurück oder -1 für 
 }*/
 
 function FPsub(& $fingerprint,& $molecule,$path,$paramHash=array()) {
-	$path_count=count($path);
+	$path_count=count_compat($path);
 	if ($path_count>FP3_BOND_ATOMS || $path_count<1) { // should not happen
 		return;
 	}
 	elseif ($path_count==FP3_BOND_ATOMS) {
 		// order
 		$shifts=FP3single($molecule,$path,!$paramHash["forStructureSearch"]);
-		for ($a=0;$a<count($shifts);$a++) {
+		for ($a=0;$a<count_compat($shifts);$a++) {
 			$shift=$shifts[$a];
 			
 			$idx=intval(floor($shift/BITS_PER_BLOCK));
@@ -276,7 +276,7 @@ function FPsub(& $fingerprint,& $molecule,$path,$paramHash=array()) {
 	if ($path_count<FP3_BOND_ATOMS) {
 		// Nachbarn durchgehen
 		$last_atom=$path[$path_count-1];
-		for ($a=0;$a<count($molecule["atoms"][$last_atom][NEIGHBOURS]);$a++) {
+		for ($a=0;$a<count_compat($molecule["atoms"][$last_atom][NEIGHBOURS]);$a++) {
 			
 			$new_atom=$molecule["atoms"][$last_atom][NEIGHBOURS][$a];
 			if ($molecule["atoms"][$new_atom][ATOMIC_NUMBER]==1) { // no expl Hs
@@ -308,7 +308,7 @@ function FPsub(& $fingerprint,& $molecule,$path,$paramHash=array()) {
 function FPall(& $molecule,$paramHash=array()) {
 	// alle 4Atome-3Bindungen-Konstellationen finden
 	$fingerprint=array_fill(0,8,0);
-	for ($a=0;$a<count($molecule["atoms"]);$a++) {
+	for ($a=0;$a<count_compat($molecule["atoms"]);$a++) {
 		if ($molecule["atoms"][$a][ATOMIC_NUMBER]==1) { // no expl Hs
 			continue;
 		}

@@ -297,7 +297,7 @@ function CLgetSuggestionsMicrofragChain($frag,$chainNo,$posInWord,$wordLength) {
 	}
 	
 	// end/noend
-	$el_count=count($CL_chains[$chainNo]);
+	$el_count=count_compat($CL_chains[$chainNo]);
 	$is_at_end=($posInWord+strlen($frag)==$wordLength); // fragment ist am Ende des Worts
 	//~ echo $frag."G".$is_at_end."T".$el_count."<br>";
 	if ($CL_chains[$chainNo][$el_count-1]["type"]=="end") {
@@ -318,7 +318,7 @@ function CLgetSuggestionsMicrofragChain($frag,$chainNo,$posInWord,$wordLength) {
 		//~ print_r($alternatives);
 		
 		$limits[$b]=array();
-		for ($a=0;$a<count($alternatives);$a++) {
+		for ($a=0;$a<count_compat($alternatives);$a++) {
 			//~ $pos=strpos($frag,$alternatives[$a]);
 			if ($b==0) {
 				$CL_start="^";
@@ -338,7 +338,7 @@ function CLgetSuggestionsMicrofragChain($frag,$chainNo,$posInWord,$wordLength) {
 			// check if end conditions matched
 			$limits[$b]=array_merge($limits[$b],CLgetLimits($re,$frag,1));
 			
-			//~ if ($pos!==FALSE && ($b!=0 || $pos==0) && ($b!=count($CL_chains[$chainNo])-1 || $pos+strlen($alternatives[$a])==strlen($frag) ) ) { // force begin for 1st and end for last
+			//~ if ($pos!==FALSE && ($b!=0 || $pos==0) && ($b!=count_compat($CL_chains[$chainNo])-1 || $pos+strlen($alternatives[$a])==strlen($frag) ) ) { // force begin for 1st and end for last
 				//~ echo $alternatives[$a]."<br>";
 				//~ $limits[$b][]=array($pos,$pos+strlen($alternatives[$a]));
 			//~ }
@@ -357,8 +357,8 @@ function CLgetSuggestionsMicrofragChain($frag,$chainNo,$posInWord,$wordLength) {
 
 function CLgetNextElWithLimits($chainNo,$limits,$skip=0) {
 	global $CL_chains;
-	for ($a=$skip;$a<count($limits);$a++) {
-		if (count($limits[$a])) {
+	for ($a=$skip;$a<count_compat($limits);$a++) {
+		if (count_compat($limits[$a])) {
 			return $a;
 		}
 		elseif (!$CL_chains[$chainNo][$a]["opt"]) { // accept that optional is not found
@@ -372,8 +372,8 @@ function CLbuildGuessSolutions($frag,$chainNo,$limits,$check_element=0,$pos=0,$g
 	// $check_element: aktueller Eintrag der Kette $chainNo
 	global $CL_groups,$CL_chains;
 	//~ echo $chainNo."A".$check_element."B".$pos."C".$guess."<br>";
-	//~ $check_element=count($path);
-	if ($check_element==count($CL_chains[$chainNo])) { // fertiggeraten, d.h. letztes Element der Kette
+	//~ $check_element=count_compat($path);
+	if ($check_element==count_compat($CL_chains[$chainNo])) { // fertiggeraten, d.h. letztes Element der Kette
 		//~ echo $guess."X".$frag."<br>";
 		if ($pos!=strlen($frag)) { // paßt nicht (na und? Können wir doch auch etwas zurückgeben)
 			return array();
@@ -382,16 +382,16 @@ function CLbuildGuessSolutions($frag,$chainNo,$limits,$check_element=0,$pos=0,$g
 	}
 	
 	$retval=array();
-	for ($a=0;$a<count($limits[$check_element]);$a++) { // etwas passendes für Element gefunden
+	for ($a=0;$a<count_compat($limits[$check_element]);$a++) { // etwas passendes für Element gefunden
 		$start=$limits[$check_element][$a][0]; // [0]: Startposition, [1]: Endposition
 		if ($start==$pos) { // passender Anküpfungspunkt
 			$new_guess=$guess.substr($frag,$start,$limits[$check_element][$a][1]-$start); // neuen Teil anhängen
 			$retval=array_merge($retval,CLbuildGuessSolutions($frag,$chainNo,$limits,$check_element+1,$limits[$check_element][$a][1],$new_guess));
 		}
 	}
-	if (!count($limits[$check_element])) { // nichts passendes für Element gefunden
+	if (!count_compat($limits[$check_element])) { // nichts passendes für Element gefunden
 		$next_def=CLgetNextElWithLimits($chainNo,$limits,$check_element+1);
-		//~ if ($check_element==count($CL_chains[$chainNo])-1) { // last
+		//~ if ($check_element==count_compat($CL_chains[$chainNo])-1) { // last
 		if ($next_def==-1) { // last
 			// guess until end
 			$guess_frag=CLguessAtom($chainNo,$check_element,substr($frag,$pos));
@@ -401,7 +401,7 @@ function CLbuildGuessSolutions($frag,$chainNo,$limits,$check_element=0,$pos=0,$g
 			}
 		}
 		elseif ($next_def!==FALSE) {
-			for ($a=0;$a<count($limits[$next_def]);$a++) { // go through next
+			for ($a=0;$a<count_compat($limits[$next_def]);$a++) { // go through next
 				if ($limits[$next_def][$a][0]>=$pos) {
 					$atom=substr($frag,$pos,$limits[$next_def][$a][0]-$pos); // durch $limits[$next_def] vorgegebener Teil
 					$guess_frag=CLguessAtom($chainNo,$check_element,$atom);
@@ -432,7 +432,7 @@ function CLgetAlternatives($chainNo,$check_element) {
 		$alternatives=$CL_groups[ $CL_chains[$chainNo][$check_element]["id"] ];
 	break;
 	case "groups":
-		for ($c=0;$c<count($CL_chains[$chainNo][$check_element]["ids"]);$c++) {
+		for ($c=0;$c<count_compat($CL_chains[$chainNo][$check_element]["ids"]);$c++) {
 			$id=$CL_chains[$chainNo][$check_element]["ids"][$c];
 			if (is_array($CL_groups[$id])) {
 				$alternatives=array_merge($alternatives,$CL_groups[$id]);
@@ -452,7 +452,7 @@ function CLguessAtom($chainNo,$check_element,$frag) {
 	$best_suggestion=false;
 	$alternatives=CLgetAlternatives($chainNo,$check_element);
 	//~ print_r($alternatives);
-	for ($a=0;$a<count($alternatives);$a++) {
+	for ($a=0;$a<count_compat($alternatives);$a++) {
 		if (abs($frag_len-strlen($alternatives[$a]))>CL_frag_len_diff) {
 			continue;
 		}
@@ -479,7 +479,7 @@ function CLgetSuggestionsForMicrofrag($frag,$posInWord,$wordLength,$flags=0) {
 	foreach ($CL_groups as $id => $group) {
 		$group_in=false;
 		//~ $universal_group=in_array($id,$CL_universalGroups);
-		for ($b=0;$b<count($group);$b++) {
+		for ($b=0;$b<count_compat($group);$b++) {
 			if (!$group_in && (strpos($frag,$group[$b])!==FALSE || strpos($group[$b],$frag)!==FALSE)) {
 				$possible_groups[]=$id;
 				$group_in=true;
@@ -493,10 +493,10 @@ function CLgetSuggestionsForMicrofrag($frag,$posInWord,$wordLength,$flags=0) {
 	//~ print_r($possible_groups);
 	
 	// 2. go through chains and try to find something
-	for ($a=0;$a<count($CL_chains);$a++) { // Zusammenhängende Fragmente
+	for ($a=0;$a<count_compat($CL_chains);$a++) { // Zusammenhängende Fragmente
 		if (!$CL_chains[$a][0]["alwaysCheck"]) {
 			$chain_points=0;
-			for ($b=0;$b<count($CL_chains[$a]);$b++) {
+			for ($b=0;$b<count_compat($CL_chains[$a]);$b++) {
 				switch ($CL_chains[$a][$b]["type"]) {
 				case "text":
 					if (strpos($frag,$CL_chains[$a][$b]["value"])!==FALSE || strpos($CL_chains[$a][$b]["value"],$frag)!==FALSE) {
@@ -509,7 +509,7 @@ function CLgetSuggestionsForMicrofrag($frag,$posInWord,$wordLength,$flags=0) {
 					}
 				break;
 				case "groups":
-					for ($c=0;$c<count($CL_chains[$a][$b]["ids"]);$c++) {
+					for ($c=0;$c<count_compat($CL_chains[$a][$b]["ids"]);$c++) {
 						if (in_array($CL_chains[$a][$b]["ids"][$c],$possible_groups)) {
 							$chain_points++;
 							break;
@@ -532,7 +532,7 @@ function CLgetSuggestionsForMicrofrag($frag,$posInWord,$wordLength,$flags=0) {
 	//~ die();
 	
 	// 3. choose best suggestion
-	for ($a=0;$a<count($suggestions);$a++) {
+	for ($a=0;$a<count_compat($suggestions);$a++) {
 		$new_quality=CL_frag_max_cost-CLstring_sim($frag,$suggestions[$a]);
 		if ($new_quality>$quality) {
 			$best_suggestion=$suggestions[$a]; // Einzelfragmente
@@ -600,7 +600,7 @@ function CLisSpecialChar($parts,$partNo) {
 
 function CLgetSolutionPart($word,$solution,$partNo) {
 	//~ echo "A".$partNo;
-	if ($partNo>=0 && $partNo<count($solution)) {
+	if ($partNo>=0 && $partNo<count_compat($solution)) {
 		return substr($word,$solution[$partNo][0],$solution[$partNo][1]-$solution[$partNo][0]);
 	}
 	return false;
@@ -608,14 +608,14 @@ function CLgetSolutionPart($word,$solution,$partNo) {
 
 function CLgetGuessPart($word,$solution,$partNo) {
 	//~ echo "B".$partNo;
-	if ($partNo>=0 && $partNo<=count($solution)) {
+	if ($partNo>=0 && $partNo<=count_compat($solution)) {
 		if ($partNo==0) {
 			$start=0;
 		}
 		else {
 			$start=$solution[$partNo-1][1];
 		}
-		if ($partNo==count($solution)) {
+		if ($partNo==count_compat($solution)) {
 			$end=strlen($word);
 		}
 		else {
@@ -707,7 +707,7 @@ function CLgetFragRange($word,$solution,$b,$items) {
 function CLgetSuggestionsForFragment($word,& $solutions,& $suggestions,$solution_no,$b) { // Vorschläge für nicht zuordenbare Fragmente zur Korrektur
 	//~ echo $word."D<br>";
 	
-	// 0 <= $b <= count($solutions[$solution_no])
+	// 0 <= $b <= count_compat($solutions[$solution_no])
 	// $prev, $next: arrays of (full) text fragments at each side of the unmatched fragment, like ch,chol,cholrid,...
 	
 	if ($b==0) { // am Anfang
@@ -719,7 +719,7 @@ function CLgetSuggestionsForFragment($word,& $solutions,& $suggestions,$solution
 		$prev=CLgetFragRange($word,$solutions[$solution_no],$b,-CL_max_frag_range);
 	}
 	
-	if ($b==count($solutions[$solution_no])) { // am Ende
+	if ($b==count_compat($solutions[$solution_no])) { // am Ende
 		$end=strlen($word);
 		$next=array();
 	}
@@ -752,7 +752,7 @@ function CLgetSuggestionsForFragment($word,& $solutions,& $suggestions,$solution
 	// anything left ?
 	$posInWord=$start;
 	$wordLength=strlen($word);
-	for ($a=0;$a<count($parts);$a++) {
+	for ($a=0;$a<count_compat($parts);$a++) {
 		// einzelZeichen lassen und Oxidationszahlen
 		if (CLisSpecialChar($parts,$a) || CLmatchRoman($parts[$a])) {
 			$retval.=$parts[$a];
@@ -765,14 +765,14 @@ function CLgetSuggestionsForFragment($word,& $solutions,& $suggestions,$solution
 			array("",0), // nothing
 			CLgetSuggestionsForMicrofrag($parts[$a],$posInWord,$wordLength)
 		);
-		if (count($prev) && $a==0) { // also try combined with $prev
-			//~ for ($c=0;$c<count($prev);$c++) {
+		if (count_compat($prev) && $a==0) { // also try combined with $prev
+			//~ for ($c=0;$c<count_compat($prev);$c++) {
 			foreach($prev as $c => $prev_frag) {
 				$text_suggestions[]=CLgetSuggestionsForMicrofrag($prev_frag.$parts[$a],$posInWord-strlen($prev_frag),$wordLength,$c-1);
 			}
 		}
-		if (count($next) && $a==count($parts)-1) { // also try combined with $next
-			//~ for ($c=0;$c<count($next);$c++) {
+		if (count_compat($next) && $a==count_compat($parts)-1) { // also try combined with $next
+			//~ for ($c=0;$c<count_compat($next);$c++) {
 			foreach($next as $c => $next_frag) {
 				$text_suggestions[]=CLgetSuggestionsForMicrofrag($parts[$a].$next_frag,$posInWord,$wordLength,$c+1);
 			}
@@ -781,7 +781,7 @@ function CLgetSuggestionsForFragment($word,& $solutions,& $suggestions,$solution
 		
 		//~ print_r($suggestions);
 		$max_sugg=0;
-		for ($c=1;$c<count($text_suggestions);$c++) {
+		for ($c=1;$c<count_compat($text_suggestions);$c++) {
 			if ($text_suggestions[$c][1]>$text_suggestions[$max_sugg][1]) {
 				$max_sugg=$c;
 			}
@@ -846,7 +846,7 @@ function CLgetSuggestionsForFragment($word,& $solutions,& $suggestions,$solution
 			
 			$solutions[]=$new_solution;
 			$suggestions[]=$new_suggestion;
-			$solution_no=count($solutions)-1;
+			$solution_no=count_compat($solutions)-1;
 		}
 		
 		$retval.=$text_suggestions[$max_sugg][0];
@@ -888,7 +888,7 @@ function CLgetLimits($re,$word,$item=0) {
 	
 	$limits=array();
 	// return array of start and end indices
-	for ($a=0;$a<count($results);$a++) {
+	for ($a=0;$a<count_compat($results);$a++) {
 		$limits[]=array($results[$a][1],$results[$a][1]+strlen($results[$a][0]));
 	}
 	return $limits;
@@ -912,9 +912,9 @@ function CLmatchChainOnWord($chainNo,$word) { // gibt Array mit Treffern zurück
 	// build RE from $chain
 	global $CL_groups,$CL_chains;
 	$re="/(?ims)";
-	for ($a=0;$a<count($CL_chains[$chainNo]);$a++) {
+	for ($a=0;$a<count_compat($CL_chains[$chainNo]);$a++) {
 		$alternatives=CLgetAlternatives($chainNo,$a);
-		if (count($alternatives)) {
+		if (count_compat($alternatives)) {
 			$re.="(".join("|",$alternatives).")";
 			if ($CL_chains[$chainNo][$a]["opt"]) {
 				$re.="?";
@@ -977,12 +977,12 @@ function CLbuildSolutionsFromLimits(& $limits) {
 	
 	// combine limits and identify unused areas
 	$solutions=array();
-	for ($a=0;$a<count($limits);$a++) { // abdeckbare Bereiche durchgehen
+	for ($a=0;$a<count_compat($limits);$a++) { // abdeckbare Bereiche durchgehen
 		$solution_found=false;
-		$solutions_count=count($solutions);
+		$solutions_count=count_compat($solutions);
 		// limit-Bereich an Lösungen anfügen, längere Fragmente werden bevorzugt
 		for ($b=0;$b<$solutions_count;$b++) { // bestehende Lösungskombinationen durchgehen
-			$this_sol_count=count($solutions[$b]);
+			$this_sol_count=count_compat($solutions[$b]);
 			if ($solutions[$b][ $this_sol_count-1 ][1]<=$limits[$a][0]) { // an bestehende Lösung anhängen, keine Überlappung
 				$solutions[$b][]=$limits[$a];
 				$solution_found=true;
@@ -1017,8 +1017,8 @@ function CLbuildSolutionsFromLimits(& $limits) {
 ..--------------------------------------------------------------------------------------------------*/
 function CLarray_unique($arr) {
 	$retval=array();
-	for ($a=0;$a<count($arr);$a++) {
-		for ($b=$a+1;$b<count($arr);$b++) {
+	for ($a=0;$a<count_compat($arr);$a++) {
+		for ($b=$a+1;$b<count_compat($arr);$b++) {
 			if ($arr[$a]==$arr[$b]) {
 				continue 2;
 			}
@@ -1053,7 +1053,7 @@ function CLgetSuggestionsForWord($word) {
 	
 	// get start and end for matches
 	$limits=array();
-	for ($a=0;$a<count($CL_chains);$a++) {
+	for ($a=0;$a<count_compat($CL_chains);$a++) {
 		$limits=array_merge($limits,CLmatchChainOnWord($a,$word));
 	}
 	//~ print_r($limits);
@@ -1066,11 +1066,11 @@ function CLgetSuggestionsForWord($word) {
 	//~ die();
 	
 	// check if solution matches $word
-	for ($a=0;$a<count($solutions);$a++) {
+	for ($a=0;$a<count_compat($solutions);$a++) {
 		if ($solutions[$a][0][0]!=0) {
 			continue;
 		}
-		$solution_count=count($solutions[$a]);
+		$solution_count=count_compat($solutions[$a]);
 		for ($b=1;$b<$solution_count;$b++) {
 			if ($solutions[$a][$b-1][1]!=$solutions[$a][$b][0]) {
 				continue 2;
@@ -1087,9 +1087,9 @@ function CLgetSuggestionsForWord($word) {
 	
 	// find unused areas and make suggestions
 	$suggestions=array();
-	for ($a=0;$a<count($solutions);$a++) {
-		//~ for ($b=count($suggestions[$a]);$b<=count($solutions[$a]);$b++) { // start at point where it continues
-		for ($b=0;$b<=count($solutions[$a]);$b++) { // start at point where it continues
+	for ($a=0;$a<count_compat($solutions);$a++) {
+		//~ for ($b=count_compat($suggestions[$a]);$b<=count_compat($solutions[$a]);$b++) { // start at point where it continues
+		for ($b=0;$b<=count_compat($solutions[$a]);$b++) { // start at point where it continues
 			//~ echo $a."X".$b."<br>";
 			//~ print_r($solutions[$a]);
 			//~ flush();
@@ -1102,8 +1102,8 @@ function CLgetSuggestionsForWord($word) {
 	//~ print_r($solutions);print_r($suggestions);
 	
 	// check suggestions for two consecutive equal entries
-	for ($a=count($solutions)-1;$a>=0;$a--) {
-		for ($b=0;$b<count($solutions[$a]);$b++) {
+	for ($a=count_compat($solutions)-1;$a>=0;$a--) {
+		for ($b=0;$b<count_compat($solutions[$a]);$b++) {
 			if ($suggestions[$a][$b]!="" && $suggestions[$a][$b]==$suggestions[$a][$b+1] && preg_match("/(ims?)^[a-zA-Z]+\$/",$suggestions[$a][$b])) { // allow with symbols or numbers
 				array_splice($solutions,$a,1);
 				array_splice($suggestions,$a,1);
@@ -1117,9 +1117,9 @@ function CLgetSuggestionsForWord($word) {
 	// merge
 	$suggestion_texts=array();
 	$suggestion_cost=array();
-	for ($a=0;$a<count($solutions);$a++) {
+	for ($a=0;$a<count_compat($solutions);$a++) {
 		$suggestion_texts[$a]="";
-		for ($b=-1;$b<count($solutions[$a]);$b++) {
+		for ($b=-1;$b<count_compat($solutions[$a]);$b++) {
 			if (is_array($solutions[$a][$b])) { // ignore -1 and deleted ones
 				$suggestion_texts[$a].=substr($word,$solutions[$a][$b][0],$solutions[$a][$b][1]-$solutions[$a][$b][0]);
 			}
@@ -1127,14 +1127,14 @@ function CLgetSuggestionsForWord($word) {
 		}
 	}
 	
-	//~ if (!count($solutions)) { // no fragment found
+	//~ if (!count_compat($solutions)) { // no fragment found
 	list($whole)=CLgetSuggestionsForMicrofrag($word,0,$word_len);
 	$suggestion_texts[]=$whole;
 	//~ }
 	
 	$suggestion_texts=array_values(array_unique($suggestion_texts));
 	
-	for ($a=0;$a<count($suggestion_texts);$a++) {
+	for ($a=0;$a<count_compat($suggestion_texts);$a++) {
 		if ($suggestion_texts[$a]==="") {
 			continue;
 		}

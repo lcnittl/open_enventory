@@ -29,13 +29,13 @@ pageHeader();
 
 //~ $settings["selection"][$table][$db_id]=array();
 $table=$_REQUEST["table"];
-$count_db_id=count($_REQUEST["db_id"]);
+$count_db_id=count_compat($_REQUEST["db_id"]);
 
 //~ session_start();
 if ($_REQUEST["desired_action"]=="reset") {
 	$settings["selection"][$table]=array();
 }
-elseif ($count_db_id && $count_db_id==count($_REQUEST["pk"])) {
+elseif ($count_db_id && $count_db_id==count_compat($_REQUEST["pk"])) {
 	for ($a=0;$a<$count_db_id;$a++) {
 		$db_id=$_REQUEST["db_id"][$a];
 		switch ($_REQUEST["desired_action"]) {

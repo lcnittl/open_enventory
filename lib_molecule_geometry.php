@@ -24,7 +24,7 @@ along with open enventory.  If not, see <http://www.gnu.org/licenses/>.
 require_once "lib_formatting.php";
 
 function optimiseMoleculeParts(& $molecule) {
-	if (count($molecule["orig_parts"])<2) { // would be waste of time
+	if (count_compat($molecule["orig_parts"])<2) { // would be waste of time
 		return;
 	}
 	// Dimensionen der Teile messen
@@ -34,7 +34,7 @@ function optimiseMoleculeParts(& $molecule) {
 	$minWidth=1;
 	
 	$area=array();
-	for ($a=0;$a<count($molecule["orig_parts"]);$a++) {
+	for ($a=0;$a<count_compat($molecule["orig_parts"]);$a++) {
 		$area[$a]=getMoleculePartDimensions($molecule,$a);
 		
 		// set dimensions at least to min
@@ -48,9 +48,9 @@ function optimiseMoleculeParts(& $molecule) {
 	$part_order=array_keys($area);
 	
 	$part0=$part_order[0];
-	for ($a=0;$a<count($part_order)-1;$a++) { // der nächstkleinere Teil wird verschoben
+	for ($a=0;$a<count_compat($part_order)-1;$a++) { // der nächstkleinere Teil wird verschoben
 		$c=$part_order[$a];
-		//~ for ($b=$a+1;$b<count($part_order);$b++) {
+		//~ for ($b=$a+1;$b<count_compat($part_order);$b++) {
 		//~ $b=$a+1;
 		//~ $d=$part_order[$b];
 		$d=$part_order[$a+1];
@@ -89,7 +89,7 @@ function optimiseMoleculeParts(& $molecule) {
 }
 
 function getMoleculePartDimensions(& $molecule,$part_no) {
-	if (!count($molecule["orig_parts"][$part_no]["atoms"])) {
+	if (!count_compat($molecule["orig_parts"][$part_no]["atoms"])) {
 		return 0;
 	}
 	$atom0=$molecule["orig_parts"][$part_no]["atoms"][0];
@@ -97,7 +97,7 @@ function getMoleculePartDimensions(& $molecule,$part_no) {
 	$maxX=$minX;
 	$minY=$molecule["atoms"][$atom0]["y"];
 	$maxY=$minY;
-	for ($a=1;$a<count($molecule["orig_parts"][$part_no]["atoms"]);$a++) {
+	for ($a=1;$a<count_compat($molecule["orig_parts"][$part_no]["atoms"]);$a++) {
 		$atom_no=$molecule["orig_parts"][$part_no]["atoms"][$a];
 		$minX=min($minX,$molecule["atoms"][$atom_no]["x"]);
 		$maxX=max($maxX,$molecule["atoms"][$atom_no]["x"]);
@@ -119,7 +119,7 @@ function getMoleculePartDimensions(& $molecule,$part_no) {
 }
 
 function shiftMoleculePart(& $molecule,$part_no,$delta_x,$delta_y,$delta_z=0) {
-	if (!count($molecule["orig_parts"][$part_no])) {
+	if (!count_compat($molecule["orig_parts"][$part_no])) {
 		return;
 	}
 	if (isset($molecule["orig_parts"][$part_no]["centerX"])) {
@@ -128,13 +128,13 @@ function shiftMoleculePart(& $molecule,$part_no,$delta_x,$delta_y,$delta_z=0) {
 	if (isset($molecule["orig_parts"][$part_no]["centerY"])) {
 		$molecule["orig_parts"][$part_no]["centerY"]+=$delta_y;
 	}
-	for ($a=0;$a<count($molecule["orig_parts"][$part_no]["atoms"]);$a++) {
+	for ($a=0;$a<count_compat($molecule["orig_parts"][$part_no]["atoms"]);$a++) {
 		$atom_no=$molecule["orig_parts"][$part_no]["atoms"][$a];
 		$molecule["atoms"][$atom_no]["x"]+=$delta_x;
 		$molecule["atoms"][$atom_no]["y"]+=$delta_y;
 		$molecule["atoms"][$atom_no]["z"]+=$delta_z;
 	}
-	for ($a=0;$a<count($molecule[RINGS]);$a++) {
+	for ($a=0;$a<count_compat($molecule[RINGS]);$a++) {
 		if ($part_no==$molecule[RINGS][$a][PART]) {
 			$molecule[RINGS][$a]["x"]+=$delta_x;
 			$molecule[RINGS][$a]["y"]+=$delta_y;
@@ -147,12 +147,12 @@ function scaleMolecule(& $molecule, $scale) {
 	if ($scale<=0) {
 		return;
 	}
-	for ($a=0;$a<count($molecule["atoms"]);$a++) {
+	for ($a=0;$a<count_compat($molecule["atoms"]);$a++) {
 		$molecule["atoms"][$a]["x"]*=$scale;
 		$molecule["atoms"][$a]["y"]*=$scale;
 		$molecule["atoms"][$a]["z"]*=$scale;
 	}
-	for ($a=0;$a<count($molecule[RINGS]);$a++) {
+	for ($a=0;$a<count_compat($molecule[RINGS]);$a++) {
 		$molecule[RINGS][$a]["x"]*=$scale;
 		$molecule[RINGS][$a]["y"]*=$scale;
 	}
@@ -160,7 +160,7 @@ function scaleMolecule(& $molecule, $scale) {
 
 function normaliseReaction(& $reaction) {
 	// Größe der Moleküle angleichen
-	for ($a=0;$a<count($reaction["molecules"]);$a++) {
+	for ($a=0;$a<count_compat($reaction["molecules"]);$a++) {
 		$molecule=& $reaction["molecules"][$a];
 		// get Molscale
 		$scale=getMolscale($molecule);
@@ -172,8 +172,8 @@ function normaliseReaction(& $reaction) {
 function getMolscale(& $molecule) {
 	// mittlere Bindungslänge bestimmen, dann Skalierungsfaktor anpassen
 	$sumLength=0;
-	if (count($molecule[BONDS])==0) {
-		$atomCount=count($molecule["atoms"]);
+	if (count_compat($molecule[BONDS])==0) {
+		$atomCount=count_compat($molecule["atoms"]);
 		for ($atom1=0;$atom1<$atomCount;$atom1++) {
 			for ($atom2=$atom1+1;$atom2<$atomCount;$atom2++) {
 				$sumLength+=sqrt(
@@ -186,7 +186,7 @@ function getMolscale(& $molecule) {
 		$noBonds=$atomCount*($atomCount-1);
 	}
 	else {
-		for ($a=0;$a<count($molecule[BONDS]);$a++) {
+		for ($a=0;$a<count_compat($molecule[BONDS]);$a++) {
 			$atom1=$molecule[BONDS][$a][ATOM1];
 			$atom2=$molecule[BONDS][$a][ATOM2];
 			$sumLength+=sqrt(
@@ -195,7 +195,7 @@ function getMolscale(& $molecule) {
 				pow($molecule["atoms"][$atom1]["z"]-$molecule["atoms"][$atom2]["z"],2)
 			);
 		}
-		$noBonds+=count($molecule[BONDS]);
+		$noBonds+=count_compat($molecule[BONDS]);
 	}
 	// }
 	//~ echo $sumLength/$noBonds;
@@ -214,7 +214,7 @@ function getMoleculeDimensions($molecule,$scale,$margin) { // Vorsicht, für sca
 
 
 	// xMin, xMax, yMin, yMax bestimmen
-	for ($a=0;$a<count($molecule["atoms"]);$a++) {
+	for ($a=0;$a<count_compat($molecule["atoms"]);$a++) {
 		$thisX=$molecule["atoms"][$a]["x"];
 		$thisY=$molecule["atoms"][$a]["y"];
 		if (is_numeric($thisX) && is_numeric($thisY)) { // hole xMin, xMax, yMin,yMax

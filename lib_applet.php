@@ -222,7 +222,7 @@ function getAppletHTML2($paramHash=array()) { // part after name
 		$appletVal="><param name=\"templateCreationMode\" value=\"".($paramHash["mode"]=="template"?"1":"0")."\"><param name=\"rxnMode\" value=\"".($paramHash["mode"]=="rxn"?"1":"0")."\"><param name=\"restActivated\" value=\"".($paramHash["searchMode"]?"1":"0")."\"><param name=\"compactMode\" value=\"".($paramHash["compactMode"]?"1":"0")."\">";
 		// templates
 		$templates=arr_merge($g_settings["applet_templates"],$settings["applet_templates"]);
-		for ($a=0;$a<count($templates);$a++) {
+		for ($a=0;$a<count_compat($templates);$a++) {
 			$appletVal.="<param name=\"template".$a."\" value=".fixStr(addPipes($templates[$a]["molfile_blob"])).">";
 		}
 		$appletVal.="</applet>".$copyPasteText."<td style=\"background-color:white;color:black\"><span class=\"very_small\">Copyright 2007-2010 Otmar Ginkel, TU Kaiserslautern</span><a href=\"imes_".$lang.".pdf\" target=\"_blank\"><img src=\"lib/help_sm.png\"".getTooltip("help")." border=\"0\"></a></td></tr></table>";

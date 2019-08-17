@@ -185,7 +185,7 @@ case "true":
 	$list_int_name="applet_templates";
 	$settings[$list_int_name]=getSubitemlistObject($list_int_name,array("molfile_blob","template_name","template_shortcuts"));
 	// add name, shortcuts into molfile	
-	for ($a=0;$a<count($settings[$list_int_name]);$a++) { // vorerst 0 0 einfügen
+	for ($a=0;$a<count_compat($settings[$list_int_name]);$a++) { // vorerst 0 0 einfügen
 		$molecule=readMolfile($settings[$list_int_name][$a]["molfile_blob"]);
 		moleculeAddTemplateLine($molecule,$settings[$list_int_name][$a]["template_name"],$settings[$list_int_name][$a]["template_shortcuts"]);
 		$settings[$list_int_name][$a]["molfile_blob"]=writeMolfile($molecule);
@@ -218,7 +218,7 @@ case "true":
 	
 		for ($a=0;$a<analytics_transfer_profiles;$a++) {
 			$settings["include_in_auto_transfer"][$a]=array();
-			for ($b=0;$b<count($auto_trans);$b++) {
+			for ($b=0;$b<count_compat($auto_trans);$b++) {
 				if ($auto_trans[$b]["include_in_auto_transfer_".$a]) {
 					$settings["include_in_auto_transfer"][$a][]=$auto_trans[$b]["analytics_type_id"];
 				}
@@ -305,7 +305,7 @@ if (!$no_access_to_labj) {
 			if (!is_array($settings["include_in_auto_transfer"][$a])) {
 				continue;
 			}
-			for ($b=0;$b<count($settings["analytics_type_order"]);$b++) {
+			for ($b=0;$b<count_compat($settings["analytics_type_order"]);$b++) {
 				if (in_array($settings["analytics_type_order"][$b]["analytics_type_id"],$settings["include_in_auto_transfer"][$a])) {
 					$settings["analytics_type_order"][$b][$a]["include_in_auto_transfer"]=1;
 				}

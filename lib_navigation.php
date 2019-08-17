@@ -112,7 +112,7 @@ function getMessageButton() {
 		"dbs" => "-1", 
 	));
 	
-	$unread=count($message_results);
+	$unread=count_compat($message_results);
 	if ($unread>0) {
 		$highlight=" style=\"border-color:red\"";
 	}
@@ -125,7 +125,7 @@ function getMessageButton() {
 }
 
 function alignHorizontal($iHTMLarray,$blockAlign="") {
-	if (count($iHTMLarray)==0) {
+	if (count_compat($iHTMLarray)==0) {
 		return "";
 	}
 	if (!is_array($iHTMLarray)) {
@@ -197,7 +197,7 @@ function getLawMenu() {
 function getTransferDevices($transfer_settings) {
 	$result=getDeviceResult($transfer_settings);
 	$retval=array();
-	for ($a=0;$a<count($result);$a++) {
+	for ($a=0;$a<count_compat($result);$a++) {
 		$retval[]=$result[$a]["analytics_device_name"];
 	}
 	return join(", ",$retval);
@@ -206,8 +206,8 @@ function getTransferDevices($transfer_settings) {
 function getTransferMenu() {
 	global $settings;
 	$retval="<div id=\"transferMenu\" class=\"overlayMenu\" style=\"display:none;\" onMouseover=\"cancelOverlayTimeout(); \" onMouseout=\"hideOverlayId(&quot;transferMenu&quot;);\">";
-	for ($a=1;$a<count($settings["include_in_auto_transfer"]);$a++) {
-		if (count($settings["include_in_auto_transfer"][$a])) {
+	for ($a=1;$a<count_compat($settings["include_in_auto_transfer"]);$a++) {
+		if (count_compat($settings["include_in_auto_transfer"][$a])) {
 			$retval.="<a href=\"javascript:void transferGCs(".$a.")\" class=\"imgButtonSm\" title=".fixStr(s("transfer_gc1").getTransferDevices($a).s("transfer_gc2"))."><img src=\"lib/auto_trans_sm.png\" border=\"0\"".getTooltip("transfer_gc").">".($a+1)."</a>";
 		}
 	}
@@ -330,7 +330,7 @@ function gutCustomMenu($table) {
 	if (isset($edit_views[$table])) { //  && !isMSIE() customization does not work in MSIE 7 due to $ bug. I WILL NOT reprogram this to fit MSIE BS.
 		// customize button
 		$retval.="<div id=\"customize_view\" class=\"no_print\"><a href=\"Javascript:showCustomMenu()\" class=\"imgButtonSm\"><img src=\"lib/list_options_sm.png\" border=\"0\"".getTooltip("customize_view")."></a><br clear=\"all\"><div id=\"customize_view_menu\" style=\"display:none;border:1px solid black\"><form id=\"customize_view_form\" method=\"get\" target=\"comm\" action=\"chooseAsync.php\"><input type=\"hidden\" name=\"desired_action\" value=\"update_custom_view\"><input type=\"hidden\" name=\"table\" value=".fixStr($table).">";
-		for ($a=0;$a<count($view_controls[$table]);$a++) {
+		for ($a=0;$a<count_compat($view_controls[$table]);$a++) {
 			$id=$view_controls[$table][$a];
 			$text=s($view_controls[$table][$a]);
 			if ($text) {
@@ -338,7 +338,7 @@ function gutCustomMenu($table) {
 				$retval.="<label for=".fixStr($cid)."><input type=\"checkbox\" id=".fixStr($cid)." name=".fixStr($id)." value=\"1\"".(in_array($id,$edit_views[$table]["custom_view"]["visibleControls"])?" checked=\"checked\"":"").">".$text."</label><br>";
 			}
 		}
-		for ($a=0;$a<count($view_ids[$table]);$a++) {
+		for ($a=0;$a<count_compat($view_ids[$table]);$a++) {
 			$id=$view_ids[$table][$a];
 			$text=s($view_ids[$table][$a]);
 			if ($text) {

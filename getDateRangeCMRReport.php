@@ -93,7 +93,7 @@ if (!empty($_REQUEST["from_date"])) {
 		));
 		//~ var_dump($results);die();
 		
-		if (!count($results)) {
+		if (!count_compat($results)) {
 			continue;
 		}
 		$has_entries=true;

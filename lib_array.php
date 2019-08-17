@@ -25,7 +25,7 @@ along with open enventory.  If not, see <http://www.gnu.org/licenses/>.
 	if (!is_array($valueArr)) {
 		$valueArr=array($valueArr);
 	}
-	if (count($valueArr)) foreach ($valueArr as $value) {
+	if (count_compat($valueArr)) foreach ($valueArr as $value) {
 		while ($pos=array_search($value,$arr)) {
 			array_splice($arr,$pos,1);
 		}
@@ -45,20 +45,20 @@ function array_clean($arr) {
 }
 
 function array_key_clear(& $arr,$keys) {
-	for ($a=0,$d=count($keys);$a<$d;$a++) {
+	for ($a=0,$d=count_compat($keys);$a<$d;$a++) {
 		$arr[ $keys[$a] ]="";
 	}
 }
 
 function array_key_remove(& $arr,$keys) {
-	for ($a=0,$d=count($keys);$a<$d;$a++) {
+	for ($a=0,$d=count_compat($keys);$a<$d;$a++) {
 		unset($arr[ $keys[$a] ]);
 	}
 }
 
 function array_key_filter($arr,$keys) {
 	$retval=array();
-	if (is_array($keys)) for ($a=0,$d=count($keys);$a<$d;$a++) {
+	if (is_array($keys)) for ($a=0,$d=count_compat($keys);$a<$d;$a++) {
 		$key=& $keys[$a];
 		if (isset($arr[$key])) {
 			$retval[$key]=$arr[$key];
@@ -71,7 +71,7 @@ function arr_replace($search,$replace,$arr) { // replaces array elements, simila
 	if (!is_array($arr)) {
 		return;
 	}
-	if (is_array($search) && is_array($replace) && count($replace)>=count($search)) {
+	if (is_array($search) && is_array($replace) && count_compat($replace)>=count_compat($search)) {
 		$arr_mode=true;
 	}
 	elseif (!is_array($search)) {
@@ -101,7 +101,7 @@ function arr_trans(& $target,& $source,$fields,$strip_tags=false) { // & $source
 	if (!is_array($target)) {
 		$target=array();
 	}
-	for ($a=0,$d=count($fields);$a<$d;$a++) {
+	for ($a=0,$d=count_compat($fields);$a<$d;$a++) {
 		$field=$fields[$a];
 		$value=$source[$field];
 		if ($strip_tags) {
@@ -132,7 +132,7 @@ function cumSum($arr,$until) {
 	if (!is_array($arr)) {
 		return;
 	}
-	if (!count($arr) || $until==0) {
+	if (!count_compat($arr) || $until==0) {
 		return 0;
 	}
 	return array_sum(array_slice($arr,0,$until));
@@ -167,7 +167,7 @@ function getVecAngle(& $v1,& $v2) {
 
 function getScalarProd($a,$b) {
 	$retval=0;
-	for ($c=0,$d=count($a);$c<$d;$c++) {
+	for ($c=0,$d=count_compat($a);$c<$d;$c++) {
 		$retval+=$a[$c]*$b[$c];
 	}
 	return $retval;
@@ -197,14 +197,14 @@ function array_key_sum(& $arr_sum,& $arr_keys) {
 }
 
 function array_subtract(& $arr1,& $arr2) {
-	if (!is_array($arr1) || count($arr1)==0) {
+	if (!is_array($arr1) || count_compat($arr1)==0) {
 		return array();
 	}
-	if (!is_array($arr2) || count($arr2)==0) {
+	if (!is_array($arr2) || count_compat($arr2)==0) {
 		return $arr1;
 	}
 	$retval=array();
-	for ($a=0;$a<count($arr1);$a++) {
+	for ($a=0;$a<count_compat($arr1);$a++) {
 		$retval[$a]=$arr1[$a]-$arr2[$a];
 	}
 	return $retval;
@@ -213,8 +213,8 @@ function array_subtract(& $arr1,& $arr2) {
 function array_add(& $arr1,& $arr2) {
 	$arrays=func_get_args();
 	$retval=array();
-	for ($b=0,$d=count($arrays);$b<$d;$b++) {
-		for ($a=0,$e=count($arrays[$b]);$a<$e;$a++) {
+	for ($b=0,$d=count_compat($arrays);$b<$d;$b++) {
+		for ($a=0,$e=count_compat($arrays[$b]);$a<$e;$a++) {
 			$retval[$a]+=$arrays[$b][$a];
 		}
 	}
@@ -222,21 +222,21 @@ function array_add(& $arr1,& $arr2) {
 }
 
 function array_round($arr,$s) {
-	for ($c=0,$d=count($arr);$c<$d;$c++) {
+	for ($c=0,$d=count_compat($arr);$c<$d;$c++) {
 		$arr[$c]=round($arr[$c],$s);
 	}
 	return $arr;
 }
 
 function array_mult($arr,$s) {
-	for ($c=0,$d=count($arr);$c<$d;$c++) {
+	for ($c=0,$d=count_compat($arr);$c<$d;$c++) {
 		$arr[$c]*=$s;
 	}
 	return $arr;
 }
 
 function array_mult_byref(& $arr,$s) { // faster
-	for ($c=0,$a=count($arr);$c<$a;$c++) {
+	for ($c=0,$a=count_compat($arr);$c<$a;$c++) {
 		$arr[$c]*=$s;
 	}
 }
@@ -272,7 +272,7 @@ function array_values_r($arr) {
 
 function array_diff_r($arr1,$arr2) {
 	$retval=array();
-	if (count($arr2)==0) {
+	if (count_compat($arr2)==0) {
 		return $arr1;
 	}
 	if (is_array($arr1)) foreach ($arr1 as $item) {
@@ -297,11 +297,11 @@ function array_slice_r($arr,$offset,$length) { // nur 2 Ebenen, arr[db_id]=array
 	// print_r($arr);
 	// echo $offset." ".$length;
 	$retval=array();
-	if (count($arr)>0) {
+	if (count_compat($arr)>0) {
 		$total_count=0;
 		$ende=$offset+$length; // 
 		foreach ($arr as $key => $value) {
-			$len=count($value);
+			$len=count_compat($value);
 			if (is_array($value) && $len>$offset-$total_count && $len>0) {
 				$this_start=max(0,$offset-$total_count);
 				$this_len=max(0,$ende-$total_count-$this_start);

@@ -36,7 +36,7 @@ $results=mysql_select_array(array(
 	"filter" => "density_20>10", 
 ));
 
-for ($a=0;$a<count($results);$a++) {
+for ($a=0;$a<count_compat($results);$a++) {
 	unset($results[$a]["density_20"]);
 	getAddInfo($results[$a],false,array("min_number" => 2)); // Daten von suppliern holen, kann dauern
 	//~ print_r($results[$a]);die();

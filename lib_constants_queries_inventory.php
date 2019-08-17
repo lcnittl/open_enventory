@@ -125,7 +125,7 @@ $query["disposed_chemical_storage"]["filter"]="chemical_storage.chemical_storage
 
 function procBarcode(& $resultset) { // zeigt entweder den gesetzten Barcode oder den aus dem Primärschlüssel erzeugten
 	$prefix=findBarcodePrefixForPk("chemical_storage");
-	for ($a=0;$a<count($resultset);$a++) {
+	for ($a=0;$a<count_compat($resultset);$a++) {
 		if (empty($resultset[$a]["chemical_storage_barcode"])) {
 			$resultset[$a]["chemical_storage_barcode"]=getEAN8($prefix,$resultset[$a]["chemical_storage_id"]);
 		}

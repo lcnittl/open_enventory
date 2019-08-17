@@ -97,7 +97,7 @@ $GLOBALS["suppliers"][$code]=array(
 	preg_match_all("/(?ims)<dt[^>]*>(.*?)<\/dt>\s*<dd[^>]*>(.*?)<\/dd>/",$body,$manyNVPs,PREG_SET_ORDER);
 	//~ print_r($manyNVPs);die();
 	
-	for ($b=0;$b<count($manyNVPs);$b++) {
+	for ($b=0;$b<count_compat($manyNVPs);$b++) {
 		$rawValue=$manyNVPs[$b][2];
 		$value=fixTags($rawValue);
 		if (isEmptyStr($value)) {
@@ -204,7 +204,7 @@ $GLOBALS["suppliers"][$code]=array(
 		$col_price=3;
 		$col_discount_price=4;
 		$min_cells=4;
-		for ($b=0;$b<count($manyLines);$b++) {
+		for ($b=0;$b<count_compat($manyLines);$b++) {
 			preg_match_all("/(?ims)<t[dh].*?<\/t[dh]>/",$manyLines[$b],$cells,PREG_PATTERN_ORDER);
 			$cells=$cells[0];
 			
@@ -229,7 +229,7 @@ $GLOBALS["suppliers"][$code]=array(
 				}
 				continue;
 			}
-			if (count($cells)<=$min_cells) {
+			if (count_compat($cells)<=$min_cells) {
 				continue;
 			}
 			
@@ -278,7 +278,7 @@ $GLOBALS["suppliers"][$code]=array(
 			$body=$cut[0];
 		}
 		preg_match_all("/(?ims)<h(\d) [^>]*class=\"prod-name\"[^>]*>(.*?)<\/span>(.*?)<\/a>.*?<\/h\\\\1>/",$body,$data_matches,PREG_SET_ORDER);
-		for ($b=0;$b<count($data_matches);$b++) {
+		for ($b=0;$b<count_compat($data_matches);$b++) {
 			$catNo=fixTags($data_matches[$b][2]);
 			$results[]=array(
 				"name" => fixTags($data_matches[$b][3]),
@@ -299,7 +299,7 @@ $GLOBALS["suppliers"][$code]=array(
 	return $results;
 '),
 "getBestHit" => create_function('& $hitlist,$name=NULL','
-	if (count($hitlist)>0) {
+	if (count_compat($hitlist)>0) {
 		return 0;
 	}
 ')

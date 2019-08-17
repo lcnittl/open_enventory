@@ -42,7 +42,7 @@ function getAtomInfo(& $molecule,$atom_no) {
 	
 	// Neighbours (bond, num, symbol, charge, isotope)
 	$neighbour_info=array();
-	for ($a=0;$a<count($atom[NEIGHBOURS]);$a++) {
+	for ($a=0;$a<count_compat($atom[NEIGHBOURS]);$a++) {
 		$neighbour_atom_no=$atom[NEIGHBOURS][$a];
 		$neighbour_info[]=SMaddBond($molecule["bondsFromNeighbours"][$atom_no][$neighbour_atom_no][ORIG_BOND_ORDER]).getAtomInfoText($molecule,$neighbour_atom_no);
 	}
@@ -92,7 +92,7 @@ function checkReactionMapping(& $reaction,$assignment_tables,$paramHash) {
 		for ($mol_reactant=0;$mol_reactant<$reaction["reactants"];$mol_reactant++) {
 			$reactant=& $reaction["molecules"][$mol_reactant];
 			
-			for ($reac_atom_no=0;$reac_atom_no<count($reactant["atoms"]);$reac_atom_no++) {
+			for ($reac_atom_no=0;$reac_atom_no<count_compat($reactant["atoms"]);$reac_atom_no++) {
 				$atom_map_inverted[$idx]=array($mol_reactant,$reac_atom_no);
 				$idx++;
 			}

@@ -52,7 +52,7 @@ function make_tempfile($data,$format=null) {
 }
 
 function data_convert($data,$format_in,$format_out=array("png")) { // gives back PNG-data and text for searching
-	$format_count=count($format_out);
+	$format_count=count_compat($format_out);
 	if ($format_count==0) {
 		return;
 	}

@@ -78,7 +78,7 @@ while (!feof($handle)) {
 }
 fclose ($handle);
 
-//~ die(count($zeilen)."X");
+//~ die(count_compat($zeilen)."X");
 
 $data=array();
 
@@ -90,11 +90,11 @@ $db_sigel=array(
 );
 
 $a=0;
-do { // count($zeilen)
+do { // count_compat($zeilen)
 	set_time_limit(90);
 	list($bessi,$field,$value)=read_line($zeilen[$a]);
 	while (lineBlank($zeilen[++$a])) {
-		if ($a>=count($zeilen)) {
+		if ($a>=count_compat($zeilen)) {
 			break 2;
 		}
 		$value.=$zeilen[$a]; // collect following lines
@@ -245,7 +245,7 @@ foreach ($data as $bessi => $molecule) {
 	//~ }
 	if (!empty($chemical_storage["molecule_id"]) && $molecule["mat_stamm_nr"]) {
 		$molecule["mat_stamm_nr"]=array_unique($molecule["mat_stamm_nr"]);
-		for ($a=0;$a<count($molecule["mat_stamm_nr"]);$a++) {
+		for ($a=0;$a<count_compat($molecule["mat_stamm_nr"]);$a++) {
 			if (empty($molecule["mat_stamm_nr"][$a]) || $molecule["mat_stamm_nr"][$a]=="-") {
 				continue;
 			}

@@ -118,7 +118,7 @@ $GLOBALS["suppliers"][$code]=array(
 	preg_match_all("/(?ims)<li.*?>.*?<p.*?>(.*?)<span.*?>(.*?)<\/span>.*?<\/p>.*?<\/li>/",$top_data[1],$manyNVPs,PREG_SET_ORDER);
 	//~ print_r($manyNVPs);die();
 	
-	for ($b=0;$b<count($manyNVPs);$b++) {
+	for ($b=0;$b<count_compat($manyNVPs);$b++) {
 		$name=fixTags($manyNVPs[$b][1]);
 		$value=fixTags($manyNVPs[$b][2]);
 		
@@ -142,17 +142,17 @@ $GLOBALS["suppliers"][$code]=array(
 	preg_match_all("/(?ims)<tr.*?<\/tr>/",$body,$manyLines,PREG_PATTERN_ORDER);
 	$manyLines=$manyLines[0];
 
-	for ($b=0;$b<count($manyLines);$b++) {
+	for ($b=0;$b<count_compat($manyLines);$b++) {
 		preg_match_all("/(?ims)<td.*?<\/td>/",$manyLines[$b],$cells,PREG_PATTERN_ORDER);
 		$cells=$cells[0];
 		
-		if (count($cells)>=2) {
+		if (count_compat($cells)>=2) {
 			$self["handleCells"]($result,$cells);
 		}
 	}
 	
 	preg_match_all("/(?ims)<div[^>]* class=\"safetyRow\"[^>]*>\s*<div[^>]*>(.*?)<\/div>\s*<div[^>]*>(.*?)<\/div>\s*<\/div>/",$body,$specialLines,PREG_SET_ORDER);
-	for ($b=0;$b<count($specialLines);$b++) {
+	for ($b=0;$b<count_compat($specialLines);$b++) {
 		$self["handleCells"]($result,array_slice($specialLines[$b],1));
 	}
 	
@@ -285,7 +285,7 @@ $GLOBALS["suppliers"][$code]=array(
 	//~ print_r($manyBlocks);die();
 	$results=array();
 	
-	for ($c=1;$c<count($manyBlocks);$c++) { // 1st elemnt is bogus
+	for ($c=1;$c<count_compat($manyBlocks);$c++) { // 1st elemnt is bogus
 		// get name
 		preg_match("/(?ims)<h2 [^>]*class=\"name\"[^>]*>(.*?)<\/h2>/",$manyBlocks[$c],$name_data);
 		$molecule_name=fixTags($name_data[1]);
@@ -294,7 +294,7 @@ $GLOBALS["suppliers"][$code]=array(
 		$manyLines=$manyLines[0];
 		//~ print_r($manyLines);die();
 		
-		for ($b=0;$b<count($manyLines);$b++) {
+		for ($b=0;$b<count_compat($manyLines);$b++) {
 			preg_match_all("/(?ims)<li.*?<\/li>/",$manyLines[$b],$cells,PREG_PATTERN_ORDER);
 			$cells=$cells[0];
 			// real list entry
@@ -316,7 +316,7 @@ $GLOBALS["suppliers"][$code]=array(
 	return $results;
 '),
 "getBestHit" => create_function('& $hitlist,$name=NULL','
-	if (count($hitlist)>0) {
+	if (count_compat($hitlist)>0) {
 		return 0;
 	}
 ')

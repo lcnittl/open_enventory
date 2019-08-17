@@ -28,7 +28,7 @@ function findFloatRange($data,$code,$low,$high) {
 		$trun_data=substr($data,$a);
 		$blocks=str_split($trun_data,$code_len);
 		
-		for($b=0;$b<count($blocks);$b++) {
+		for($b=0;$b<count_compat($blocks);$b++) {
 			$val=up($code,$blocks[$b]);
 			if (!is_nan($val) && $val>=$low && $val<=$high) {
 				$retval.=$code."@".dechex($a+$b*$code_len)." - ".$val." (".getBinhex($blocks[$b]).")<br>";

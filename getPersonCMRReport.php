@@ -90,7 +90,7 @@ if (!empty($_REQUEST["person_id"])) {
 		));
 		//~ var_dump($results);die();
 		
-		if (!count($results)) {
+		if (!count_compat($results)) {
 			continue;
 		}
 		$has_entries=true;

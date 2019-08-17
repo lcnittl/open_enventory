@@ -88,7 +88,7 @@ $GLOBALS["suppliers"][$code]=array(
 	return $data && !startswith($data,"<h1") && !startswith($data,"<!DOCTYPE") && !startswith($data,"Status: ") && strpos($data,"error:")===FALSE && strpos($data,"NotFound")===FALSE;
 '),
 "getBestHit" => create_function('& $hitlist,$name=NULL','
-	if (count($hitlist)>0) {
+	if (count_compat($hitlist)>0) {
 		return 0;
 	}
 '),

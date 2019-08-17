@@ -116,7 +116,7 @@ $GLOBALS["suppliers"][$code]=array(
 	if ($table_match) {
 		preg_match_all("/(?ims)<tr[^>]*>.*?<td[^>]*>(.*?)<\/td>.*<\/tr>/",$table_match,$data,PREG_PATTERN_ORDER);
 		$data=$data[1];
-		for ($a=0;$a<count($data);$a++) {
+		for ($a=0;$a<count_compat($data);$a++) {
 			$result["molecule_names_array"][]=fixTags($data[$a]);
 		}
 	}
@@ -126,7 +126,7 @@ $GLOBALS["suppliers"][$code]=array(
 	if ($table_match) {
 		preg_match_all("/(?ims)<tr[^>]*>.*?<td[^>]*>(.*?)<\/td>.*<\/tr>/",$table_match,$data,PREG_PATTERN_ORDER);
 		$data=$data[1];
-		for ($a=0;$a<count($data);$a++) {
+		for ($a=0;$a<count_compat($data);$a++) {
 			$value=fixTags($data[$a]);
 			if (strpos($value,"-")!==FALSE) {
 				// only the first
@@ -180,7 +180,7 @@ $GLOBALS["suppliers"][$code]=array(
 	return $results;
 '),
 "getBestHit" => create_function('& $hitlist,$name=NULL','
-	if (count($hitlist)>0) {
+	if (count_compat($hitlist)>0) {
 		return 0;
 	}
 '),
@@ -200,7 +200,7 @@ $GLOBALS["suppliers"][$code]=array(
 '),
 "getCAS" => create_function('& $molfile',getFunctionHeader().'
 	$result=$self["strSearch"]($molfile,"se");
-	if (count($result)>1) {
+	if (count_compat($result)>1) {
 		$a=$self["getBestHit"]($result);
 		$result[0]=$self["getInfo"]($result[$a]["catNo"]);
 		$result[0]["supplierCode"]=$code;

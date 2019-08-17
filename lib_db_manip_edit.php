@@ -112,7 +112,7 @@ function performEdit($table,$db_id,$dbObj,$paramHash=array()) {
 			));
 		}
 		
-		if (count($_FILES["spzfile_file"]) && $_FILES["spzfile_file"]["error"]==0) { // upload
+		if (count_compat($_FILES["spzfile_file"]) && $_FILES["spzfile_file"]["error"]==0) { // upload
 			/*
 			[load_molfile] => Array
 			(
@@ -240,7 +240,7 @@ function performEdit($table,$db_id,$dbObj,$paramHash=array()) {
 			$device["analytics_type_name"]=$spectrum_data["analytics_type_name"];
 			//print_r($spectrum_data);die("X".$spectrum_data["interpretation"]."X");
 			
-			if (count($spectrum_data)) {
+			if (count_compat($spectrum_data)) {
 				//~ $spectrum_data=$analytics[ $device["analytics_type_code"] ][ $device["analytics_device_driver"] ]["getProcData"]($raw_data["zipdata"],$analytics_img_params);
 				$graphics_text=
 					",analytical_data_graphics_blob=".fixBlob($spectrum_data["img"][0]).
@@ -277,7 +277,7 @@ function performEdit($table,$db_id,$dbObj,$paramHash=array()) {
 				// insert additional images (if any)
 				$sql_query[]="DELETE FROM analytical_data_image WHERE analytical_data_image.analytical_data_id=".fixNull($pk).";";
 				$imagesUpdated=true;
-				for ($a=1;$a<count($spectrum_data["img"]);$a++) {
+				for ($a=1;$a<count_compat($spectrum_data["img"]);$a++) {
 					$sql_query[]="INSERT INTO analytical_data_image (analytical_data_id,reaction_id,project_id,image_no,analytical_data_graphics_blob,analytical_data_csv,analytical_data_graphics_type) 
 						VALUES (".fixNull($pk).",".fixNull($_REQUEST["reaction_id"]).",".fixNull($_REQUEST["project_id"]).",".$a.",".fixBlob($spectrum_data["img"][$a]).",".fixStrSQL($spectrum_data["analytical_data_csv"][$a]).",".fixStrSQL($spectrum_data["img_mime"][$a]).");";
 				}
@@ -431,7 +431,7 @@ function performEdit($table,$db_id,$dbObj,$paramHash=array()) {
 		$add_multiple=1;
 		$list_int_name="item_list";
 		if (is_array($_REQUEST[$list_int_name])) {
-			$add_multiple=count($_REQUEST[$list_int_name]);
+			$add_multiple=count_compat($_REQUEST[$list_int_name]);
 		}
 		elseif (!empty($_REQUEST["order_uid_cp"])) {
 			// always based on chemical_order from either the own or a foreign database
@@ -642,7 +642,7 @@ function performEdit($table,$db_id,$dbObj,$paramHash=array()) {
 					$pk2=getInsertPk("order_alternative",$createArr,$dbObj); // cmdINSERTsub
 				}
 				
-				if ($UID==$_REQUEST["order_alternative_customer_selected_alternative_id"] || count($_REQUEST[$list_int_name])==1) {
+				if ($UID==$_REQUEST["order_alternative_customer_selected_alternative_id"] || count_compat($_REQUEST[$list_int_name])==1) {
 					$customer_selected_alternative_id=$pk2;
 					$value=getValueUID($list_int_name,$UID,"price")*getValueUID($list_int_name,$UID,"number_packages");
 					$value_unit=getValueUID($list_int_name,$UID,"price_unit");
@@ -903,7 +903,7 @@ function performEdit($table,$db_id,$dbObj,$paramHash=array()) {
 			
 			// assign chemical_storage_type
 			$sql_query[]="DELETE FROM chemical_storage_chemical_storage_type WHERE chemical_storage_id=".$pk.";";
-			if (count($_REQUEST["chemical_storage_type"])) {
+			if (count_compat($_REQUEST["chemical_storage_type"])) {
 				foreach ($_REQUEST["chemical_storage_type"] as $chemical_storage_type_id) {
 					if (is_numeric($chemical_storage_type_id)) {
 						$sql_query[]="INSERT INTO chemical_storage_chemical_storage_type (chemical_storage_type_id,chemical_storage_id) ".
@@ -1112,7 +1112,7 @@ WHERE chemical_storage_id=".fixNull($pk).";";
 			$literature_blob_upload=& $_REQUEST["literature_blob"];
 			$literature_mime=& $_REQUEST["literature_mime"];
 		}
-		elseif (count($_FILES["literature_blob_upload"]) && $_FILES["literature_blob_upload"]["error"]==0) { // upload
+		elseif (count_compat($_FILES["literature_blob_upload"]) && $_FILES["literature_blob_upload"]["error"]==0) { // upload
 			/*
 		    [load_molfile] => Array
 			(
@@ -1236,7 +1236,7 @@ WHERE chemical_storage_id=".fixNull($pk).";";
 	
 	case "message":
 		if ($_REQUEST["from_person"]==$person_id) {
-			if (count($_REQUEST["recipients"])==0) {
+			if (count_compat($_REQUEST["recipients"])==0) {
 				return array(FAILURE,s("error_no_to_person"));
 			}
 			if (empty($pk)) {
@@ -1402,7 +1402,7 @@ WHERE chemical_storage_id=".fixNull($pk).";";
 		
 		$sql_query[]=$update_query;
 		$sql_query[]="DELETE FROM molecule_names WHERE molecule_id=".$pk.";";
-		if (count($names)) {
+		if (count_compat($names)) {
 			foreach ($names as $idx => $name) {
 				$is_trivial_name=endswith($name,"#");
 				if ($is_trivial_name) {
@@ -1419,7 +1419,7 @@ WHERE chemical_storage_id=".fixNull($pk).";";
 
 		// assign molecule_type
 		$sql_query[]="DELETE FROM molecule_molecule_type WHERE molecule_id=".$pk.";";
-		if (count($_REQUEST["molecule_type"])) {
+		if (count_compat($_REQUEST["molecule_type"])) {
 			foreach ($_REQUEST["molecule_type"] as $molecule_type_id) {
 				if (is_numeric($molecule_type_id)) {
 					$sql_query[]="INSERT INTO molecule_molecule_type (molecule_type_id,molecule_id) ".
@@ -1681,7 +1681,7 @@ WHERE chemical_storage_id=".fixNull($pk).";";
 				$factor=getValueUID($list_int_name,$UID,"price")/$grand_total;
 			}
 			else { // gleichmäßige Aufteilung
-				$factor=1/count($_REQUEST[$list_int_name]);
+				$factor=1/count_compat($_REQUEST[$list_int_name]);
 			}
 			
 			list($accepted_order)=mysql_select_array(array(
@@ -1852,7 +1852,7 @@ WHERE chemical_storage_id=".fixNull($pk).";";
 		
 		// set project membership
 		$sql_query[]="DELETE FROM project_person WHERE person_id=".$pk.";";
-		if (count($_REQUEST["project"])) {
+		if (count_compat($_REQUEST["project"])) {
 			foreach ($_REQUEST["project"] as $project_id) {
 				if (is_numeric($project_id)) {
 					$sql_query[]="INSERT INTO project_person (project_id,person_id) VALUES (".fixNull($project_id).",".fixNull($pk).")"; // cmdINSERT
@@ -1861,7 +1861,7 @@ WHERE chemical_storage_id=".fixNull($pk).";";
 		}
 		/* $sql_query[]="DELETE FROM cost_centre WHERE person_id=".$pk.";";
 		$cost_centres=explode(",",$_REQUEST["owns_cost_centres"]);
-		if (count($cost_centres)) {
+		if (count_compat($cost_centres)) {
 			foreach ($cost_centres as $cost_centre) {
 				if (!empty($cost_centre)) {
 					$sql_query[]="INSERT INTO cost_centre (project_id,person_id) VALUES (".fixStr($cost_centre).",".fixNull($pk).")";
@@ -2517,7 +2517,7 @@ VALUES (".fixNull($pk).",".fixStrSQL($int_name).",".fixStrSQL(makeHTMLSafe($_REQ
 				$day_end=getTimestampFromSQL($_REQUEST["to_date"]);
 				$day_after_end=$day_end+daySec;
 				
-				for ($a=0;$a<count($rent);$a++) {
+				for ($a=0;$a<count_compat($rent);$a++) {
 					
 					$setSQL="";
 

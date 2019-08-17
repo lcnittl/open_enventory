@@ -107,12 +107,13 @@ $simpleExtSearch=array("NIST","emol");
 function setSteps() {
 	global $g_settings,$suppliers,$steps;
 	$steps=array();
-	for ($a=0;$a<count($g_settings["supplier_order"]);$a++) { // filter invalid steps
+
+        for ($a=0;$a<count_compat($g_settings["supplier_order"]);$a++) { // filter invalid steps
 		if (array_key_exists("disabled", $g_settings["supplier_order"][$a]) && $g_settings["supplier_order"][$a]["disabled"]) {
 			continue;
 		}
 		$code=& $g_settings["supplier_order"][$a]["code"];
-		if (count($suppliers[$code])>0) {
+		if (count_compat($suppliers[$code])>0) {
 			$steps[]=$code;
 		}
 	}
@@ -121,7 +122,7 @@ function setSteps() {
 function autoAddSteps() { // call only if going to global settings
 	global $g_settings,$suppliers;
 	$known=array();
-	for ($a=0;$a<count($g_settings["supplier_order"]);$a++) {
+	for ($a=0;$a<count_compat($g_settings["supplier_order"]);$a++) {
 		$known[]=$g_settings["supplier_order"][$a]["code"];
 	}
 	if (is_array($suppliers)) foreach ($suppliers as $code => $supplier) { // add steps not in list at the end
@@ -137,13 +138,13 @@ function autoAddSteps() { // call only if going to global settings
 
 function getAddInfoFromSupplier($code,& $molecule,$paramHash=array()) { // daten holen
 	global $suppliers;
-	if (empty($molecule["cas_nr"]) || count($suppliers[$code])==0) {
+	if (empty($molecule["cas_nr"]) || count_compat($suppliers[$code])==0) {
 		return false;
 	}
 	$hitlist=$suppliers[$code]["getHitlist"]($molecule["cas_nr"],"cas_nr","ex",$paramHash);
 	//~ echo $code;
 	//~ print_r($hitlist);
-	switch (count($hitlist)) {
+	switch (count_compat($hitlist)) {
 	case 0:
 		return false;
 	break;
@@ -175,7 +176,7 @@ function getAddInfo(& $molecule,$silent=false,$paramHash=array()) { // genutzt f
 		}
 		getAddInfoFromSupplier($setting[0],$molecule,$paramHash);
 		if (!$silent) {
-			echo ": ".count($molecule)."<br>";
+			echo ": ".count_compat($molecule)."<br>";
 		}
 		if ($idx<$paramHash["min_number"] 
 			|| empty($molecule["default_safety_sheet_by"])
@@ -183,7 +184,7 @@ function getAddInfo(& $molecule,$silent=false,$paramHash=array()) { // genutzt f
 			|| (empty($molecule["safety_sym_ghs"]) && empty($molecule["safety_h"]) && empty($molecule["safety_p"]))) {
 			continue;
 		}
-		if ($idx>0 && count($molecule)>$setting[1]) {
+		if ($idx>0 && count_compat($molecule)>$setting[1]) {
 			//~ die($setting[0]);
 			break;
 		}
@@ -242,7 +243,7 @@ function getAddInfo(& $molecule,$silent=false,$paramHash=array()) { // genutzt f
 }
 
 function includeMoleculeData(& $molecule,$molecule_data) { // daten "einflechten"
-	if (!is_array($molecule_data) || count($molecule_data)==0 || ($molecule["cas_nr"] && $molecule["cas_nr"]!=$molecule_data["cas_nr"] )) {
+	if (!is_array($molecule_data) || count_compat($molecule_data)==0 || ($molecule["cas_nr"] && $molecule["cas_nr"]!=$molecule_data["cas_nr"] )) {
 		return;
 	}
 	foreach($molecule_data as $name => $value) {
@@ -270,10 +271,10 @@ function includeMoleculeData(& $molecule,$molecule_data) { // daten "einflechten
 		}
 	}
 	// namen zwischen molecule und molecule_data abgleichen, dubletten vermeiden
-	if (!count($molecule["molecule_names_array"])) {
+	if (!count_compat($molecule["molecule_names_array"])) {
 		$molecule["molecule_names_array"]=array();
 	}
-	if (!count($molecule_data["molecule_names_array"])) {
+	if (!count_compat($molecule_data["molecule_names_array"])) {
 		$molecule_data["molecule_names_array"]=array();
 	}
 	// namen von molecule_data trimmen
@@ -298,7 +299,7 @@ function strSearch($molfile,$mode="se") { // $smiles,
 			$hitlist=$suppliers[$code]["strSearch"]($molfile,$mode);
 		break;
 		}
-		if (count($hitlist)) {
+		if (count_compat($hitlist)) {
 			return array("hitlist" => $hitlist, "supplier" => $code);
 		}
 	}
@@ -308,7 +309,7 @@ function strSearch($molfile,$mode="se") { // $smiles,
 function getCASfromStr($molfile) {
 	global $suppliers;
 	$result=strSearch($molfile);
-	if ($result===FALSE || count($result["hitlist"])==0) {
+	if ($result===FALSE || count_compat($result["hitlist"])==0) {
 		return;
 	}
 	$bestHit=$suppliers[ $result["supplier"] ]["getBestHit"]($result["hitlist"]);
@@ -358,7 +359,7 @@ function getInquireLink(&$row,$id) {
 function displayPrice($result,$catalogHierarchy=0,$hasPriceList=0) {
 	$retval="";
 	$price=& $result["price"];
-	if (count($price)==0) {
+	if (count_compat($price)==0) {
 		// do nothing
 	}
 	elseif ($hasPriceList==1) {
@@ -380,7 +381,7 @@ function displayPrice($result,$catalogHierarchy=0,$hasPriceList=0) {
 		}
 		$retval.="</tr></thead><tbody>";
 		
-		for ($a=0;$a<count($price);$a++) {
+		for ($a=0;$a<count_compat($price);$a++) {
 			$retval.="<tr><td>".$price[$a]["amount"]."&nbsp;".$price[$a]["amount_unit"]."</td>";
 			if ($catalogHierarchy==1) {
 				$retval.="<td>".$price[$a]["addInfo"]."</td>";
@@ -409,7 +410,7 @@ function getExtResultList($res,$step,$paramHash=array()) {
 	if ($res===FALSE) {
 		$resOut.=s("no_connection1")."<b>".$supplier_obj["name"]."</b>".s("no_connection2").".<br>";
 	}
-	elseif (count($res)==0) {
+	elseif (count_compat($res)==0) {
 		$resOut.=s("no_results1"); // ."<b>".$supplier_obj["name"]."</b>".s("no_results2").".<br>";
 		if (!isEmptyStr($step)) {
 			$resOut.="<a href=\"getResultList.php?query=<0>&val0=".$cache["filter_obj"]["vals"][0][0]."&crit0=".$cache["filter_obj"]["crits"][0]."&op0=".$cache["filter_obj"]["ops"][0]."&supplier=".$code."\" target=\"_blank\">";
@@ -457,7 +458,7 @@ function getExtResultList($res,$step,$paramHash=array()) {
 		$resOut.="</tr></head><tbody>";
 		
 		// Liste
-		for ($a=0;$a<count($res);$a++) {
+		for ($a=0;$a<count_compat($res);$a++) {
 			$resOut.="<tr><td>".fixHtmlOut($res[$a]["name"]).ifnotempty(" (",fixHtmlOut($res[$a]["addInfo"]),")").ifnotempty(" (",fixHtmlOut(trim($res[$a]["amount"]." ".$res[$a]["amount_unit"])),")")."</td>";
 			if (!$supplier_obj["catalogHierarchy"]) {
 				if ($supplier_obj["hasPurity"]) {
@@ -506,7 +507,7 @@ function getExtResultList($res,$step,$paramHash=array()) {
 function splitAmount($str) { // 1ML => 1, ml
 	$str=strtolower($str);
 	preg_match("/([\d\.\,]+)(?:\s*)([A-Za-z]+)/",$str,$retval);
-	if (!count($retval)) {
+	if (!count_compat($retval)) {
 		return $str;
 	}
 	array_shift($retval);

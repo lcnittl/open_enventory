@@ -89,7 +89,7 @@ _script.
 <input type=\"hidden\" name=\"table\" value=\"my_chemical_order\">";
 //~ print_r($cache);
 // echo $_REQUEST["cached_query"];
-if (count($res)) { // in eigener Datenbank etwas gefunden
+if (count_compat($res)) { // in eigener Datenbank etwas gefunden
 	// Anker für Moleküle
 	list($fields,$hidden)=getFields($columns[ $_REQUEST["table"] ]);
 	echo showAnchor(array("int_name" => $_REQUEST["table"], )).
@@ -109,7 +109,7 @@ if (count($res)) { // in eigener Datenbank etwas gefunden
 				break;
 			}
 			$a++;
-		} while ($a<count($res));
+		} while ($a<count_compat($res));
 	}
 }
 
@@ -130,7 +130,7 @@ if (capabilities & 1) {
 	$per_page=& $dataArray["per_page"];
 	$from_cache=& $dataArray["cache_active"];
 
-	if (count($res)) { // in eigener Datenbank etwas gefunden
+	if (count_compat($res)) { // in eigener Datenbank etwas gefunden
 		// Anker für Moleküle
 		list($fields,$hidden)=getFields($columns[ $_REQUEST["table"] ]);
 		echo showAnchor(array("int_name" => $_REQUEST["table"], )).

@@ -23,13 +23,13 @@ along with open enventory.  If not, see <http://www.gnu.org/licenses/>.
 require_once "FPDF/mem_image.php";
 
 function drawPictograms(& $pdf,$images,$widths,$height,$prefix="lib/",$suffix=".png") {
-	$symCount=count($images);
+	$symCount=count_compat($images);
 	if (!$symCount) {
 		return;
 	}
 	$perRow=ceil(sqrt($symCount));
 	if (!is_array($widths)) {
-		$widths=array_fill(0,count($images),$widths);
+		$widths=array_fill(0,count_compat($images),$widths);
 	}
 	$top=$pdf->GetY();
 	$maxTotalWidth=0;
@@ -174,7 +174,7 @@ function getWorkingInstructionsPDF(& $hash,$list_int_name,$UID,$molecule_names) 
 	
 	// signal word below, try to center
 	if (!isEmptyStr($hash["safety_text"])) {
-		if (count($pictoFilenames)) {
+		if (count_compat($pictoFilenames)) {
 			// below symbols
 			$pdf->SetY($oldTop+$boxHeight);
 		}

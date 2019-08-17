@@ -26,20 +26,20 @@ require_once "lib_root_funcs.php";
 
 function addOneToMany(& $pkLibrary,$queryTable,$queryTableFk,$refTable) {
 	global $db;
-	if (count($pkLibrary[$refTable])) {
+	if (count_compat($pkLibrary[$refTable])) {
 		$shortPk=getShortPrimary($queryTable);
 		$temp_arr=mysql_select_array_from_dbObj($shortPk." FROM ".$queryTable." WHERE ".$queryTableFk." IN(".join(",",$pkLibrary[$refTable]).");",$db);
-		for ($a=0;$a<count($temp_arr);$a++) {
+		for ($a=0;$a<count_compat($temp_arr);$a++) {
 			$pkLibrary[$queryTable][]=$temp_arr[$a][$shortPk];
 		}
 	}
 }
 function addManyToOne(& $pkLibrary,$queryTable,$refTableFk,$refTable) {
 	global $db;
-	if (count($pkLibrary[$refTable])) {
+	if (count_compat($pkLibrary[$refTable])) {
 		$shortPk=getShortPrimary($refTable);
 		$temp_arr=mysql_select_array_from_dbObj($refTableFk." FROM ".$refTable." WHERE (NOT ".$refTableFk." IS NULL) AND ".$shortPk." IN(".join(",",$pkLibrary[$refTable]).");",$db);
-		for ($a=0;$a<count($temp_arr);$a++) {
+		for ($a=0;$a<count_compat($temp_arr);$a++) {
 			$value=$temp_arr[$a][$refTableFk];
 			if (!is_array($pkLibrary[$queryTable]) || !in_array($value,$pkLibrary[$queryTable])) {
 				$pkLibrary[$queryTable][]=$value;
@@ -100,7 +100,7 @@ if ($_REQUEST["desired_action"]=="export_lj_data" && $_REQUEST["save_settings"]=
 		@mkdir($tmpdir);
 		@chmod($tmpdir,0777);
 		foreach ($export_pks as $table => $pks) {
-			if (!count($pks)) {
+			if (!count_compat($pks)) {
 				continue;
 			}
 			$shortPk=getShortPrimary($table);
@@ -253,12 +253,12 @@ switch ($_REQUEST["desired_action"]) {
 				$spectrum_data=getProcData($result["analytical_data_blob"],$analytics_img_params,$result["analytics_type_code"],$result["analytics_device_driver"]);
 				
 				// write, ignore limitations
-				if (count($spectrum_data)) {
+				if (count_compat($spectrum_data)) {
 					$sql_query=array();
 					
 					// insert additional images (if any)
 					$sql_query[]="DELETE FROM analytical_data_image WHERE analytical_data_image.analytical_data_id=".fixNull($result["analytical_data_id"]).";";
-					for ($a=1;$a<count($spectrum_data["img"]);$a++) {
+					for ($a=1;$a<count_compat($spectrum_data["img"]);$a++) {
 						$sql_query[]="INSERT INTO analytical_data_image (analytical_data_id,reaction_id,project_id,image_no,analytical_data_graphics_blob,analytical_data_graphics_type) 
 							VALUES (".fixNull($result["analytical_data_id"]).",".fixNull($result["reaction_id"]).",".fixNull($result["project_id"]).",".$a.",".fixBlob($spectrum_data["img"][$a]).",".fixStrSQL($spectrum_data["img_mime"][$a]).");";
 					}
@@ -284,7 +284,7 @@ switch ($_REQUEST["desired_action"]) {
 	case "merge":
 	if ($db_user==ROOT) {
 		$db_names=array();
-		for ($a=0;$a<count($db_info);$a++) {
+		for ($a=0;$a<count_compat($db_info);$a++) {
 			$db_names[$a]=$db_info[$a]["name"];
 		}
 		$table_names=array_keys($tables);
@@ -424,12 +424,12 @@ switch ($_REQUEST["desired_action"]) {
 	if ($db_user==ROOT) {
 		
 		$db_names=array();
-		for ($a=0;$a<count($db_info);$a++) {
+		for ($a=0;$a<count_compat($db_info);$a++) {
 			$db_names[$a]=$db_info[$a]["name"];
 		}
 		
 		$list_int_names=array("reactants","reagents","products");
-		for ($a=count($list_int_names)-1;$a>=0;$a--) {
+		for ($a=count_compat($list_int_names)-1;$a>=0;$a--) {
 			if (!$_REQUEST[ $list_int_names[$a] ]) {
 				array_splice($list_int_names,$a,1);
 			}
@@ -719,7 +719,7 @@ switch ($_REQUEST["desired_action"]) {
 								$_REQUEST=$oldReq;
 							}
 							
-							if (count($sql_parts)) {
+							if (count_compat($sql_parts)) {
 								$sql="UPDATE molecule SET ".join(",",$sql_parts)." WHERE molecule_id=".fixNull($result["molecule_id"]).";";
 								mysqli_query($db,$sql) or die($sql.mysqli_error($db));
 							}
@@ -729,7 +729,7 @@ switch ($_REQUEST["desired_action"]) {
 				
 				// reaction components
 				
-				if ($_REQUEST["recalcRxnfile"] || count($list_int_names)) {
+				if ($_REQUEST["recalcRxnfile"] || count_compat($list_int_names)) {
 					$block_length=500;
 					
 					// Zählen
@@ -789,7 +789,7 @@ switch ($_REQUEST["desired_action"]) {
 										$sql_parts[]=getFingerprintSQL($molecule_search,true);
 									}
 									
-									if (count($sql_parts)) {
+									if (count_compat($sql_parts)) {
 										$sql="UPDATE reaction_chemical SET ".join(",",$sql_parts)." WHERE reaction_chemical_id=".fixNull($result2["reaction_chemical_id"]).";";
 										mysqli_query($db,$sql) or die($sql.mysqli_error($db));
 									}
@@ -1004,7 +1004,7 @@ switch ($_REQUEST["desired_action"]) {
 	
 	$db_list=array();
 	
-	for ($a=0;$a<count($db_info);$a++) {
+	for ($a=0;$a<count_compat($db_info);$a++) {
 		$db_link_fields[]=array("item" => "cell");
 		$db_link_fields[]=array("item" => "checkbox", "group" => "link", "int_name" => $db_info[$a]["name"], "text" => $db_info[$a]["name"], );
 		$db_man["db_cross"][$a]=array("name" => $db_info[$a]["name"], "host" => db_server, "oe_version" => $db_info[$a]["version"], );
@@ -1013,7 +1013,7 @@ switch ($_REQUEST["desired_action"]) {
 		$db_list[]=$db_info[$a]["name"];
 		//~ switchDB($read_db,$db); // obsolete, global check
 		
-		for ($b=0;$b<count($db_info);$b++) {
+		for ($b=0;$b<count_compat($db_info);$b++) {
 			if ($a==$b) {
 				// disabled
 				continue;
