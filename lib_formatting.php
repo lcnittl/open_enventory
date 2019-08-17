@@ -1477,7 +1477,7 @@ function roundIfNotEmpty($num,$digits=0) {
 }
 
 function round_sign($num,$digits) {
-	return round($num,ceil($digits-ceil(log10($num))));
+	return round($num,intval(ceil($digits-ceil(log10($num)))));
 }
 
 // purity

@@ -20,6 +20,8 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with open enventory.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+require_once "lib_global_funcs.php";
 require_once "lib_constants.php";
 require_once "lib_safety.php";
 require_once "lib_simple_forms.php";

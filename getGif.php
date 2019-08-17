@@ -38,7 +38,7 @@ if (empty($_COOKIE[db_type]) && !empty($_REQUEST[db_type])) {
 $barcodeTerminal=true;
 pageHeader(true,false,true,false);
 
-$db_id=$_REQUEST["db_id"]+0;
+$db_id=intval($_REQUEST["db_id"]);
 if (empty($db_id)) {
 	$db_id=-1;
 }

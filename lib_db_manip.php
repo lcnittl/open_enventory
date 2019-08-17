@@ -22,7 +22,9 @@ along with open enventory.  If not, see <http://www.gnu.org/licenses/>.
 */
 /*
 Bibliothek zum Ändern von Werten in der Datenbank. Erklärungen zu den einzelnen Befehlen am Ort
-*/
+ */
+
+require_once "lib_global_funcs.php";
 require_once "lib_constants.php";
 require_once "lib_constants_default_dataset.php";
 require_once "lib_molfile.php";

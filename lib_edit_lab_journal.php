@@ -21,6 +21,8 @@ You should have received a copy of the GNU Affero General Public License
 along with open enventory.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+require_once "lib_global_funcs.php";
+
 function showLabJournalEditForm($paramHash) {
 	global $editMode,$permissions;
 	$paramHash["int_name"]=ifempty($paramHash["int_name"],"lab_journal");

@@ -21,6 +21,8 @@ You should have received a copy of the GNU Affero General Public License
 along with open enventory.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+require_once "lib_global_funcs.php";
+
 function getSettingsForPerson($person_id) {
 	list($person)=mysql_select_array(array(
 			"dbs" => -1,

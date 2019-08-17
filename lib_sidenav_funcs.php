@@ -21,6 +21,8 @@ You should have received a copy of the GNU Affero General Public License
 along with open enventory.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+require_once "lib_global_funcs.php";
+
 function showProjectLinks($linkParams) {
 	global $person_id;
 	if (!empty($person_id)) {
@@ -83,6 +85,7 @@ function showSideLink($paramHash) {
 	// Anzeige eines Links an der Seite
 	global $links;
 	$text=$paramHash["text"];
+	$targetText="";
 	if (!empty($paramHash["target"])) {
 		$targetText=" target=".fixStr($paramHash["target"]);
 	}
@@ -120,6 +123,8 @@ END;
 
 function getValInput($type) { // generiert JS-Code
 	global $searchModes;
+
+	$retval="";
 
 	switch ($type) {
 	case "structure":

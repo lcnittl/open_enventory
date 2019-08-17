@@ -21,6 +21,9 @@ You should have received a copy of the GNU Affero General Public License
 along with open enventory.  If not, see <http://www.gnu.org/licenses/>.
 */
 // VWR
+
+require_once "lib_global_funcs.php";
+
 $GLOBALS["code"]="VWR";
 $code=$GLOBALS["code"];
 

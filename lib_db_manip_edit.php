@@ -24,6 +24,8 @@ along with open enventory.  If not, see <http://www.gnu.org/licenses/>.
  * History:
  * 2009-10-19 MST00 Add additional fields for MPI orders
  *----------------------------------------------------------------------------*/
+
+require_once "lib_global_funcs.php";
 require_once "lib_convert.php";
 require_once "lib_array.php";
 require_once "lib_molfile.php";

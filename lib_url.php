@@ -81,7 +81,7 @@ function getSelfRef($suppress=array(),$call_transparent_params=array()) {
 	if (!isset($_REQUEST["user"]) && !in_array("user",$suppress)) {
 		$retval.="&user=".$db_user;
 	}
-	if (!in_array("sess_proof",$suppress)) {
+	if (isset($_SESSION["sess_proof"]) && !in_array("sess_proof",$suppress)) {
 		$retval.="&sess_proof=".$_SESSION["sess_proof"];
 	}
 	return $retval;

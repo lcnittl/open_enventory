@@ -377,6 +377,7 @@ function getNavigationLink($baseURL,$targetPage,$per_page,$text,$target="") {
 }
 
 function getImageLink($paramHash) {
+	$retval="";
 	if (!empty($paramHash["url"])) {
 		$retval.="<a href=".fixStr($paramHash["url"]).ifnotempty(" target=\"",$paramHash["target"],"\"").ifnotempty(" class=\"",$paramHash["a_class"],"\"").ifnotempty(" id=\"",$paramHash["a_id"],"\"").">";
 	}

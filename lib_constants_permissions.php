@@ -25,8 +25,12 @@ along with open enventory.  If not, see <http://www.gnu.org/licenses/>.
 define("_admin",1); // globale Einstellungen machen, Benutzer anlegen/ändern/löschen, other_db eintragen
 define("_remote_read",2); // remote lesen
 define("_remote_direct",4); // *auch Geheimes über remote lesen
-// define("_remote_write",8); // *über remote schreiben (entsprechend der anderen Rechte)
+define("_remote_read_all",0);//_remote_read|_remote_direct); // *über remote alles lesen (inklusive Geheimes)
 // unnötig, _remote_direct erlaubt, die weiteren Rechte per remote zu nutzen
+// Wurde gesetzt, da sonst missing variable Meldung kommt
+define("_remote_write",0);//8); // *über remote schreiben (entsprechend der anderen Rechte)
+// unnötig, _remote_direct erlaubt, die weiteren Rechte per remote zu nutzen
+// Wurde gesetzt, da sonst missing variable Meldung kommt
 define("_barcode_user",16); // Barcode-Terminal-Benutzer
 // 4
 

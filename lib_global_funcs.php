@@ -297,6 +297,7 @@ function getIniSuggestion($value,$type) {
 
 function checkExtensions() {
 	global $requiredExtensions,$requiredSettings;
+	$problem=false;
 	$messages="<html><body>";
 	for ($a=0;$a<count($requiredExtensions);$a++) {
 		$extension=& $requiredExtensions[$a];
@@ -442,8 +443,14 @@ function setGlobalVars() {
 	$baseTable=$query[$table]["base_table"]; // zugrundeliegende tabelle
 	//~ $pk_name=$query[$table]["short_primary"];
 	$pk_name=getShortPrimary($table);
-	$pk=$_REQUEST["pk"];
-	$selectTables=explode(",",$_REQUEST["tableSelect"]);
+	$pk=NULL;
+	if (array_key_exists("pk", $_REQUEST)) {
+		$pk=$_REQUEST["pk"];
+	}
+	$selectTables=array();
+	if (array_key_exists("tableSelect", $_REQUEST)) {
+		$selectTables=explode(",",$_REQUEST["tableSelect"]);
+	}
 }
 
 function setGVar($name,$value) {

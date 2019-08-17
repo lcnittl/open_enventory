@@ -26,6 +26,8 @@ along with open enventory.  If not, see <http://www.gnu.org/licenses/>.
 	return (capabilities & 1) && (($permissions & _admin) || ($permissions & _order_accept));
 }*/
 
+require_once "lib_global_funcs.php";
+
 function mayReadRemote($table) {
 	global $tables;
 	return ($tables[$table]["readPermRemote"]!=0 || $tables[$table]["writePermRemote"]!=0);

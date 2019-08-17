@@ -136,7 +136,8 @@ function showCheck($paramHash) {
 	}
 
 	$text=getControlText($paramHash);
-	
+
+	$allowLockText="";	
 	if (!$allowLock) {
 		$allowLockText=" allowLock=\"false\"";
 	}

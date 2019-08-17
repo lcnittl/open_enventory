@@ -23,7 +23,9 @@ along with open enventory.  If not, see <http://www.gnu.org/licenses/>.
 /*
 Lokalisierung: $localizedString[iso-Sprachcode][identifier]ggf[index]
 Benutzung mit s(identifier[,index]), die globale Variable $lang wird genutzt
-*/
+ */
+
+require_once "lib_global_funcs.php";
 require_once "lib_formatting.php";
 
 $globalString=array(
@@ -63,7 +65,7 @@ function autoLang() {
 }
 
 function loadLanguage($langToLoad=null) {
-	global $lang,$localizedString,$globalString;
+	global $g_settings,$lang,$localizedString,$globalString;
 	
 	if (is_null($langToLoad)) {
 		autoLang();
