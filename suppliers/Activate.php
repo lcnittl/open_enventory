@@ -160,7 +160,7 @@ $GLOBALS["suppliers"][$code]=array(
 //~ 	print_r($json);die();
 	$results=array();
 	$catNos=array();
-	if (count($json)) foreach ($json["results"] as $result) {
+	if (is_array($json)) foreach ($json["results"] as $result) {
 		if (!in_array($result["productId"],$catNos)) {
 			$catNos[]=$result["productId"];
 			$results[]=array(

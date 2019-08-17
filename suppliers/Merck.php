@@ -291,7 +291,7 @@ $GLOBALS["suppliers"][$code]=array(
 "getClauses" => create_function('$html,$type',getFunctionHeader().'
 	$clauses=array();
 	$rows=explode("<br",$html);
-	if (count($rows)) foreach($rows as $row) {
+	if (is_array($rows)) foreach($rows as $row) {
 		if (preg_match("/(?ims)".$type."(.*?):/",fixTags($row),$cut)) {
 			$clauses[]=$cut[1];
 		}

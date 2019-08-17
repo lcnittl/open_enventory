@@ -151,7 +151,7 @@ $GLOBALS["suppliers"][$code]=array(
 		switch ($name) {
 		case "Synonym(s):":
 			$names=explode(", ",$value);
-			if (count($names)) foreach($names as $name) {
+			if (is_array($names)) foreach($names as $name) {
 				$result["molecule_names_array"][]=$name;
 			}
 		break;

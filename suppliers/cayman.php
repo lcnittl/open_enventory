@@ -163,7 +163,7 @@ $GLOBALS["suppliers"][$code]=array(
 	//~ print_r($json);
 	
 	$results=array();
-	if (count($json)) foreach ($json["response"]["docs"] as $doc) {
+	if (is_array($json)) foreach ($json["response"]["docs"] as $doc) {
 		$results[]=array(
 			"name" => fixTags($doc["name"]), 
 			"beautifulCatNo" => $doc["catalog_num"], 
