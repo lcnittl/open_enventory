@@ -57,6 +57,7 @@ define("ban_duration",180);
 define("login_max_retries",4);
 
 define("installPath",__DIR__."/");
+define("webrootInstall",true);
 //define("tempDirPath",""); // when running on cloud servers with limited control about PHP config
 //define("allowLocalhostLink",true); // on CentOS, this seems required to crosslink databases, it does not like database access via 127.0.0.1
 //define("QDBS",true); // activate modification for QDBS barcode terminal (developed by K. Troshin, UCB)
