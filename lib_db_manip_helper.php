@@ -578,11 +578,17 @@ function getSDSSQL($fieldName) {
 	if ($firstChar=="-") { // new one
 		require_once "lib_http.php";
 
-		$_REQUEST[$fieldName."_url"]=substr($_REQUEST[$fieldName."_url"],1);
-		$response=@oe_http_get($_REQUEST[$fieldName."_url"],array("redirect" => maxRedir, "useragent" => uA));
+		$response=false;
+		if (substr($_REQUEST[$fieldName."_url"],1) != "") {
+			$_REQUEST[$fieldName."_url"]=substr($_REQUEST[$fieldName."_url"],1);
+			$response=@oe_http_get($_REQUEST[$fieldName."_url"],array("redirect" => maxRedir, "useragent" => uA));
+		}
+
 		if ($response!==FALSE) {
 			$_REQUEST[$fieldName."_blob"]=@$response->getBody();
 			$_REQUEST[$fieldName."_mime"]=@$response->getHeader("Content-Type");
+		} else {
+			$_REQUEST[$fieldName."_blob"]="";
 		}
 		if (empty($_REQUEST[$fieldName."_blob"])) {
 			$_REQUEST[$fieldName."_url"]="";
