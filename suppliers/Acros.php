@@ -37,25 +37,30 @@ $GLOBALS["suppliers"][$code]=array(
 	"forGroupNames" => "AcrosOrganics%2CFisherSci%2CMaybridgeBB%2CBioReagents",
 	"chemExperServer" => "&server=www.acros.com",
 	
-"init" => create_function('',getFunctionHeader().'
+"init" => function () use ($code) {
+	eval(getFunctionHeader());
 	$suppliers[$code]["urls"]["server"]="http://www.acros.com"; // startPage
 	$suppliers[$code]["urls"]["startPage"]=$urls["server"];
-'),
-"requestResultList" => create_function('$query_obj',getFunctionHeader().'
+},
+"requestResultList" => function ($query_obj) use ($code) {
+	eval(getFunctionHeader());
 	return chemExperRequestResultList($self,$query_obj);
-'),
-"getDetailPageURL" => create_function('$catNo',getFunctionHeader().'
+},
+"getDetailPageURL" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	return chemExperGetDetailPageURL($self,$catNo);
-'),
-"getInfo" => create_function('$catNo',getFunctionHeader().'
+},
+"getInfo" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	return chemExperGetInfo($self,$catNo);
-'),
-"getHitlist" => create_function('$searchText,$filter,$mode="ct",$paramHash=array()',getFunctionHeader().'
+},
+"getHitlist" => function ($searchText,$filter,$mode="ct",$paramHash=array()) use ($code) {
+	eval(getFunctionHeader());
 	return chemExperGetHitlist($self,$searchText,$filter,$mode,$paramHash);
-'),
-"getBestHit" => create_function('& $hitlist,$name=NULL','
+},
+"getBestHit" => function (& $hitlist,$name=NULL) use ($code) {
 	return chemExperGetBestHit($hitlist,$name);
-'),
+},
 );
 $GLOBALS["suppliers"][$code]["init"]();
 ?>

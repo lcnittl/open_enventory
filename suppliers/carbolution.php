@@ -41,25 +41,29 @@ $GLOBALS["suppliers"][$code]=array(
 		)
 	),
 
-"init" => create_function('',getFunctionHeader().'
+"init" => function () use ($code) {
+	eval(getFunctionHeader());
 	$suppliers[$code]["urls"]["server"]="https://www.carbolution.de"; // startPage
 	$suppliers[$code]["urls"]["search"]=$urls["server"]."/advanced_search_result.php?keywords=";
 	$suppliers[$code]["urls"]["detail"]=$urls["server"]."/product_info.php?products_id=";
 	$suppliers[$code]["urls"]["startPage"]=$urls["server"];
-'),
-"requestResultList" => create_function('$query_obj',getFunctionHeader().'
+},
+"requestResultList" => function ($query_obj) use ($code) {
+	eval(getFunctionHeader());
 	$retval["method"]="url";
 	$retval["action"]=$suppliers[$code]["urls"]["search"].$query_obj["vals"][0][0];
 	
 	return $retval;
-'),
-"getDetailPageURL" => create_function('$catNo',getFunctionHeader().'
+},
+"getDetailPageURL" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	if (empty($catNo)) {
 		return;
 	}
 	return $urls["detail"].$catNo."&referrer=enventory";
-'),
-"getInfo" => create_function('$catNo',getFunctionHeader().'
+},
+"getInfo" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	$url=$self["getDetailPageURL"]($catNo);
 	if (empty($url)) {
 		return $noConnection;
@@ -71,8 +75,9 @@ $GLOBALS["suppliers"][$code]=array(
 		return $noConnection;
 	}
 	return $self["procDetail"]($response,$catNo);
-'),
-"getHitlist" => create_function('$searchText,$filter,$mode="ct",$paramHash=array()',getFunctionHeader().'
+},
+"getHitlist" => function ($searchText,$filter,$mode="ct",$paramHash=array()) use ($code) {
+	eval(getFunctionHeader());
 	$url=$urls["search"];
 	if ($filter=="cas_nr" || $mode=="ex" || $mode=="sw") {
 		$url.=">";
@@ -86,8 +91,8 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 
 	return $self["procHitlist"]($response);
-'),
-"getClauses" => create_function('$html,$type','
+},
+"getClauses" => function ($html,$type) use ($code) {
 	$clauses=array();
 	$rows=explode("</div>",$html);
 	if (is_array($rows)) foreach ($rows as $row) {
@@ -99,8 +104,9 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	
 	return str_replace(array(" ",$type,),"",implode("-",$clauses));
-'),
-"procDetail" => create_function('& $response,$catNo=""',getFunctionHeader().'
+},
+"procDetail" => function (& $response,$catNo="") use ($code) {
+	eval(getFunctionHeader());
 	$body=utf8_decode(@$response->getBody());
 	if (preg_match("/(?ims)<div [^>]*class=\"[^\"]*shop-items[^\"]*\".*<footer/",$body,$cut)) {
 		$body=$cut[0];
@@ -179,8 +185,9 @@ $GLOBALS["suppliers"][$code]=array(
 	$result["supplierCode"]=$code;
 	$result["catNo"]=$catNo;
 	return $result;
-'),
-"procHitlist" => create_function('& $response',getFunctionHeader().'
+},
+"procHitlist" => function (& $response) use ($code) {
+	eval(getFunctionHeader());
 	$body=utf8_decode(@$response->getBody());
 	if (strpos($body,"Leider haben wir das Produkt")!==FALSE) {
 		return $noResults;
@@ -219,12 +226,12 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 //~ 	print_r($result);
 	return $result;
-'),
-"getBestHit" => create_function('& $hitlist,$name=NULL','
+},
+"getBestHit" => function (& $hitlist,$name=NULL) use ($code) {
 	if (count_compat($hitlist)>0) {
 		return 0;
 	}
-')
+},
 );
 $GLOBALS["suppliers"][$code]["init"]();
 ?>

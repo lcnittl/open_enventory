@@ -40,12 +40,14 @@ $GLOBALS["suppliers"][$code]=array(
 		//~ "foresee.session" => "%7B%22alive%22%3A0%2C%22previous%22%3Anull%2C%22finish%22%3A1260376567205%2C%22cpps%22%3A%7B%22COUNTRY%22%3A%22NONE%22%2C%22REGION%22%3A%22NONE%22%2C%22ClientId%22%3A%22Unknown%22%2C%22MemberId%22%3A%22Unknown%22%7D%7D", 
 		//~ "SialSiteDef" => "AnonymousClientId~Y|WebLang~-1|CountryCode~DE|", 
 	),
-"init" => create_function('',getFunctionHeader().'
+"init" => function () use ($code) {
+	eval(getFunctionHeader());
 	$suppliers[$code]["urls"]["startPage"]="http://www.sigmaaldrich.com"; // startPage
 	$suppliers[$code]["urls"]["search"]=$urls["startPage"]."/catalog/search/SearchResultsPage?Query=";
 	$suppliers[$code]["urls"]["detail"]=$urls["startPage"]."/catalog/product/";
-'),
-"requestResultList" => create_function('$query_obj',getFunctionHeader().'
+},
+"requestResultList" => function ($query_obj) use ($code) {
+	eval(getFunctionHeader());
 	$retval["method"]="url";
 	$retval["action"]=$suppliers[$code]["urls"]["search"].$query_obj["vals"][0][0]."&Scope=";
 	if ($query_obj["crits"][0]=="cas_nr") {
@@ -59,12 +61,14 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	
 	return $retval;
-'),
-"getDetailPageURL" => create_function('$catNo',getFunctionHeader().'
+},
+"getDetailPageURL" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	list($brand,$productNumber)=explode("/",$catNo,2);
 	return $urls["detail"].$brand."/".$productNumber."?lang=en&region=US&referrer=enventory";
-'),
-"getInfo" => create_function('$catNo',getFunctionHeader().'
+},
+"getInfo" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	$url=$self["getDetailPageURL"]($catNo);
 	if (empty($url)) {
 		return $noConnection;
@@ -78,8 +82,9 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 
 	return $self["procDetail"]($response,$catNo);
-'),
-"getHitlist" => create_function('$searchText,$filter,$mode="ct",$paramHash=array()',getFunctionHeader().'
+},
+"getHitlist" => function ($searchText,$filter,$mode="ct",$paramHash=array()) use ($code) {
+	eval(getFunctionHeader());
 	$url=$urls["search"].urlencode($searchText)."&Scope=";
 	if ($filter=="cas_nr") {
 		$url.="CASSearch";
@@ -98,8 +103,9 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 
 	return $self["procHitlist"]($response);
-'),
-"procDetail" => create_function('& $response,$catNo=""',getFunctionHeader().'
+},
+"procDetail" => function (& $response,$catNo="") use ($code) {
+	eval(getFunctionHeader());
 	global $lang,$default_http_options;
 	
 	$body=html_entity_decode(@$response->getBody(),ENT_QUOTES,"UTF-8");
@@ -183,8 +189,9 @@ $GLOBALS["suppliers"][$code]=array(
 	$result["supplierCode"]=$code;
 	$result["catNo"]=$catNo;
 	return $result;
-'),
-"handleCells" => create_function('& $result,$cells',getFunctionHeader().'
+},
+"handleCells" => function (& $result,$cells) use ($code) {
+	eval(getFunctionHeader());
 	$text=fixTags($cells[0]);
 	$next_text=fixTags($cells[1]);
 	if (strpos($text,"Synonym")!==FALSE) {
@@ -256,7 +263,7 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	elseif (strpos($text,"Flash Point(C)")!==FALSE) {
 		if (!isEmptyStr($next_text)) {
-			$result["molecule_property"][]=array("class" => "FP", "source" => $code, "value_high" => $next_text+0.0, "unit" => "°C");
+			$result["molecule_property"][]=array("class" => "FP", "source" => $code, "value_high" => floatval($next_text), "unit" => "°C");
 		}
 	}
 	elseif (strpos($text,"vapor pressure")!==FALSE) {
@@ -271,8 +278,9 @@ $GLOBALS["suppliers"][$code]=array(
 			$result["molecule_property"][]=array("class" => "Ex_limits", "source" => $code, "value_high" => $next_text+0.0, "unit" => "Vol.-%");
 		}
 	}
-'),
-"procHitlist" => create_function('& $response',getFunctionHeader().'
+},
+"procHitlist" => function (& $response) use ($code) {
+	eval(getFunctionHeader());
 	$body=@$response->getBody();
 	if (stripos($body,"No Results Found")!==FALSE) { // no results at all
 		return $noResults;
@@ -314,12 +322,12 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 
 	return $results;
-'),
-"getBestHit" => create_function('& $hitlist,$name=NULL','
+},
+"getBestHit" => function (& $hitlist,$name=NULL) use ($code) {
 	if (count_compat($hitlist)>0) {
 		return 0;
 	}
-')
+},
 );
 $GLOBALS["suppliers"][$code]["init"]();
 ?>

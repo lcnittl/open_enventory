@@ -33,25 +33,29 @@ $GLOBALS["suppliers"][$code]=array(
 	"hasPriceList" => 2, 
 	"excludeTests" => array("emp_formula"), 
 	
-"init" => create_function('',getFunctionHeader().'
+"init" => function () use ($code) {
+	eval(getFunctionHeader());
 	$suppliers[$code]["urls"]["server"]="https://shop.biosolve-chemicals.eu"; // startPage
 	$suppliers[$code]["urls"]["search"]=$urls["server"]."/search.php?search=";
 	$suppliers[$code]["urls"]["detail"]=$urls["server"]."/detail.php?id=";
 	$suppliers[$code]["urls"]["startPage"]=$urls["server"];
-'),
-"requestResultList" => create_function('$query_obj',getFunctionHeader().'
+},
+"requestResultList" => function ($query_obj) use ($code) {
+	eval(getFunctionHeader());
 	$retval["method"]="url";
 	$retval["action"]=$suppliers[$code]["urls"]["search"].$query_obj["vals"][0][0];
 	
 	return $retval;
-'),
-"getDetailPageURL" => create_function('$catNo',getFunctionHeader().'
+},
+"getDetailPageURL" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	if (empty($catNo)) {
 		return;
 	}
 	return $urls["detail"].$catNo."&referrer=enventory";
-'),
-"getInfo" => create_function('$catNo',getFunctionHeader().'
+},
+"getInfo" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	$url=$self["getDetailPageURL"]($catNo);
 	if (empty($url)) {
 		return $noConnection;
@@ -65,8 +69,9 @@ $GLOBALS["suppliers"][$code]=array(
 	
 	$body=@$response->getBody();
 	return $self["procDetail"]($response,$catNo);
-'),
-"getHitlist" => create_function('$searchText,$filter,$mode="ct",$paramHash=array()',getFunctionHeader().'
+},
+"getHitlist" => function ($searchText,$filter,$mode="ct",$paramHash=array()) use ($code) {
+	eval(getFunctionHeader());
 	$my_http_options=$default_http_options;
 	$my_http_options["timeout"]=35;
 	$response=@oe_http_get($urls["search"].$searchText,$my_http_options);
@@ -75,8 +80,9 @@ $GLOBALS["suppliers"][$code]=array(
 		return $noConnection;
 	}
 	return $self["procHitlist"]($response);
-'),
-"procDetail" => create_function('& $response,$catNo=""',getFunctionHeader().'
+},
+"procDetail" => function (& $response,$catNo="") use ($code) {
+	eval(getFunctionHeader());
 	$body=@$response->getBody();
 	if (preg_match("/(?ims)id=\"bandeau\".*class=\"row-fluid\"(.*)id=\"footer\"/",$body,$cut)) {
 		$body=$cut[1];
@@ -228,8 +234,9 @@ $GLOBALS["suppliers"][$code]=array(
 	//~ var_dump($result);
 	
 	return $result;
-'),
-"procHitlist" => create_function('& $response',getFunctionHeader().'
+},
+"procHitlist" => function (& $response) use ($code) {
+	eval(getFunctionHeader());
 	$body=utf8_decode(@$response->getBody());
 	cutRange($body,"id=\"search\"","id=\"footer\"");
 	
@@ -256,12 +263,12 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	
 	return $results;
-'),
-"getBestHit" => create_function('& $hitlist,$name=NULL','
+},
+"getBestHit" => function (& $hitlist,$name=NULL) use ($code) {
 	if (count_compat($hitlist)>0) {
 		return 0;
 	}
-')
+},
 );
 $GLOBALS["suppliers"][$code]["init"]();
 ?>

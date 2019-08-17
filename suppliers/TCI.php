@@ -34,7 +34,8 @@ $GLOBALS["suppliers"][$code]=array(
 	"alwaysProcDetail" => true, 
 	"searchTypeCode" => array("cas_nr" => 0, "emp_formula" => 4, "molecule_name" => 2),
 	
-"init" => create_function('',getFunctionHeader().'
+"init" => function () use ($code) {
+	eval(getFunctionHeader());
 	$suppliers[$code]["urls"]["server"]="http://www.tcichemicals.com"; // startPage
 	$suppliers[$code]["urls"]["search"]=$urls["server"]."/eshop/en/eu/catalog/list/search?searchCategory=";
 	$suppliers[$code]["urls"]["search2"]="&searchWord=";
@@ -43,17 +44,20 @@ $GLOBALS["suppliers"][$code]=array(
 	$suppliers[$code]["urls"]["sds"]=$urls["server"]."/en/msds/search?item=";
 	$suppliers[$code]["urls"]["sds2"]="&lang=";
 	$suppliers[$code]["urls"]["startPage"]=$urls["server"];
-'),
-"requestResultList" => create_function('$query_obj',getFunctionHeader().'
+},
+"requestResultList" => function ($query_obj) use ($code) {
+	eval(getFunctionHeader());
 	$retval["method"]="url";
 	$search_type_code=$self["searchTypeCode"][$query_obj["crits"][0]];
 	$retval["action"]=$urls["search"].$search_type_code.$urls["search2"].urlencode($query_obj["vals"][0][0]).$urls["search3"];
 	return $retval;
-'),
-"getDetailPageURL" => create_function('$catNo',getFunctionHeader().'
+},
+"getDetailPageURL" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	return $urls["detail"].$catNo.$urls["detail2"]."?referrer=enventory";
-'),
-"getInfo" => create_function('$catNo',getFunctionHeader().'
+},
+"getInfo" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	$url=$self["getDetailPageURL"]($catNo);
 	if (empty($url)) {
 		return $noConnection;
@@ -65,8 +69,9 @@ $GLOBALS["suppliers"][$code]=array(
 		return $noConnection;
 	}
 	return $self["procDetail"]($response,$catNo);
-'),
-"getHitlist" => create_function('$searchText,$filter,$mode="ct",$paramHash=array()',getFunctionHeader().'
+},
+"getHitlist" => function ($searchText,$filter,$mode="ct",$paramHash=array()) use ($code) {
+	eval(getFunctionHeader());
 	$search_type_code=$self["searchTypeCode"][$filter];
 	$url=$urls["search"].$search_type_code.$urls["search2"].urlencode($searchText).$urls["search3"];
 	$my_http_options=$default_http_options;
@@ -77,8 +82,9 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	
 	return $self["procHitlist"]($response,$search_type_code.$searchText);
-'),
-"procDetail" => create_function('& $response, $catNo=""',getFunctionHeader().'
+},
+"procDetail" => function (& $response, $catNo="") use ($code) {
+	eval(getFunctionHeader());
 	$body=@$response->getBody();
 	$body=str_replace(array("&nbsp;","&middot;"),array(" ","*"),$body);
 	cutRange($body,"<h1 id=\"page-title\"","id=\"side\"");
@@ -170,8 +176,9 @@ $GLOBALS["suppliers"][$code]=array(
 
 	$result["supplierCode"]=$code;
 	return $result;
-'),
-"procHitlist" => create_function('& $response,$catNo',getFunctionHeader().'
+},
+"procHitlist" => function (& $response,$catNo) use ($code) {
+	eval(getFunctionHeader());
 	$body=@$response->getBody();
 	$body=str_replace(array("&nbsp;"),array(" "),$body);
 	cutRange($body,"id=\"main\"","id=\"tabPanel02\"");
@@ -212,8 +219,8 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 
 	return $results;
-'),
-"parsePriceList" => create_function('$html','
+},
+"parsePriceList" => function ($html) use ($code) {
 $retval=array();
 cutRange($html,"<table class=\"price-tbl\">","</table>");
 if (preg_match_all("/(?ims)<tr.*?(<td.*?<\/td>)\s*(<td.*?<\/td>)/",$html,$nameValuePairs,PREG_SET_ORDER)) {
@@ -230,12 +237,12 @@ if (preg_match_all("/(?ims)<tr.*?(<td.*?<\/td>)\s*(<td.*?<\/td>)/",$html,$nameVa
 	}
 }
 return $retval;
-'),
-"getBestHit" => create_function('& $hitlist,$name=NULL','
+},
+"getBestHit" => function (& $hitlist,$name=NULL) use ($code) {
 	if (count_compat($hitlist)>0) {
 		return 0;
 	}
-'),
+},
 );
 $GLOBALS["suppliers"][$code]["init"]();
 ?>

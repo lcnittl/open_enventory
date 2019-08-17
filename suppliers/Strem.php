@@ -33,13 +33,15 @@ $GLOBALS["suppliers"][$code]=array(
 	"hasPriceList" => 0, 
 	"excludeFields" => array(), 
 
-"init" => create_function('',getFunctionHeader().'
+"init" => function () use ($code) {
+	eval(getFunctionHeader());
 	$urls["server"]="http://www.strem.com"; // startPage
 	$urls["base"]=$urls["server"]."/catalog/index.php";
 	$urls["detail"]=$urls["server"]."/catalog/v/";
 	$urls["startPage"]=$urls["server"];
-'),
-/*"getPrices" => create_function('$catNo',getFunctionHeader().'
+},
+/*"getPrices" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	// prepare cookies
 	$fields=array(
 		"country" => "de",
@@ -93,8 +95,9 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	
 	return $result;
-'),*/
-"requestResultList" => create_function('$query_obj',getFunctionHeader().'
+},*/
+"requestResultList" => function ($query_obj) use ($code) {
+	eval(getFunctionHeader());
 	$retval["method"]="url";
 	$retval["action"]=$urls["base"]."?focus=";
 	if ($query_obj["crits"][0]=="cas_nr") {
@@ -109,11 +112,13 @@ $GLOBALS["suppliers"][$code]=array(
 	$retval["action"].="&keyword=".urlencode($query_obj["vals"][0][0])."&x=10&y=10&page_function=keyword_search&display_products=list";
 	
 	return $retval;
-'),
-"getDetailPageURL" => create_function('$catNo',getFunctionHeader().'
+},
+"getDetailPageURL" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	return $urls["detail"].$catNo."/?referrer=enventory"; // last number is irrelevant
-'),
-"getInfo" => create_function('$catNo',getFunctionHeader().'
+},
+"getInfo" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	$url=$self["getDetailPageURL"]($catNo);
 	if (empty($url)) {
 		return $noConnection;
@@ -125,8 +130,9 @@ $GLOBALS["suppliers"][$code]=array(
 		return $noConnection;
 	}
 	return $self["procDetail"]($response,$catNo);
-'),
-"getHitlist" => create_function('$searchText,$filter,$mode="ct",$paramHash=array()',getFunctionHeader().'
+},
+"getHitlist" => function ($searchText,$filter,$mode="ct",$paramHash=array()) use ($code) {
+	eval(getFunctionHeader());
 	// http://www.strem.com/catalog/index.php?focus=product&keyword=nacnac&x=9&y=20&page_function=keyword_search&display_products=list
 	$url=$urls["base"]."?focus=";
 	if ($filter=="cas_nr") {
@@ -146,8 +152,9 @@ $GLOBALS["suppliers"][$code]=array(
 		return $noConnection;
 	}
 	return $self["procHitlist"]($response);
-'),
-"procDetail" => create_function('& $response,$catNo=""',getFunctionHeader().'
+},
+"procDetail" => function (& $response,$catNo="") use ($code) {
+	eval(getFunctionHeader());
 	$body=utf8_encode(@$response->getBody());
 	cutRange($body,"<div id=\"page_header_catalog\">","Enter a lot number",false);
 	$result=array();
@@ -262,8 +269,9 @@ $GLOBALS["suppliers"][$code]=array(
 	
 	$result["supplierCode"]=$code;
 	return $result;
-'),
-"procHitlist" => create_function('& $response',getFunctionHeader().'
+},
+"procHitlist" => function (& $response) use ($code) {
+	eval(getFunctionHeader());
 	$body=@$response->getBody();
 	
 	if (strpos($body,"returned 0 results.")!==FALSE) {
@@ -297,17 +305,17 @@ $GLOBALS["suppliers"][$code]=array(
 		}
 	}
 	return $results;
-'),
-"getBestHit" => create_function('& $hitlist,$name=NULL','
+},
+"getBestHit" => function (& $hitlist,$name=NULL) use ($code) {
 	if (count_compat($hitlist)>0) {
 		return 0;
 	}
-'),
+},
 // custom
-"getData" => create_function('& $pageStr,$preStr','
+"getData" => function (& $pageStr,$preStr) use ($code) {
 	preg_match("/(?ims)<tr>[\s|\n|\r]*<td[^>]*>[\s|\n|\r]*<b>".$preStr."<\/b>[\s|\n|\r]*<\/td>[\s|\n|\r]*<td[^>]*>[\s|\n|\r]*([^>]+)[\s|\n|\r]*<\/td>[\s|\n|\r]*<\/tr>/",$pageStr,$result);
 	return fixHtml($result[1]);
-') 
+}, 
 );
 $GLOBALS["suppliers"][$code]["init"]();
 //~ $suppliers[$code]["init"]();

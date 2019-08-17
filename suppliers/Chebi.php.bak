@@ -32,14 +32,16 @@ $GLOBALS["suppliers"][$code]=array(
 	"strSearchFormat" => "Molfile",
 	"searchTypeCode" => array("cas_nr" => "Cross_reference", "emp_formula" => "Formula", "molecule_name" => "All_names"),
 	"defaultPostParams" => array("structure" => "", "structureSearchMethod" => "exact", "printerFriendlyView" => "false", "callbackUrl" => "", "specialDataset" => "", "advancedSearchApplet" => "", "similarityLevel" => "0.7", "strictlyStereo" => "N", "resultsPerPage" => "45", "maxResults" => "50", "queryBean.stars" => "2", "action" => "Suche", "textQuery[0].operator" => "AND", "textQuery[0].value" => "", "textQuery[0].category" => "All_fields", "incomingOntologyQuery[0].operator" => "AND", "incomingOntologyQuery[0].category" => "", "incomingOntologyQueryLabelField0" => "", "incomingOntologyQuery[0].value" => "", "formulaQuery[0].category" => "Formula", "formulaQuery[0].operator" => "AND", "formulaQuery[0].value" => "", "molecularWeightQuery[0].category" => "Mass_range", "molecularWeightQuery[0].operator" => "AND", "molecularWeightQuery[0].startRange" => "", "molecularWeightQuery[0].endRange" => "", "chargeQuery[0].category" => "Charge_range", "chargeQuery[0].operator" => "AND", "chargeQuery[0].startRange" => "1000", "chargeQuery[0].endRange" => "1000", "datasourceQuery[0].category" => "Cross_reference_sources", "datasourceQuery[0].operator" => "AND", "datasourceQuery[0].value" => " All databases ", "chemicalStructure" => "false",),
-"init" => create_function('',getFunctionHeader().'
+"init" => function () use ($code) {
+	eval(getFunctionHeader());
 	$suppliers[$code]["urls"]["server"]="http://www.ebi.ac.uk";
 	$suppliers[$code]["urls"]["search"]=$urls["server"]."/chebi/advancedSearchFT.do";
 	$suppliers[$code]["urls"]["detail"]=$urls["server"]."/chebi/searchId.do?chebiId=";
 	$suppliers[$code]["urls"]["molfile_prefix"]=$urls["server"]."/chebi/";
 	$suppliers[$code]["urls"]["startPage"]=$suppliers[$code]["urls"]["server"]; // startPage
-'),
-"requestResultList" => create_function('$query_obj',getFunctionHeader().'
+},
+"requestResultList" => function ($query_obj) use ($code) {
+	eval(getFunctionHeader());
 	$retval["method"]="post";
 	$retval["action"]=$urls["search"];
 	$fields=$self["defaultPostParams"];
@@ -52,11 +54,13 @@ $GLOBALS["suppliers"][$code]=array(
 "fields" => $fields
 );
 	return $retval;
-'),
-"getDetailPageURL" => create_function('$catNo',getFunctionHeader().'
+},
+"getDetailPageURL" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	return $urls["detail"].$catNo;
-'),
-"getInfo" => create_function('$catNo',getFunctionHeader().'
+},
+"getInfo" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	$url=$self["getDetailPageURL"]($catNo);
 	if (empty($url)) {
 		return $noConnection;
@@ -69,8 +73,9 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 
 	return $self["procDetail"]($response,$catNo);
-'),
-"getHitlist" => create_function('$searchText,$filter,$mode="ct",$paramHash=array()',getFunctionHeader().'
+},
+"getHitlist" => function ($searchText,$filter,$mode="ct",$paramHash=array()) use ($code) {
+	eval(getFunctionHeader());
 	addWildcards($searchText,$mode);
 	
 	$fields=$self["defaultPostParams"];
@@ -85,8 +90,9 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 
 	return $self["procHitlist"]($response);
-'),
-"procDetail" => create_function('& $response,$catNo=""',getFunctionHeader().'
+},
+"procDetail" => function (& $response,$catNo="") use ($code) {
+	eval(getFunctionHeader());
 	$body=utf8_encode(@$response->getBody());
 	
 	$result=array();
@@ -154,8 +160,9 @@ $GLOBALS["suppliers"][$code]=array(
 	
 	$result["supplierCode"]=$code;
 	return $result;
-'),
-"procHitlist" => create_function('& $response',getFunctionHeader().'
+},
+"procHitlist" => function (& $response) use ($code) {
+	eval(getFunctionHeader());
 	$body=@$response->getBody();
 	if (strpos($body,"Download your search results")===FALSE) {
 		// only one
@@ -178,13 +185,14 @@ $GLOBALS["suppliers"][$code]=array(
 		}
 	}
 	return $results;
-'),
-"getBestHit" => create_function('& $hitlist,$name=NULL','
+},
+"getBestHit" => function (& $hitlist,$name=NULL) use ($code) {
 	if (count_compat($hitlist)>0) {
 		return 0;
 	}
-'),
-"strSearch" => create_function('$molfile,$mode="se"',getFunctionHeader().'
+},
+"strSearch" => function ($molfile,$mode="se") use ($code) {
+	eval(getFunctionHeader());
 	$fields=$self["defaultPostParams"];
 	$fields["structure"]=$molfile;
 	
@@ -197,8 +205,9 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	
 	return $self["procHitlist"]($response);
-'),
-"getCAS" => create_function('& $molfile',getFunctionHeader().'
+},
+"getCAS" => function (& $molfile) use ($code) {
+	eval(getFunctionHeader());
 	$result=$self["strSearch"]($molfile,"se");
 	if (count_compat($result)>1) {
 		$a=$self["getBestHit"]($result);
@@ -206,19 +215,19 @@ $GLOBALS["suppliers"][$code]=array(
 		$result[0]["supplierCode"]=$code;
 	}
 	return $result[0];
-'),
-"re_inline" => create_function('$html,$hashtag','
+},
+"re_inline" => function ($html,$hashtag) use ($code) {
 	preg_match("/(?ims)<tr>\s*<td[^>]*class=\"chebiDataHeader\".*?#".$hashtag.".*?<td.*?>(.*?)<\/td>/",$html,$data);
 	return $data[1];
-'),
-"re_single" => create_function('$html,$hashtag','
+},
+"re_single" => function ($html,$hashtag) use ($code) {
 	preg_match("/(?ims)<tr>\s*<td[^>]*class=\"chebiDataHeader\".*?#".$hashtag.".*?<\/tr>\s*<tr>\s*<td[^>]*class=\"chebiDataContent\"[^>]*>([^<]*)<\/td>/",$html,$data);
 	return $data[1];
-'),
-"re_table" => create_function('$html,$hashtag','
+},
+"re_table" => function ($html,$hashtag) use ($code) {
 	preg_match("/(?ims)<tr>\s*<td[^>]*class=\"chebiDataHeader\".*?#".$hashtag.".*?<\/tr>(.*?)<\/table>/",$html,$data);
 	return $data[1];
-'),
+},
 );
 $GLOBALS["suppliers"][$code]["init"]();
 ?>

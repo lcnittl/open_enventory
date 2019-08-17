@@ -43,27 +43,31 @@ $GLOBALS["suppliers"][$code]=array(
 		"Irritant" => "Xi",
 		"Harmful" => "Xn",
 	),
-"init" => create_function('',getFunctionHeader().'
+"init" => function () use ($code) {
+	eval(getFunctionHeader());
 	$suppliers[$code]["urls"]["server"]="https://www.merckmillipore.com"; // startPage
 	$suppliers[$code]["urls"]["search"]=$urls["server"]."/DE/en/search/%2B";
 	$suppliers[$code]["urls"]["search_suffix"]="/browse?SynchronizerToken=&TrackingSearchType=filter&SearchTerm=%2B";
 	$suppliers[$code]["urls"]["search_suffix2"]="&SelectedSearchResult=SFProductSearch&PageSize=20";
 	$suppliers[$code]["urls"]["detail"]=$urls["server"]."/DE/en/product/";
 	$suppliers[$code]["urls"]["startPage"]=$urls["server"];
-'),
-"requestResultList" => create_function('$query_obj',getFunctionHeader().'
+},
+"requestResultList" => function ($query_obj) use ($code) {
+	eval(getFunctionHeader());
 	$retval["method"]="url";
 	$retval["action"]=$suppliers[$code]["urls"]["search"].urlencode($query_obj["vals"][0][0]).$urls["search_suffix"].urlencode($query_obj["vals"][0][0]).$urls["search_suffix2"];
 	
 	return $retval;
-'),
-"getDetailPageURL" => create_function('$catNo',getFunctionHeader().'
+},
+"getDetailPageURL" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	if (empty($catNo)) {
 		return;
 	}
 	return $urls["detail"].$catNo."?referrer=enventory";
-'),
-"getInfo" => create_function('$catNo',getFunctionHeader().'
+},
+"getInfo" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	$url=$self["getDetailPageURL"]($catNo);
 	if (empty($url)) {
 		return $noConnection;
@@ -75,8 +79,9 @@ $GLOBALS["suppliers"][$code]=array(
 		return $noConnection;
 	}
 	return $self["procDetail"]($response,$catNo);
-'),
-"getHitlist" => create_function('$searchText,$filter,$mode="ct",$paramHash=array()',getFunctionHeader().'
+},
+"getHitlist" => function ($searchText,$filter,$mode="ct",$paramHash=array()) use ($code) {
+	eval(getFunctionHeader());
 	$url=$urls["search"].urlencode($searchText).$urls["search_suffix"].urlencode($searchText).$urls["search_suffix2"];
 	$my_http_options=$default_http_options;
 	$my_http_options["cookies"]=array(
@@ -92,8 +97,9 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 
 	return $self["procHitlist"]($response);
-'),
-"procDetail" => create_function('& $response,$catNo=""',getFunctionHeader().'
+},
+"procDetail" => function (& $response,$catNo="") use ($code) {
+	eval(getFunctionHeader());
 	$body=@$response->getBody();
 	$body=trimNbsp($body);
 //~ 	die($body);
@@ -287,8 +293,9 @@ $GLOBALS["suppliers"][$code]=array(
 	$result["supplierCode"]=$code;
 	$result["catNo"]=$catNo;
 	return $result;
-'),
-"getClauses" => create_function('$html,$type',getFunctionHeader().'
+},
+"getClauses" => function ($html,$type) use ($code) {
+	eval(getFunctionHeader());
 	$clauses=array();
 	$rows=explode("<br",$html);
 	if (is_array($rows)) foreach($rows as $row) {
@@ -297,8 +304,9 @@ $GLOBALS["suppliers"][$code]=array(
 		}
 	}
 	return str_replace(array(" ",$type),"",implode("-",$clauses));
-'),
-"procHitlist" => create_function('& $response',getFunctionHeader().'
+},
+"procHitlist" => function (& $response) use ($code) {
+	eval(getFunctionHeader());
 	$body=str_replace("<span class=\"ish-searchTerm\"></span>", "",@$response->getBody()); // remove garbage
 	
 	// echo $body;
@@ -335,12 +343,12 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	// print_r($results);
 	return $results;
-'),
-"getBestHit" => create_function('& $hitlist,$name=NULL','
+},
+"getBestHit" => function (& $hitlist,$name=NULL) use ($code) {
 	if (count_compat($hitlist)>0) {
 		return 0;
 	}
-')
+},
 );
 $GLOBALS["suppliers"][$code]["init"]();
 ?>

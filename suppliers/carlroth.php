@@ -41,14 +41,15 @@ $GLOBALS["suppliers"][$code]=array(
 		)
 	),
 	
-"init" => create_function('',getFunctionHeader().'
+"init" => function () use ($code) {
+	eval(getFunctionHeader());
 	$suppliers[$code]["urls"]["server"]="https://www.carlroth.com"; // startPage
-	$suppliers[$code]["urls"]["base_url"]=$urls["server"]."/de/en/";
-	$suppliers[$code]["urls"]["search"]=$urls["base_url"]."search?text=";
-	$suppliers[$code]["urls"]["detail"]=$urls["base_url"];
+	$suppliers[$code]["urls"]["search"]=$urls["server"]."/de/en/search?text=";
+	$suppliers[$code]["urls"]["detail"]=$urls["server"]."/de/en/";
 	$suppliers[$code]["urls"]["startPage"]=$urls["server"];
-'),
-"getPrices" => create_function('$catNo',getFunctionHeader().'
+},
+"getPrices" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	$url=$self["getDetailPageURL"]($catNo);
 	if (empty($url)) {
 		return $noConnection;
@@ -132,20 +133,23 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	
 	return $result;
-'),
-"requestResultList" => create_function('$query_obj',getFunctionHeader().'
+},
+"requestResultList" => function ($query_obj) use ($code) {
+	eval(getFunctionHeader());
 	$retval["method"]="url";
 	$retval["action"]=$suppliers[$code]["urls"]["search"].$query_obj["vals"][0][0];
 	
 	return $retval;
-'),
-"getDetailPageURL" => create_function('$catNo',getFunctionHeader().'
+},
+"getDetailPageURL" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	if (empty($catNo)) {
 		return;
 	}
 	return $urls["detail"].$catNo."?referrer=enventory";
-'),
-"getInfo" => create_function('$catNo',getFunctionHeader().'
+},
+"getInfo" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	$url=$self["getDetailPageURL"]($catNo);
 	if (empty($url)) {
 		return $noConnection;
@@ -158,8 +162,9 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	
 	return $self["procDetail"]($response,$catNo);
-'),
-"getHitlist" => create_function('$searchText,$filter,$mode="ct",$paramHash=array()',getFunctionHeader().'
+},
+"getHitlist" => function ($searchText,$filter,$mode="ct",$paramHash=array()) use ($code) {
+	eval(getFunctionHeader());
 	$my_http_options=$default_http_options;
 	$my_http_options["redirect"]=maxRedir;
 	$response=@oe_http_get($urls["search"].urlencode($searchText),$my_http_options);
@@ -168,8 +173,9 @@ $GLOBALS["suppliers"][$code]=array(
 		return $noConnection;
 	}
 	return $self["procHitlist"]($response);
-'),
-"procDetail" => create_function('& $response,$catNo=""',getFunctionHeader().'
+},
+"procDetail" => function (& $response,$catNo="") use ($code) {
+	eval(getFunctionHeader());
 	$body=utf8_decode(@$response->getBody());
 	cutRange($body,"<div id=\"content\"","<footer class=\"wrap\">");
 	$body=str_replace(array("\t","\n","\r"),"",$body);
@@ -260,8 +266,9 @@ $GLOBALS["suppliers"][$code]=array(
 	//~ var_dump($result);
 	
 	return $result;
-'),
-"procHitlist" => create_function('& $response',getFunctionHeader().'
+},
+"procHitlist" => function (& $response) use ($code) {
+	eval(getFunctionHeader());
 	//~ var_dump($response);die();
 	$body=@$response->getBody(); // utf8_decode(
 	cutRange($body,"<div id=\"content\"","<footer class=\"wrap\">");
@@ -287,12 +294,12 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	
 	return $results;
-'),
-"getBestHit" => create_function('& $hitlist,$name=NULL','
+},
+"getBestHit" => function (& $hitlist,$name=NULL) use ($code) {
 	if (count_compat($hitlist)>0) {
 		return 0;
 	}
-')
+},
 );
 $GLOBALS["suppliers"][$code]["init"]();
 ?>

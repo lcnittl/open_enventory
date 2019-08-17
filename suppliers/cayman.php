@@ -37,14 +37,16 @@ $GLOBALS["suppliers"][$code]=array(
 	),
 	"excludeTests" => array("emp_formula"), 
 	
-"init" => create_function('',getFunctionHeader().'
+"init" => function () use ($code) {
+	eval(getFunctionHeader());
 	$suppliers[$code]["urls"]["server"]="https://www.caymanchem.com"; // startPage
 	$suppliers[$code]["urls"]["search"]=$urls["server"]."/solr/cayman/select?bf=recip(rord(introduction_date)%2C1%2C1000%2C1000)&defType=dismax&fl=catalog_num%2Cname%2Ccas_no%2Cmojo%2Cscore&mm=50%25&rows=100&start=0&serial=16&version=2.2&wt=json&q=";
 	$suppliers[$code]["urls"]["search_suffix"]="catalog_num%5E10+catalog_num_suffix%5E10+supplier_catalog_num+discontinued_id+name%5E1000+synonym%5E100+tagline%5E0.01+key_information%5E0.01+preamble%5E0.01+keywords+product_qualifier_id%5E0.01+ngram_name%5E100+ngram_general%5E0.01+sku+library%5E0.01";
 	$suppliers[$code]["urls"]["detail"]=$urls["server"]."/product/";
 	$suppliers[$code]["urls"]["startPage"]=$urls["server"];
-'),
-"requestResultList" => create_function('$query_obj',getFunctionHeader().'
+},
+"requestResultList" => function ($query_obj) use ($code) {
+	eval(getFunctionHeader());
 	$retval["method"]="url";
 	$retval["action"]=$suppliers[$code]["urls"]["search"].$query_obj["vals"][0][0]."&qf=";
 	if ($query_obj["crits"][0]=="cas_nr") {
@@ -55,14 +57,16 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	
 	return $retval;
-'),
-"getDetailPageURL" => create_function('$catNo',getFunctionHeader().'
+},
+"getDetailPageURL" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	if (empty($catNo)) {
 		return;
 	}
 	return $urls["detail"].$catNo."?referrer=enventory";
-'),
-"getInfo" => create_function('$catNo',getFunctionHeader().'
+},
+"getInfo" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	$url=$self["getDetailPageURL"]($catNo);
 	if (empty($url)) {
 		return $noConnection;
@@ -76,8 +80,9 @@ $GLOBALS["suppliers"][$code]=array(
 	
 	$body=@$response->getBody();
 	return $self["procDetail"]($response,$catNo);
-'),
-"getHitlist" => create_function('$searchText,$filter,$mode="ct",$paramHash=array()',getFunctionHeader().'
+},
+"getHitlist" => function ($searchText,$filter,$mode="ct",$paramHash=array()) use ($code) {
+	eval(getFunctionHeader());
 	$url=$urls["search"].urlencode($searchText)."&qf=";
 	if ($filter=="cas_nr") {
 		$url.="cas_no";
@@ -93,8 +98,9 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 
 	return $self["procHitlist"]($response);
-'),
-"procDetail" => create_function('& $response,$catNo=""',getFunctionHeader().'
+},
+"procDetail" => function (& $response,$catNo="") use ($code) {
+	eval(getFunctionHeader());
 	$body=@$response->getBody();
 	//~ die($body);
 	
@@ -156,8 +162,9 @@ $GLOBALS["suppliers"][$code]=array(
 	//~ var_dump($result);
 	
 	return $result;
-'),
-"procHitlist" => create_function('& $response',getFunctionHeader().'
+},
+"procHitlist" => function (& $response) use ($code) {
+	eval(getFunctionHeader());
 	$body=utf8_decode(@$response->getBody());
 	$json=json_decode($body,true);
 	//~ print_r($json);
@@ -173,12 +180,12 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	
 	return $results;
-'),
-"getBestHit" => create_function('& $hitlist,$name=NULL','
+},
+"getBestHit" => function (& $hitlist,$name=NULL) use ($code) {
 	if (count_compat($hitlist)>0) {
 		return 0;
 	}
-')
+},
 );
 $GLOBALS["suppliers"][$code]["init"]();
 ?>

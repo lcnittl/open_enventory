@@ -38,23 +38,27 @@ $GLOBALS["suppliers"][$code]=array(
 "safety_sym_ghs_map" => array("Explosive" => "GHS01","Flammable" => "GHS02","Oxidizing" => "GHS03","Corrosive" => "GHS05","Toxic" => "GHS06","Harmful_Irritant" => "GHS07","Health_hazard" => "GHS08","Environment" => "GHS09"),
 "search_types" => array("cas_nr" => "SEARCH_CHOICE_CAS", "name" => "SEARCH_CHOICE_ITEM_NUM"),
 
-"init" => create_function('',getFunctionHeader().'
+"init" => function () use ($code) {
+	eval(getFunctionHeader());
 	$suppliers[$code]["urls"]["server"]="https://www.alfa.com";
 	$suppliers[$code]["urls"]["search"]=$urls["server"]."/en/search/?search-tab=product-search-container&type=";
 	$suppliers[$code]["urls"]["detail"]=$urls["server"]."/en/catalog/";
 	$suppliers[$code]["urls"]["msds"]=$urls["server"]."/en/catalog/sds/";
 	$suppliers[$code]["urls"]["startPage"]=$urls["server"];
-'),
-"requestResultList" => create_function('$query_obj',getFunctionHeader().'
+},
+"requestResultList" => function ($query_obj) use ($code) {
+	eval(getFunctionHeader());
 	$retval["method"]="url";
 	$retval["action"]=$suppliers[$code]["urls"]["search"].$suppliers[$code]["search_types"][ $query_obj["crits"][0] ]."&q=".$query_obj["vals"][0][0];
 	
 	return $retval;
-'),
-"getDetailPageURL" => create_function('$catNo',getFunctionHeader().'
+},
+"getDetailPageURL" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	return $urls["detail"].$catNo."/";
-'),
-"getInfo" => create_function('$catNo',getFunctionHeader().'
+},
+"getInfo" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	$url=$self["getDetailPageURL"]($catNo);
 	if (empty($url)) {
 		return $noConnection;
@@ -67,8 +71,9 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 
 	return $self["procDetail"]($response,$catNo);
-'),
-"getHitlist" => create_function('$searchText,$filter,$mode="ct",$paramHash=array()',getFunctionHeader().'
+},
+"getHitlist" => function ($searchText,$filter,$mode="ct",$paramHash=array()) use ($code) {
+	eval(getFunctionHeader());
 	$my_http_options=$default_http_options;
 	$response=@oe_http_get($suppliers[$code]["urls"]["search"].$suppliers[$code]["search_types"][ $filter ]."&q=".$searchText,$my_http_options);
 	
@@ -76,8 +81,9 @@ $GLOBALS["suppliers"][$code]=array(
 		return $noConnection;
 	}
 	return $self["procHitlist"]($response);
-'),
-"procDetail" => create_function('& $response,$catNo=""',getFunctionHeader().'
+},
+"procDetail" => function (& $response,$catNo="") use ($code) {
+	eval(getFunctionHeader());
 	$body=$response->getBody();
 	
 	$result=array();
@@ -192,8 +198,9 @@ $GLOBALS["suppliers"][$code]=array(
 	//~ var_dump($result);
 	
 	return $result;
-'),
-"procHitlist" => create_function('& $response',getFunctionHeader().'
+},
+"procHitlist" => function (& $response) use ($code) {
+	eval(getFunctionHeader());
 	$body=@$response->getBody();
 	cutRange($body,"id=\"products\"","id=\"footer\"");
 	//~ die($body);
@@ -217,12 +224,12 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 
 	return $results;
-'),
-"getBestHit" => create_function('& $hitlist,$name=NULL','
+},
+"getBestHit" => function (& $hitlist,$name=NULL) use ($code) {
 	if (count_compat($hitlist)>0) {
 		return 0;
 	}
-')
+},
 );
 $GLOBALS["suppliers"][$code]["init"]();
 //~ $suppliers[$code]["init"]();

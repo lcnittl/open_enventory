@@ -32,24 +32,28 @@ $GLOBALS["suppliers"][$code]=array(
 	"vendor" => true, 
 	"hasPriceList" => 2, 
 	
-"init" => create_function('',getFunctionHeader().'
+"init" => function () use ($code) {
+	eval(getFunctionHeader());
 	$suppliers[$code]["urls"]["server"]="http://www.activate-scientific.com"; // startPage
 	$suppliers[$code]["urls"]["chemicalize_server_url"]="https://catalog.chemicalize.com";
 	$suppliers[$code]["urls"]["search"]=$urls["chemicalize_server_url"]."/v1/48cb00fd27694c7c8824bbd4c566177e/search";
 	$suppliers[$code]["urls"]["search_referer"]=$urls["chemicalize_server_url"]."/v1/48cb00fd27694c7c8824bbd4c566177e/editor.html";
 	$suppliers[$code]["urls"]["detail"]=$urls["server"]."/code/";
 	$suppliers[$code]["urls"]["startPage"]=$urls["server"];
-'),
-"requestResultList" => create_function('$query_obj',getFunctionHeader().'
+},
+"requestResultList" => function ($query_obj) use ($code) {
+	eval(getFunctionHeader());
 	$retval["method"]="url";
 	$retval["action"]=$urls["search"].urlencode($query_obj["vals"][0][0]);
 	
 	return $retval;
-'),
-"getDetailPageURL" => create_function('$catNo',getFunctionHeader().'
+},
+"getDetailPageURL" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	return $urls["detail"].$catNo."?referrer=enventory"; // last number is irrelevant
-'),
-"getInfo" => create_function('$catNo',getFunctionHeader().'
+},
+"getInfo" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	$url=$self["getDetailPageURL"]($catNo);
 	if (empty($url)) {
 		return $noConnection;
@@ -61,8 +65,9 @@ $GLOBALS["suppliers"][$code]=array(
 		return $noConnection;
 	}
 	return $self["procDetail"]($response,$catNo);
-'),
-"getHitlist" => create_function('$searchText,$filter,$mode="ct",$paramHash=array()',getFunctionHeader().'
+},
+"getHitlist" => function ($searchText,$filter,$mode="ct",$paramHash=array()) use ($code) {
+	eval(getFunctionHeader());
 	$my_http_options=$default_http_options;
 	$my_http_options["redirect"]=maxRedir;
 	$my_http_options["referer"]=$urls["search_referer"];
@@ -79,8 +84,9 @@ $GLOBALS["suppliers"][$code]=array(
 		return $noConnection;
 	}
 	return $self["procHitlist"]($response);
-'),
-"procDetail" => create_function('& $response,$catNo=""',getFunctionHeader().'
+},
+"procDetail" => function (& $response,$catNo="") use ($code) {
+	eval(getFunctionHeader());
 	$body=utf8_encode(@$response->getBody());
 	cutRange($body,"<h1","class=\"footer-main\"");
 	$result=array();
@@ -153,8 +159,9 @@ $GLOBALS["suppliers"][$code]=array(
 	
 	$result["supplierCode"]=$code;
 	return $result;
-'),
-"procHitlist" => create_function('& $response',getFunctionHeader().'
+},
+"procHitlist" => function (& $response) use ($code) {
+	eval(getFunctionHeader());
 	$body=@$response->getBody();
 	$json=json_decode($body,true);
 //~ 	print_r($json);die();
@@ -173,12 +180,12 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	
 	return $results;
-'),
-"getBestHit" => create_function('& $hitlist,$name=NULL','
+},
+"getBestHit" => function (& $hitlist,$name=NULL) use ($code) {
 	if (count_compat($hitlist)>0) {
 		return 0;
 	}
-'),
+},
 );
 $GLOBALS["suppliers"][$code]["init"]();
 ?>

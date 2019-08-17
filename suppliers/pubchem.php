@@ -32,16 +32,19 @@ $GLOBALS["suppliers"][$code]=array(
 	"noExtSearch" => true, 
 	"strSearchFormat" => "SMILES",
 
-"init" => create_function('',getFunctionHeader().'
+"init" => function () use ($code) {
+	eval(getFunctionHeader());
 	$suppliers[$code]["urls"]["server"]="https://pubchem.ncbi.nlm.nih.gov";
 	$suppliers[$code]["urls"]["base"]=$urls["server"]."/rest/pug/compound/";
 	$suppliers[$code]["urls"]["name_suffix"]="name/";
 	$suppliers[$code]["urls"]["smiles_suffix"]="smiles/";
-'),
-"getDetailPageURL" => create_function('$catNo',getFunctionHeader().'
+},
+"getDetailPageURL" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	return $urls["base"].$urls["smiles_suffix"].urlencode($catNo)."/xrefs/RN/TXT?referrer=enventory";
-'),
-"getHitlist" => create_function('$searchText,$filter,$mode="ct",$paramHash=array()',getFunctionHeader().' // searchText is either CAS No or SMILES, always one result only
+},
+"getHitlist" => function ($searchText,$filter,$mode="ct",$paramHash=array()) use ($code) { // searchText is either CAS No or SMILES, always one result only
+	eval(getFunctionHeader());
 	$result=array();
 	$my_http_options=$default_http_options;
 	$my_http_options["redirect"]=maxRedir;
@@ -83,18 +86,19 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 //~ 	var_dump($result);die($body);
 	return $result;
-'),
-"isReplyValid" => create_function('$data','
+},
+"isReplyValid" => function ($data) use ($code) {
 	return $data && !startswith($data,"<h1") && !startswith($data,"<!DOCTYPE") && !startswith($data,"Status: ") && strpos($data,"error:")===FALSE && strpos($data,"NotFound")===FALSE;
-'),
-"getBestHit" => create_function('& $hitlist,$name=NULL','
+},
+"getBestHit" => function (& $hitlist,$name=NULL) use ($code) {
 	if (count_compat($hitlist)>0) {
 		return 0;
 	}
-'),
-"strSearch" => create_function('$smiles,$mode="se"',getFunctionHeader().'
+},
+"strSearch" => function ($smiles,$mode="se") use ($code) {
+	eval(getFunctionHeader());
 	return $self["getHitlist"]($smiles,$mode);
-')
+},
 );
 $GLOBALS["suppliers"][$code]["init"]();
 ?>

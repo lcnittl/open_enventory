@@ -33,22 +33,26 @@ $GLOBALS["suppliers"][$code]=array(
 	"hasPriceList" => 0, 
 	"excludeFields" => array(), 
 
-"init" => create_function('',getFunctionHeader().'
+"init" => function () use ($code) {
+	eval(getFunctionHeader());
 	$urls["server"]="https://www.fishersci.com"; // startPage
 	$urls["search"]=$urls["server"]."/us/en/catalog/search/products?keyword=";
 	$urls["detail"]=$urls["server"]."/shop/products/";
 	$urls["startPage"]=$urls["server"];
-'),
-"requestResultList" => create_function('$query_obj',getFunctionHeader().'
+},
+"requestResultList" => function ($query_obj) use ($code) {
+	eval(getFunctionHeader());
 	$retval["method"]="url";
 	$retval["action"]=$urls["search"].urlencode($query_obj["vals"][0][0]);
 	
 	return $retval;
-'),
-"getDetailPageURL" => create_function('$catNo',getFunctionHeader().'
+},
+"getDetailPageURL" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	return $urls["detail"].$catNo."/?referrer=enventory"; // last number is irrelevant
-'),
-"getInfo" => create_function('$catNo',getFunctionHeader().'
+},
+"getInfo" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	$url=$self["getDetailPageURL"]($catNo);
 	if (empty($url)) {
 		return $noConnection;
@@ -60,8 +64,9 @@ $GLOBALS["suppliers"][$code]=array(
 		return $noConnection;
 	}
 	return $self["procDetail"]($response,$catNo);
-'),
-"getHitlist" => create_function('$searchText,$filter,$mode="ct",$paramHash=array()',getFunctionHeader().'
+},
+"getHitlist" => function ($searchText,$filter,$mode="ct",$paramHash=array()) use ($code) {
+	eval(getFunctionHeader());
 	$my_http_options=$default_http_options;
 	$my_http_options["redirect"]=maxRedir;
 	$response=oe_http_get($urls["search"].urlencode($searchText),$my_http_options);
@@ -69,8 +74,9 @@ $GLOBALS["suppliers"][$code]=array(
 		return $noConnection;
 	}
 	return $self["procHitlist"]($response);
-'),
-"procDetail" => create_function('& $response,$catNo=""',getFunctionHeader().'
+},
+"procDetail" => function (& $response,$catNo="") use ($code) {
+	eval(getFunctionHeader());
 	$body=utf8_encode(@$response->getBody());
 	$body=preg_replace(array("/(?ims)<script.*?<\/script>/","/(?ims)<style.*?<\/style>/"),"",$body);
 	
@@ -161,8 +167,9 @@ $GLOBALS["suppliers"][$code]=array(
 	
 	$result["supplierCode"]=$code;
 	return $result;
-'),
-"procHitlist" => create_function('& $response',getFunctionHeader().'
+},
+"procHitlist" => function (& $response) use ($code) {
+	eval(getFunctionHeader());
 	$body=@$response->getBody();
 	if (strpos($body,"searchErrorText")!==FALSE) {
 		return $noResults;
@@ -201,12 +208,12 @@ $GLOBALS["suppliers"][$code]=array(
 		}
 	}
 	return $results;
-'),
-"getBestHit" => create_function('& $hitlist,$name=NULL','
+},
+"getBestHit" => function (& $hitlist,$name=NULL) use ($code) {
 	if (count_compat($hitlist)>0) {
 		return 0;
 	}
-')
+},
 );
 $GLOBALS["suppliers"][$code]["init"]();
 //~ $suppliers[$code]["init"]();

@@ -32,14 +32,16 @@ $GLOBALS["suppliers"][$code]=array(
 	"noExtSearch" => true, 
 	"strSearchFormat" => "SMILES",
 
-"init" => create_function('',getFunctionHeader().'
+"init" => function () use ($code) {
+	eval(getFunctionHeader());
 	$suppliers[$code]["urls"]["server"]="http://www.emolecules.com"; // startPage
 	$suppliers[$code]["urls"]["search"]=$urls["server"]."/cgi-bin/search?t=ex&q=";
 	$suppliers[$code]["urls"]["substructure"]=$urls["server"]."/cgi-bin/search?t=ss&q=";
 	$suppliers[$code]["urls"]["detail"]=$urls["server"]."/cgi-bin/more?vid=";
 	$suppliers[$code]["urls"]["startPage"]=$urls["server"];
-'),
-"requestResultList" => create_function('$query_obj',getFunctionHeader().'
+},
+"requestResultList" => function ($query_obj) use ($code) {
+	eval(getFunctionHeader());
 	$retval["method"]="url";
 	if ($query_obj["ops"][0]=="su") {
 		$retval["action"]=$urls["substructure"];
@@ -49,11 +51,13 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	$retval["action"].=$query_obj["vals"][0][0];
 	return $retval;
-'),
-"getDetailPageURL" => create_function('$catNo',getFunctionHeader().'
+},
+"getDetailPageURL" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 		return $urls["detail"].$catNo."&referrer=enventory";
-'),
-"getInfo" => create_function('$catNo',getFunctionHeader().'
+},
+"getInfo" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	$url=$self["getDetailPageURL"]($catNo);
 	$my_http_options=$default_http_options;
 	$my_http_options["redirect"]=maxRedir;
@@ -63,8 +67,9 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 
 	return $self["procDetail"]($response,$catNo);
-'),
-"getHitlist" => create_function('$searchText,$filter,$mode="ct",$paramHash=array()',getFunctionHeader().'
+},
+"getHitlist" => function ($searchText,$filter,$mode="ct",$paramHash=array()) use ($code) {
+	eval(getFunctionHeader());
 	$my_http_options=$default_http_options;
 	$my_http_options["redirect"]=maxRedir;
 	$responses=array();
@@ -79,8 +84,9 @@ $GLOBALS["suppliers"][$code]=array(
 		$responses[1]=@http_get($urls["emol"]["server"].$href,$my_http_options);
 	}
 	return $self["procHitlist"]($responses);
-'),
-"procDetail" => create_function('& $response,$catNo=""',getFunctionHeader().'
+},
+"procDetail" => function (& $response,$catNo="") use ($code) {
+	eval(getFunctionHeader());
 	$body=@$response->getBody();
 	
 	// get all names and all CAS-Nrs, take shortest (seems to be best in most cases) 
@@ -129,8 +135,9 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	
 	return array("molecule_name" => $name, "cas_nr" => getBestCAS($cas_nrs), "supplierCode" => "emol", "catNo" => $catNo);
-'),
-"procHitlist" => create_function('& $responses',getFunctionHeader().'
+},
+"procHitlist" => function (& $responses) use ($code) {
+	eval(getFunctionHeader());
 	$body="";
 	foreach ($responses as $response) {
 		$body.=@$response->getBody();
@@ -167,24 +174,25 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	
 	return array($self["getInfo"]($catNo)); // only best hit
-'),
-"getBestHit" => create_function('& $hitlist,$name=NULL','
+},
+"getBestHit" => function (& $hitlist,$name=NULL) use ($code) {
 	if (count_compat($hitlist)>0) {
 		return 0;
 	}
-'),
-"strSearch" => create_function('$smiles,$mode="se"',getFunctionHeader().'
+},
+"strSearch" => function ($smiles,$mode="se") use ($code) {
+	eval(getFunctionHeader());
 	return $self["getHitlist"]($smiles,$mode);
-'),
+},
 // custom
-"cutList" => create_function('$body','
+"cutList" => function ($body) use ($code) {
 	cutRange($body,"summary=\"Content Table\"","summary=\"Page Jump\"");
 	return $body;
-'),
-"getLink" => create_function('$pageStr','
+},
+"getLink" => function ($pageStr) use ($code) {
 	preg_match("/(?ims)<a\shref=\"(\/cgi\-bin\/search[^\"]+)\">\d+<\/a>/",$pageStr,$result);
 	return fixHtml($result[1]);
-')
+},
 );
 $GLOBALS["suppliers"][$code]["init"]();
 //~ $suppliers[$code]["init"]();

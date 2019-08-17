@@ -37,20 +37,22 @@ $GLOBALS["suppliers"][$code]=array(
 	),
 	"excludeTests" => array("emp_formula"), 
 	
-"init" => create_function('',getFunctionHeader().'
+"init" => function () use ($code) {
+	eval(getFunctionHeader());
 	$suppliers[$code]["urls"]["server"]="http://www.apolloscientific.co.uk"; // startPage
 	$suppliers[$code]["urls"]["search"]=$urls["server"]."/chemical_results.php";
 	$suppliers[$code]["urls"]["detail"]=$urls["server"]."/display_item.php?id=";
 	$suppliers[$code]["urls"]["startPage"]=$urls["server"];
-'),
-"getPostParams" => create_function('$searchText','
+},
+"getPostParams" => function ($searchText) use ($code) {
 	return array(
 		"product_group" => "%", 
 		"qstext" => $searchText, 
 		"search_fieldname" => "header_search"
 	);
-'),
-"requestResultList" => create_function('$query_obj',getFunctionHeader().'
+},
+"requestResultList" => function ($query_obj) use ($code) {
+	eval(getFunctionHeader());
 	$retval["method"]="post";
 	$retval["action"]=$urls["search"];
 	$fields=$self["getPostParams"]($query_obj["vals"][0][0]);
@@ -60,14 +62,16 @@ $GLOBALS["suppliers"][$code]=array(
 		"fields" => $fields
 	);
 	return $retval;
-'),
-"getDetailPageURL" => create_function('$catNo',getFunctionHeader().'
+},
+"getDetailPageURL" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	if (empty($catNo)) {
 		return;
 	}
 	return $urls["detail"].$catNo."&referrer=enventory";
-'),
-"getInfo" => create_function('$catNo',getFunctionHeader().'
+},
+"getInfo" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	$url=$self["getDetailPageURL"]($catNo);
 	if (empty($url)) {
 		return $noConnection;
@@ -81,8 +85,9 @@ $GLOBALS["suppliers"][$code]=array(
 	
 	$body=@$response->getBody();
 	return $self["procDetail"]($response,$catNo);
-'),
-"getHitlist" => create_function('$searchText,$filter,$mode="ct",$paramHash=array()',getFunctionHeader().'
+},
+"getHitlist" => function ($searchText,$filter,$mode="ct",$paramHash=array()) use ($code) {
+	eval(getFunctionHeader());
 	$fields=$self["getPostParams"]($searchText);
 	$my_http_options=$default_http_options;
 	$response=@oe_http_post_fields($urls["search"],$fields,array(),$my_http_options);
@@ -91,8 +96,9 @@ $GLOBALS["suppliers"][$code]=array(
 		return $noConnection;
 	}
 	return $self["procHitlist"]($response);
-'),
-"procDetail" => create_function('& $response,$catNo=""',getFunctionHeader().'
+},
+"procDetail" => function (& $response,$catNo="") use ($code) {
+	eval(getFunctionHeader());
 	$body=@$response->getBody();
 	
 	$result=array();
@@ -201,8 +207,9 @@ $GLOBALS["suppliers"][$code]=array(
 	//~ var_dump($result);
 	
 	return $result;
-'),
-"procHitlist" => create_function('& $response',getFunctionHeader().'
+},
+"procHitlist" => function (& $response) use ($code) {
+	eval(getFunctionHeader());
 	$body=utf8_decode(@$response->getBody());
 	cutRange($body,"Now showing Page","BASKET");
 	
@@ -232,7 +239,7 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	
 	return $results;
-'),
+},
 );
 $GLOBALS["suppliers"][$code]["init"]();
 ?>

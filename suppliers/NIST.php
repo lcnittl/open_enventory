@@ -31,13 +31,15 @@ $GLOBALS["suppliers"][$code]=array(
 	"height" => 36, 
 	"strSearchFormat" => "Molfile",
 
-"init" => create_function('',getFunctionHeader().'
+"init" => function () use ($code) {
+	eval(getFunctionHeader());
 	$suppliers[$code]["urls"]["server"]="http://webbook.nist.gov";
 	$suppliers[$code]["urls"]["base"]=$urls["server"]."/cgi/cbook.cgi";
 	//$suppliers[$code]["urls"]["base"]="http://localhost/storage/dump.php";
 	$suppliers[$code]["urls"]["startPage"]=$urls["server"]."/chemistry"; // startPage
-'),
-"requestResultList" => create_function('$query_obj',getFunctionHeader().'
+},
+"requestResultList" => function ($query_obj) use ($code) {
+	eval(getFunctionHeader());
 	if ($query_obj["crits"][0]=="molfile_blob") {
 		$retval["method"]="scrape";
 		$retval["supplier"]=$code;
@@ -56,11 +58,13 @@ $GLOBALS["suppliers"][$code]=array(
 		$retval["action"]=$urls["base"]."?Units=SI".$searchType.$query_obj["vals"][0][0];
 	}
 	return $retval;
-'),
-"getDetailPageURL" => create_function('$catNo',getFunctionHeader().'
+},
+"getDetailPageURL" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	return $urls["base"]."?Units=SI&ID=".$catNo."&referrer=enventory";
-'),
-"getInfo" => create_function('$catNo',getFunctionHeader().'
+},
+"getInfo" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	$url=$self["getDetailPageURL"]($catNo);
 	if (empty($url)) {
 		return $noConnection;
@@ -75,8 +79,9 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 
 	return $self["procDetail"]($response,$catNo);
-'),
-"getHitlist" => create_function('$searchText,$filter,$mode="ct",$paramHash=array()',getFunctionHeader().'
+},
+"getHitlist" => function ($searchText,$filter,$mode="ct",$paramHash=array()) use ($code) {
+	eval(getFunctionHeader());
 	$baseurl=$urls["base"]."?Units=SI";
 	switch($filter) {
 	case "cas_nr":
@@ -99,8 +104,9 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 
 	return $self["procHitlist"]($response);
-'),
-"procDetail" => create_function('& $response,$catNo=""',getFunctionHeader().'
+},
+"procDetail" => function (& $response,$catNo="") use ($code) {
+	eval(getFunctionHeader());
 	$body=utf8_encode(@$response->getBody());
 	
 	$body=str_replace("</li>","",$body);
@@ -171,8 +177,9 @@ $GLOBALS["suppliers"][$code]=array(
 	$result["supplierCode"]=$code;
 	//~ $result["catNo"]=$catNo;
 	return $result;
-'),
-"procHitlist" => create_function('& $response',getFunctionHeader().'
+},
+"procHitlist" => function (& $response) use ($code) {
+	eval(getFunctionHeader());
 	$body=@$response->getBody();
 	
 	$baseurl=$urls["base"]."?Units=SI";
@@ -199,8 +206,8 @@ $GLOBALS["suppliers"][$code]=array(
 		}
 	}
 	return $result;
-'),
-"getBestHit" => create_function('& $hitlist,$name=NULL','
+},
+"getBestHit" => function (& $hitlist,$name=NULL) use ($code) {
 	if (!is_null($name)) {
 		$a=count_compat($hitlist)-1;
 		while ($a>=0) {
@@ -215,8 +222,8 @@ $GLOBALS["suppliers"][$code]=array(
 		$a--;
 	}
 	return $a;
-'),
-"parseTableVal" => create_function('$value,$unit','
+},
+"parseTableVal" => function ($value,$unit) use ($code) {
 	list($value,)=explode("&",fixTags($value),2);
 	$value=trim($value);
 	$unit=fixTags($unit);
@@ -230,8 +237,9 @@ $GLOBALS["suppliers"][$code]=array(
 	break;
 	}
 	return $retval;
-'),
-"strSearch" => create_function('$molfile,$mode="se"',getFunctionHeader().'
+},
+"strSearch" => function ($molfile,$mode="se") use ($code) {
+	eval(getFunctionHeader());
 	if ($mode=="se") {
 		$type="Struct";
 	}
@@ -260,8 +268,9 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	
 	return $self["procHitlist"]($response);
-'),
-"getCAS" => create_function('& $molfile',getFunctionHeader().'
+},
+"getCAS" => function (& $molfile) use ($code) {
+	eval(getFunctionHeader());
 	$result=$self["strSearch"]($molfile,"se");
 	if (count_compat($result)>1) {
 		$a=$self["getBestHit"]($result);
@@ -269,8 +278,9 @@ $GLOBALS["suppliers"][$code]=array(
 		$result[0]["supplierCode"]=$code;
 	}
 	return $result[0];
-'),
-"getCASfromName" => create_function('$name',getFunctionHeader().'
+},
+"getCASfromName" => function ($name) use ($code) {
+	eval(getFunctionHeader());
 	$name=strtolower($name);
 	$hitlist=$self["getHitlist"]($name,"molecule_name","ex");
 	if (!empty($hitlist[0]["cas_nr"])) {
@@ -278,7 +288,7 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	$info=$self["getInfo"]($hitlist[ $self["getBestHit"]($hitlist,$name) ]["catNo"]);
 	return $info["cas_nr"];
-')
+},
 );
 $GLOBALS["suppliers"][$code]["init"]();
 ?>

@@ -29,21 +29,25 @@ $GLOBALS["suppliers"][$code]=array(
 	"name" => "ChemicalBook", 
 	"logo" => "chembook.gif", 
 	"height" => 36, 
-"init" => create_function('',getFunctionHeader().'
+"init" => function () use ($code) {
+	eval(getFunctionHeader());
 	$suppliers[$code]["urls"]["server"]="http://www.chemicalbook.com";
 	$suppliers[$code]["urls"]["base"]=$urls["server"]."/Search_EN.aspx?keyword=";
 	$suppliers[$code]["urls"]["startPage"]=$urls["server"]; // startPage
-'),
-"requestResultList" => create_function('$query_obj',getFunctionHeader().'
+},
+"requestResultList" => function ($query_obj) use ($code) {
+	eval(getFunctionHeader());
 	$retval["method"]="url";
 	$retval["action"]=$urls["base"].$query_obj["vals"][0][0];
 	return $retval;
-'),
-"getDetailPageURL" => create_function('$catNo',getFunctionHeader().'
+},
+"getDetailPageURL" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	$baseurl=$urls["base"];
 	return $baseurl.$catNo;
-'),
-"getInfo" => create_function('$catNo',getFunctionHeader().'
+},
+"getInfo" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	$url=$urls["server"]."/ProductChemicalProperties".$catNo."_EN.htm";
 	if (empty($url)) {
 		return $noConnection;
@@ -51,13 +55,14 @@ $GLOBALS["suppliers"][$code]=array(
 	$my_http_options=$default_http_options;
 	$my_http_options["redirect"]=maxRedir;
 	$response=oe_http_get($url,$my_http_options);
-	$body=utf8_encode(@$response->getBody());
 	if ($response==FALSE) {
 		return $noConnection;
 	}
+        $body=utf8_encode(@$response->getBody());
 	return $self["procDetail"]($body);
-'),
-"getHitlist" => create_function('$searchText,$filter,$mode="ct",$paramHash=array()',getFunctionHeader().'
+},
+"getHitlist" => function ($searchText,$filter,$mode="ct",$paramHash=array()) use ($code) {
+	eval(getFunctionHeader());
 	$baseurl=$urls["base"];
 	$srch=$searchText; //process the value to other functions. Needed to filter out erroneusly found entries sometimes returned by ChemicalBook
 	$url=$baseurl.urlencode($searchText);	
@@ -69,8 +74,8 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	$body=utf8_encode(@$response->getBody());
 	return $self["procHitlist"]($response,$srch,$filter);
-'),
-"getBestHit" => create_function('& $hitlist,$name=NULL','
+},
+"getBestHit" => function (& $hitlist,$name=NULL) use ($code) {
 	$a=0;
 	for($i=0;$i<count_compat($hitlist);$i++) {
 		if (count_compat(array_filter($hitlist[$i])) > count_compat(array_filter($hitlist[$a]))) {
@@ -78,12 +83,13 @@ $GLOBALS["suppliers"][$code]=array(
 		}
 	}
 	return $a;
-'),
-"procDetail" => create_function('$body,$catNo=""',getFunctionHeader().'
+},
+"procDetail" => function ($body,$catNo="") use ($code) {
+	eval(getFunctionHeader());
 	$body=utf8_encode(str_replace("&nbsp;"," ",$body));
 	preg_match("/(?ims)Mol\s?File:?(.*?)<a href=.*?\.mol/",$body,$lk);
 	$lk2=preg_replace("/(?ims)Mol\s?File:?(.*?)<a href=\.\./","",$lk[0]);
-	$molurl=str_replace("\\\","/",$lk2);
+	$molurl=str_replace("\\","/",$lk2);
 	preg_match_all("/(?ims)<td.*?<\/td>/",$body,$cells,PREG_PATTERN_ORDER);
 	$cells=$cells[0];
 	//var_dump($cells);
@@ -207,9 +213,10 @@ $GLOBALS["suppliers"][$code]=array(
 
 	$result["supplierCode"]=$code;
 	return $result;
-'),
+},
 
-"procHitlist" => create_function('& $response,$srch,$filter',getFunctionHeader().'
+"procHitlist" => function (& $response,$srch,$filter) use ($code) {
+	eval(getFunctionHeader());
 	if ($filter!=="molecule_name" && $filter!=="emp_formula"){ //check what is the topic of search
 		$patt="/[0-9]+\-[0-9][0-9]\-[0-9]/";
    	 	if (!preg_match($patt,$srch)){ //If neither name nor empirical formula, check whether the search text is a CAS number, proceed if true 
@@ -285,8 +292,9 @@ $GLOBALS["suppliers"][$code]=array(
 		}
 		return $result;
 	}
-'),
-"getCASfromName" => create_function('$name',getFunctionHeader().'
+},
+"getCASfromName" => function ($name) use ($code) {
+	eval(getFunctionHeader());
 	$name=strtolower($name);
 	$hitlist=$self["getHitlist"]($name,"molecule_name");
 	if (count_compat($hitlist)==1) {
@@ -307,7 +315,7 @@ $GLOBALS["suppliers"][$code]=array(
 			return $res;
 		}
 	}
-')
+},
 );
 $GLOBALS["suppliers"][$code]["init"]();
 ?>

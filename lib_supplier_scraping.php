@@ -40,9 +40,7 @@ require_once "lib_http.php";
 $ext_crits=array("molecule_name","cas_nr","emp_formula");
 
 function getFunctionHeader() {
-	global $code;
 	return 'global $suppliers,$noResults,$noConnection,$default_http_options;
-	$code="'.$code.'";
 	$self=& $suppliers[$code];
 	$urls=& $self["urls"];';
 }

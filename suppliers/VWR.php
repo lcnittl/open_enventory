@@ -21,9 +21,6 @@ You should have received a copy of the GNU Affero General Public License
 along with open enventory.  If not, see <http://www.gnu.org/licenses/>.
 */
 // VWR
-
-require_once "lib_global_funcs.php";
-
 $GLOBALS["code"]="VWR";
 $code=$GLOBALS["code"];
 
@@ -37,15 +34,17 @@ $GLOBALS["suppliers"][$code]=array(
 	"hasPurity" => true, 
 	"excludeTests" => array("emp_formula"), 
 
-"init" => create_function('',getFunctionHeader().'
+"init" => function () use ($code) {
+	eval(getFunctionHeader());
 	$suppliers[$code]["urls"]["server"]="https://de.vwr.com"; // startPage
 	$suppliers[$code]["urls"]["init"]=$urls["server"]."/store/"; // get cookies and _dynSessConf
 	$suppliers[$code]["urls"]["search_form"]=$urls["server"]."/store/search/searchAdv.jsp?tabId=advSearch";
 	$suppliers[$code]["urls"]["search"]=$urls["server"]."/store/product?view=list&pageSize=64&";
 	$suppliers[$code]["urls"]["detail"]=$urls["server"]."/store/catalog/product.jsp?catalog_number=";
 	$suppliers[$code]["urls"]["startPage"]=$urls["server"];
-'),
-"requestResultList" => create_function('$query_obj',getFunctionHeader().'
+},
+"requestResultList" => function ($query_obj) use ($code) {
+	eval(getFunctionHeader());
 	$retval["method"]="post";
 	$retval["action"]=$urls["search"];
 	$fields=array(
@@ -90,14 +89,16 @@ $GLOBALS["suppliers"][$code]=array(
 		"fields" => $fields
 	);
 	return $retval;
-'),
-"getDetailPageURL" => create_function('$catNo',getFunctionHeader().'
+},
+"getDetailPageURL" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	if (empty($catNo)) {
 		return;
 	}
 	return $urls["detail"].$catNo."&referrer=enventory";
-'),
-"getInfo" => create_function('$catNo',getFunctionHeader().'
+},
+"getInfo" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	$url=$self["getDetailPageURL"]($catNo);
 	if (empty($url)) {
 		return $noConnection;
@@ -109,8 +110,9 @@ $GLOBALS["suppliers"][$code]=array(
 		return $noConnection;
 	}
 	return $self["procDetail"]($response,$catNo);
-'),
-"getHitlist" => create_function('$searchText,$filter,$mode="ct",$paramHash=array()',getFunctionHeader().'
+},
+"getHitlist" => function ($searchText,$filter,$mode="ct",$paramHash=array()) use ($code) {
+	eval(getFunctionHeader());
 	$url=$urls["search"];
 	if ($filter=="cas_nr") {
 		$url.="casNum=";
@@ -130,8 +132,9 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	
 	return $self["procHitlist"]($response);
-'),
-"procDetail" => create_function('& $response,$catNo=""',getFunctionHeader().'
+},
+"procDetail" => function (& $response,$catNo="") use ($code) {
+	eval(getFunctionHeader());
 	$body=@$response->getBody();
 	$body=str_replace(array("\t","\n","\r"),"",$body);
 	if (strpos($body,"Fehlermeldung")!==FALSE) {
@@ -269,8 +272,9 @@ $GLOBALS["suppliers"][$code]=array(
 	$result["supplierCode"]=$code;
 	$result["catNo"]=$catNo;
 	return $result;
-'),
-"getResult" => create_function('$description',getFunctionHeader().'
+},
+"getResult" => function ($description) use ($code) {
+	eval(getFunctionHeader());
 	$retval=array();
 	if (preg_match("/(.*?),? ([\d\,\.]+)?%? *(\d+) *\* *([\d\,\.]+) *([a-zA-Z]+)/",$description,$preg_data)) {
 		$retval["name"]=fixTags($preg_data[1]);
@@ -284,14 +288,16 @@ $GLOBALS["suppliers"][$code]=array(
 		$retval["amount_unit"]="package";
 	}
 	return $retval;
-'),
-"applyPrice" => create_function('& $entry,$priceStr',getFunctionHeader().'
+},
+"applyPrice" => function (& $entry,$priceStr) use ($code) {
+	eval(getFunctionHeader());
 	$entry["price"][0]=array(
 		"supplier" => $code
 	);
 	list(,$entry["price"][0]["price"],$entry["price"][0]["currency"])=getRange(fixCurrency(trimNbsp($priceStr)));
-'),
-"procHitlist" => create_function('& $response',getFunctionHeader().'
+},
+"procHitlist" => function (& $response) use ($code) {
+	eval(getFunctionHeader());
 	$body=$response->getBody();
 	if (strpos($body,"did not match any products")===FALSE) {
 		// find price call
@@ -343,14 +349,14 @@ $GLOBALS["suppliers"][$code]=array(
 		// print_r($result);
 		return $result;
 	}
-'),
-"getBestHit" => create_function('& $hitlist,$name=NULL','
+},
+"getBestHit" => function (& $hitlist,$name=NULL) use ($code) {
 	if (count_compat($hitlist)>0) {
 		return 0;
 	}
-'),
+},
 // numbers formatted in an idiotic way
-"getNumber" => create_function('$str','
+"getNumber" => function ($str) use ($code) {
 	$retval=trim(str_replace(array(".",","),array("","."),strip_tags($str)));
 	if ($retval==="") {
 		return "";
@@ -362,7 +368,7 @@ $GLOBALS["suppliers"][$code]=array(
 		$retval+=0.0;
 	}
 	return $retval;
-')
+},
 );
 $GLOBALS["suppliers"][$code]["init"]();
 ?>

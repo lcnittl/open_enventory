@@ -32,19 +32,22 @@ $GLOBALS["suppliers"][$code]=array(
 	"vendor" => true, 
 	"hasPriceList" => 3, 
 	
-"init" => create_function('',getFunctionHeader().'
+"init" => function () use ($code) {
+	eval(getFunctionHeader());
 	$suppliers[$code]["urls"]["server"]="https://www.abcr.de"; // startPage
 	$suppliers[$code]["urls"]["search"]=$urls["server"]."/shop/en/catalogsearch/advanced/result/?limit=50&mode=extendedlist&";
 	$suppliers[$code]["urls"]["detail"]=$urls["server"]."/shop/en/";
 	$suppliers[$code]["urls"]["startPage"]=$urls["server"];
-'),
-"requestResultList" => create_function('$query_obj',getFunctionHeader().'
+},
+"requestResultList" => function ($query_obj) use ($code) {
+	eval(getFunctionHeader());
 	$retval["method"]="url";
 	$retval["action"]=$self["getSearchURL"]($query_obj["vals"][0][0],$query_obj["crits"][0]);
 	
 	return $retval;
-'),
-"getSearchURL" => create_function('$searchText,$filter',getFunctionHeader().'
+},
+"getSearchURL" => function ($searchText,$filter) use ($code) {
+	eval(getFunctionHeader());
 	$retval=$urls["search"];
 	if ($filter=="cas_nr") {
 		$retval.="cas=";
@@ -56,14 +59,16 @@ $GLOBALS["suppliers"][$code]=array(
 		$retval.="name=";
 	}
 	return $retval.$searchText."&referrer=enventory";
-'),
-"getDetailPageURL" => create_function('$catNo',getFunctionHeader().'
+},
+"getDetailPageURL" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	if (empty($catNo)) {
 		return;
 	}
 	return $urls["detail"].$catNo."/?referrer=enventory";
-'),
-"getInfo" => create_function('$catNo',getFunctionHeader().'
+},
+"getInfo" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	$url=$self["getDetailPageURL"]($catNo);
 	if (empty($url)) {
 		return $noConnection;
@@ -77,8 +82,9 @@ $GLOBALS["suppliers"][$code]=array(
 	
 	$body=@$response->getBody();
 	return $self["procDetail"]($response,$catNo);
-'),
-"getHitlist" => create_function('$searchText,$filter,$mode="ct",$paramHash=array()',getFunctionHeader().'
+},
+"getHitlist" => function ($searchText,$filter,$mode="ct",$paramHash=array()) use ($code) {
+	eval(getFunctionHeader());
 	$my_http_options=$default_http_options;
 	$url=$self["getSearchURL"]($searchText,$filter);
 	$response=@oe_http_get($url,$my_http_options);
@@ -87,8 +93,9 @@ $GLOBALS["suppliers"][$code]=array(
 		return $noConnection;
 	}
 	return $self["procHitlist"]($response);
-'),
-"procDetail" => create_function('& $response,$catNo=""',getFunctionHeader().'
+},
+"procDetail" => function (& $response,$catNo="") use ($code) {
+	eval(getFunctionHeader());
 	$body=@$response->getBody();
 	cutRange($body,"id=\"product_addtocart_form\"","class=\"contact\"");
 	
@@ -198,8 +205,9 @@ $GLOBALS["suppliers"][$code]=array(
 	//~ var_dump($result);
 	
 	return $result;
-'),
-"procHitlist" => create_function('& $response',getFunctionHeader().'
+},
+"procHitlist" => function (& $response) use ($code) {
+	eval(getFunctionHeader());
 	$body=utf8_decode(@$response->getBody());
 	cutRange($body,"id=\"search-result-categories\"","class=\"footer-wrap\"");
 	
@@ -254,12 +262,12 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	
 	return $results;
-'),
-"getBestHit" => create_function('& $hitlist,$name=NULL','
+},
+"getBestHit" => function (& $hitlist,$name=NULL) use ($code) {
 	if (count_compat($hitlist)>0) {
 		return 0;
 	}
-')
+},
 );
 $GLOBALS["suppliers"][$code]["init"]();
 ?>

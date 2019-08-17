@@ -31,20 +31,24 @@ $GLOBALS["suppliers"][$code]=array(
 	"height" => 50, 
 	"vendor" => false, 
 	"noExtSearch" => true,
-"init" => create_function('',getFunctionHeader().'
+"init" => function () use ($code) {
+	eval(getFunctionHeader());
 	$suppliers[$code]["urls"]["detail"]="edit.php?table=molecule&";
 	$suppliers[$code]["urls"]["search"]="list.php?table=molecule&query=<0>&";
-'),
-"requestResultList" => create_function('$query_obj',getFunctionHeader().'
+},
+"requestResultList" => function ($query_obj) use ($code) {
+	eval(getFunctionHeader());
 	$retval["method"]="get";
 	$retval["action"]=$urls["search"]."crit0=".$query_obj["crits"][0]."&op0=".$query_obj["ops"][0]."&val0=".$query_obj["vals"][0];
 	return $retval;
-'),
-"getDetailPageURL" => create_function('$catNo',getFunctionHeader().'
+},
+"getDetailPageURL" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	list($db_id,$molecule_id)=$self["splitCatNo"]($catNo);
 	return $urls["detail"]."dbs=".$db_id."&crit0=molecule.molecule_id&op0=ex&val0=".$molecule_id;
-'),
-"getInfo" => create_function('$catNo',getFunctionHeader().' // format catNo (db_id+1)_(molecule_id)
+},
+"getInfo" => function ($catNo) use ($code) { // format catNo (db_id+1)_(molecule_id)
+	eval(getFunctionHeader());
 	list($db_id,$molecule_id)=$self["splitCatNo"]($catNo);
 	list($result)=mysql_select_array(array(
 		"table" => "molecule", 
@@ -60,8 +64,9 @@ $GLOBALS["suppliers"][$code]=array(
 	
 	// Daten zurückgeben, Format dürfte schon stimmen
 	return $result;
-'),
-"getHitlist" => create_function('$searchText,$filter,$mode="ct",$paramHash=array()',getFunctionHeader().'
+},
+"getHitlist" => function ($searchText,$filter,$mode="ct",$paramHash=array()) use ($code) {
+	eval(getFunctionHeader());
 	// in allen Datenbanken entsprechenden Suchbegriff suchen
 	addWildcards($searchText,$mode,"%");
 	$filterText=$filter."=".fixStrSQL($searchText);
@@ -88,26 +93,26 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	// Daten zurückgeben, Format dürfte schon stimmen
 	return $results;
-'),
-"fixMSDS" => create_function('& $result','
+},
+"fixMSDS" => function (& $result) use ($code) {
 	if (!empty($result["default_safety_sheet_url"])) {
 		$result["default_safety_sheet_url"]="-".$result["default_safety_sheet_url"];
 	}
 	if (!empty($result["alt_default_safety_sheet_url"])) {
 		$result["alt_default_safety_sheet_url"]="-".$result["alt_default_safety_sheet_url"];
 	}
-'),
-"getBestHit" => create_function('& $hitlist,$name=NULL','
+},
+"getBestHit" => function (& $hitlist,$name=NULL) use ($code) {
 	if (count_compat($hitlist)>0) {
 		return 0;
 	}
-'),
-"splitCatNo" => create_function('$catNo','
+},
+"splitCatNo" => function ($catNo) use ($code) {
 	list($db_id,$molecule_id)=explode("_",$catNo,2);
 	$db_id--;
 	$molecule_id+=0;
 	return array($db_id,$molecule_id);
-') 
+}, 
 );
 //~ $suppliers[$code]["init"]();
 $GLOBALS["suppliers"][$code]["init"]();

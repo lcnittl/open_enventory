@@ -41,20 +41,23 @@ $GLOBALS["suppliers"][$code]=array(
 		"molecule_name" => "N",
 	),
 	
-"init" => create_function('',getFunctionHeader().'
+"init" => function () use ($code) {
+	eval(getFunctionHeader());
 	$suppliers[$code]["urls"]["server"]="https://www.fluorochem.co.uk"; // startPage
 	$suppliers[$code]["urls"]["search"]=$urls["server"]."/Products/Search";
 	$suppliers[$code]["urls"]["detail"]=$urls["server"]."/Products/Product?code=";
 	$suppliers[$code]["urls"]["startPage"]=$urls["server"];
-'),
-"getPostParams" => create_function('$searchText,$crit',getFunctionHeader().'
+},
+"getPostParams" => function ($searchText,$crit) use ($code) {
+	eval(getFunctionHeader());
 	return array(
 		//~ "chkShowPrices" => "true", 
 		"lstSearchType" => $self["search_type_codes"][$crit],
 		"txtSearchText" => $searchText, 
 	);
-'),
-"requestResultList" => create_function('$query_obj',getFunctionHeader().'
+},
+"requestResultList" => function ($query_obj) use ($code) {
+	eval(getFunctionHeader());
 	$retval["method"]="post";
 	$retval["action"]=$urls["search"];
 	$fields=$self["getPostParams"]($query_obj["vals"][0][0],$query_obj["crits"][0]);
@@ -64,14 +67,15 @@ $GLOBALS["suppliers"][$code]=array(
 		"fields" => $fields
 	);
 	return $retval;
-'),
-"getDetailPageURL" => create_function('$catNo',getFunctionHeader().'
+},
+"getDetailPageURL" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	if (empty($catNo)) {
 		return;
 	}
 	return $urls["detail"].$catNo."&referrer=enventory";
-'),
-"getClauses" => create_function('$html,$type','
+},
+"getClauses" => function ($html,$type) use ($code) {
 	$clauses=array();
 	$rows=explode("<br",$html);
 	if (is_array($rows)) foreach ($rows as $row) {
@@ -83,8 +87,9 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	
 	return str_replace(array(" ",$type,),"",implode("-",$clauses));
-'),
-"getInfo" => create_function('$catNo',getFunctionHeader().'
+},
+"getInfo" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	$url=$self["getDetailPageURL"]($catNo);
 	if (empty($url)) {
 		return $noConnection;
@@ -98,8 +103,9 @@ $GLOBALS["suppliers"][$code]=array(
 	
 	$body=@$response->getBody();
 	return $self["procDetail"]($response,$catNo);
-'),
-"getHitlist" => create_function('$searchText,$filter,$mode="ct",$paramHash=array()',getFunctionHeader().'
+},
+"getHitlist" => function ($searchText,$filter,$mode="ct",$paramHash=array()) use ($code) {
+	eval(getFunctionHeader());
 	$fields=$self["getPostParams"]($searchText,$filter);
 	$my_http_options=$default_http_options;
 	$response=@oe_http_post_fields($urls["search"],$fields,array(),$my_http_options);
@@ -108,8 +114,9 @@ $GLOBALS["suppliers"][$code]=array(
 		return $noConnection;
 	}
 	return $self["procHitlist"]($response);
-'),
-"procDetail" => create_function('& $response,$catNo=""',getFunctionHeader().'
+},
+"procDetail" => function (& $response,$catNo="") use ($code) {
+	eval(getFunctionHeader());
 	$body=@$response->getBody();
 	cutRange($body,"<span[^>]+class=\"pageHeader\"","class=\"clearer\"");
 	
@@ -232,8 +239,9 @@ $GLOBALS["suppliers"][$code]=array(
 	//~ var_dump($result);
 	
 	return $result;
-'),
-"procHitlist" => create_function('& $response',getFunctionHeader().'
+},
+"procHitlist" => function (& $response) use ($code) {
+	eval(getFunctionHeader());
 	$body=utf8_decode(@$response->getBody());
 	cutRange($body,"id=\"searchResults\"","id=\"loadingMessage\"");
 	
@@ -258,12 +266,12 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	
 	return $results;
-'),
-"getBestHit" => create_function('& $hitlist,$name=NULL','
+},
+"getBestHit" => function (& $hitlist,$name=NULL) use ($code) {
 	if (count_compat($hitlist)>0) {
 		return 0;
 	}
-')
+},
 );
 $GLOBALS["suppliers"][$code]["init"]();
 ?>

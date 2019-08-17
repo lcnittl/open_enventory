@@ -32,22 +32,26 @@ $GLOBALS["suppliers"][$code]=array(
 	"vendor" => true, 
 	"hasPriceList" => 2, 
 	"catalogHierarchy" => 1,
-"init" => create_function('',getFunctionHeader().'
+"init" => function () use ($code) {
+	eval(getFunctionHeader());
 	$suppliers[$code]["urls"]["startPage"]="https://www.itwreagents.com"; // startPage
 	$suppliers[$code]["urls"]["search"]=$urls["startPage"]."/germany/en/product/search?term=";
 	$suppliers[$code]["urls"]["detail"]=$urls["startPage"]."/germany/en/product/_/";
 	$suppliers[$code]["urls"]["msds"]=$urls["startPage"]."/germany/en/sds_ajax?productId=";
-'),
-"requestResultList" => create_function('$query_obj',getFunctionHeader().'
+},
+"requestResultList" => function ($query_obj) use ($code) {
+	eval(getFunctionHeader());
 	$retval["method"]="url";
 	$retval["action"]=$suppliers[$code]["urls"]["search"].$query_obj["vals"][0][0];
 	
 	return $retval;
-'),
-"getDetailPageURL" => create_function('$catNo',getFunctionHeader().'
+},
+"getDetailPageURL" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	return $urls["detail"].$catNo."?referrer=enventory";
-'),
-"getInfo" => create_function('$catNo',getFunctionHeader().'
+},
+"getInfo" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	$url=$self["getDetailPageURL"]($catNo);
 	if (empty($url)) {
 		return $noConnection;
@@ -61,8 +65,9 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 
 	return $self["procDetail"]($response,$catNo);
-'),
-"getHitlist" => create_function('$searchText,$filter,$mode="ct",$paramHash=array()',getFunctionHeader().'
+},
+"getHitlist" => function ($searchText,$filter,$mode="ct",$paramHash=array()) use ($code) {
+	eval(getFunctionHeader());
 	$url=$urls["search"].urlencode($searchText);
 	$my_http_options=$default_http_options;
 	$my_http_options["redirect"]=maxRedir;
@@ -72,8 +77,9 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 
 	return $self["procHitlist"]($response);
-'),
-"procDetail" => create_function('& $response,$catNo=""',getFunctionHeader().'
+},
+"procDetail" => function (& $response,$catNo="") use ($code) {
+	eval(getFunctionHeader());
 	global $lang,$default_http_options;
 	
 	$body=html_entity_decode(@$response->getBody(),ENT_QUOTES,"UTF-8");
@@ -176,8 +182,9 @@ $GLOBALS["suppliers"][$code]=array(
 	$result["supplierCode"]=$code;
 	$result["catNo"]=$catNo;
 	return $result;
-'),
-"getPrices" => create_function('$catNo',getFunctionHeader().'
+},
+"getPrices" => function ($catNo) use ($code) {
+	eval(getFunctionHeader());
 	$url=$self["getDetailPageURL"]($catNo);
 	if (empty($url)) {
 		return $noConnection;
@@ -268,8 +275,9 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	
 	return $result;
-'),
-"procHitlist" => create_function('& $response',getFunctionHeader().'
+},
+"procHitlist" => function (& $response) use ($code) {
+	eval(getFunctionHeader());
 	$body=@$response->getBody();
 	
 	$results=array();
@@ -297,12 +305,12 @@ $GLOBALS["suppliers"][$code]=array(
 	}
 	//print_r($results);
 	return $results;
-'),
-"getBestHit" => create_function('& $hitlist,$name=NULL','
+},
+"getBestHit" => function (& $hitlist,$name=NULL) use ($code) {
 	if (count_compat($hitlist)>0) {
 		return 0;
 	}
-')
+},
 );
 $GLOBALS["suppliers"][$code]["init"]();
 ?>
