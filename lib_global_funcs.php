@@ -556,7 +556,6 @@ function pageHeader($connectDB=true,$allowLoginForm=true,$autoCloseSession=true,
 		register_shutdown_function("dump_lang_stats");
 	}
 	
-	error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT);
 	if (!ini_get("date.timezone")) {
 		date_default_timezone_set("Europe/Berlin");
 	}

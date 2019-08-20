@@ -26,7 +26,6 @@ require_once "lib_formatting.php";
 require_once "lib_io.php";
 
 //~ pageHeader(true,false); // no longer force login
-error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT);
 
 header("Pragma: public");
 header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
