@@ -417,11 +417,12 @@ define("default_mass_unit","mg");
 define("default_amount_unit","mmol");
 define("default_volume_unit","ml");
 
-function count_compat ($input, $mode = \COUNT_NORMAL) { // Adds PHP>=7.2 compatibility
-	if ($input !== null) {
-		return \count((array)$input, $mode);
+function count_compat ($array_or_countable, $mode = \COUNT_NORMAL) { // Adds PHP>=7.2 compatibility
+	if (is_array($array_or_countable) || $array_or_countable instanceof \Countable) {
+		return \count($array_or_countable, $mode);
 	}
-	return 0;
+
+	return ($array_or_countable === null ? 0 : 1);
 }
 
 ?>
