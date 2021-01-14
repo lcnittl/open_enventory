@@ -62,6 +62,13 @@ refreshInterval*=1000;
 // personInterval*=1000;
 doRefresh();
 </script>
+<script type=\"text/javascript\">
+	function resetBarcode() {
+		field = document.getElementById(\"barcode\");
+		field.value=\"\";
+		setTimeout(function (){ field.focus(); }, 200);
+	}
+</script>
 </head>
 <body onKeypress=\"resetPersonInterval(); \">
 <span id=\"temp\" style=\"display:none\"></span>";
@@ -79,10 +86,10 @@ foreach ($async_fields as $async_field) {
 echo simpleHidden("sess_proof").<<<END
 </form>
 
-<form onSubmit="barcodeRead(getInputValue(&quot;barcode&quot;));return false">
-<input id="barcode"> <span id="status"></span> 
+<form onSubmit="barcodeRead(getInputValue(&quot;barcode&quot;));resetBarcode();return false">
+<input id="barcode" placeholder="barcode" autofocus> <span id="status"></span>
 <input type="button" id="btn_logout" onClick="setActivePerson()" onMouseup="focusInput(&quot;barcode&quot;)" value=
-END
+END  // autofocus in barcode input field has no effect, thus focus is set in resetBarcode()
 .fixStr(s("logout")).<<<END
 > <span id="countdown"></span> <input type="button" id="btn_login" onClick="loginActivePerson()" value=
 END
