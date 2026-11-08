@@ -1,0 +1,128 @@
+/*
+Copyright 2006-2018 Felix Rudolphi and Lukas Goossen
+open enventory is distributed under the terms of the GNU Affero General Public License, see COPYING for details. You can also find the license under http://www.gnu.org/licenses/agpl.txt
+
+open enventory is a registered trademark of Felix Rudolphi and Lukas Goossen. Usage of the name "open enventory" or the logo requires prior written permission of the trademark holders. 
+
+This file is part of open enventory.
+
+open enventory is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+open enventory is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with open enventory.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+function showRSTooltip(obj,type,value) {
+	var iHTML="<div class=\"structureOverlay\">"+procClauses(type,value)+"</div>";
+	showBottomOverlay(obj,iHTML);
+}
+
+function getSymbols(type,strSym,w,h) {
+	var retval="",filename;
+	if (!w) {
+		w=62;
+	}
+	if (!h) {
+		h=61;
+	}
+	if (strSym.indexOf(",")>=0) {
+		var arrSym=strSym.split(",");
+	}
+	else {
+		var arrSym=strSym.split(" ");
+	}
+	for (var b=0,max=arrSym.length;b<max;b++) {
+		var thisSym=arrSym[b];
+		if (!thisSym) {
+			continue;
+		}
+		if (type=="ghs") {
+			thisSym=getNumber(thisSym);
+			filename=a(arrSymURL,thisSym);
+			thisSym="GHS0"+thisSym;
+		}
+		else {
+			filename=a(arrSymURL,thisSym.substr(0,1));
+		}
+		if (filename) {
+			retval+="<img src=\"lib/"+filename+"\" height=\""+h+"\" width=\""+w+"\" align=\"left\""+getTooltipP(thisSym+": "+a(arrSymTooltip,thisSym))+">";
+		}
+	}
+	return retval;
+}
+
+function getSafetyText(type,num) {
+	if (num==undefined || num=="") {
+		return "";
+	}
+	if (num.indexOf("/")==-1 && num.indexOf(".")==-1) {
+		var retval=a(safetyText,type+"simple",parseInt(num)-1);
+		if (retval!="") {
+			return retval;
+		}
+	}
+	return defBlank(a(safetyText,type+"complex",num));
+}
+
+function procClauses(type,data,removeDbl) {
+	var arr=data.split("-"),retval="";
+	if (removeDbl) {
+		arr=array_unique(arr);
+		arr.sort(Numsort);
+	}
+	for (var b=0,max=arr.length;b<max;b++) {
+		if (arr[b]) {
+			retval+=type+" "+arr[b]+": "+getSafetyText(type,arr[b])+"<br>";
+		}
+	}
+	return retval;	
+}
+
+function getSchutzklasseKL(safety_sym,safety_r) {
+	var arrR=safety_r.split("-"),retval=0;
+	if (safety_sym.indexOf(",")>=0) {
+		var arrSym=safety_sym.split(",");
+	}
+	else {
+		var arrSym=safety_sym.split(" ");
+	}
+	// search for cancerogenic, etc
+	for (var b=0,max=arrR.length;b<max;b++) {
+		switch (arrR[b]) {
+		case "39":
+		case "40":
+		case "45":
+		case "46":
+		case "49":
+		case "60":
+		case "61":
+		case "62":
+		case "63":
+			return 4; // can't get higher
+		break;
+		case "29":
+		case "31":
+		case "32":
+		case "23": // giftig
+		case "24":
+		case "25":
+		case "26": // sehr giftig
+		case "27":
+		case "28":
+			retval=3; // can still get higher
+		break;
+		}
+	}
+	if (retval==3 || in_array("T",arrSym) || in_array("T+",arrSym)) {
+		return 3;
+	}
+	return 1;
+}

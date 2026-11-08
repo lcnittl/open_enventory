@@ -1,0 +1,545 @@
+/*
+Copyright 2006-2018 Felix Rudolphi and Lukas Goossen
+open enventory is distributed under the terms of the GNU Affero General Public License, see COPYING for details. You can also find the license under http://www.gnu.org/licenses/agpl.txt
+
+open enventory is a registered trademark of Felix Rudolphi and Lukas Goossen. Usage of the name "open enventory" or the logo requires prior written permission of the trademark holders. 
+
+This file is part of open enventory.
+
+open enventory is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+open enventory is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with open enventory.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+var min_similarity=0.68,amount_tolerance=0.05,highlightColor="lightblue",max_differences=8; // cornflowerblue deepskyblue
+reaction_chemical_lists=["reactants","reagents","products"];
+reaction_chemical_joins={"reactants":["reactants","reagents"],"reagents":["reactants","reagents"],"products":["products"]};
+rc_compares=["all","standard_name","cas_nr","molfile_blob","stoch_coeff","rc_amount"];
+reaction_chemical_compare=["smiles_stereo","cas_nr"];
+reaction_condition_include=["reaction_title"]; // "realization_text","realization_observation",
+reaction_condition_exclude=["fix_stoch","reactants_rc_amount_unit","reactants_mass_unit","reactants_volume_unit","reactants_rc_conc_unit", "products_mass_unit","products_rc_amount_unit","betr_anw_gefahren","betr_anw_schutzmass","betr_anw_verhalten","betr_anw_erste_h","betr_anw_entsorgung"];
+highlighted_fields=[];
+
+function getRefRxnParam() {
+	var retval="";
+	if (ref_reaction) {
+		retval+="&ref_reaction_db_id="+ref_reaction["db_id"]+"&ref_reaction_id="+ref_reaction["reaction_id"];
+	}
+	return retval;
+}
+
+function setRefRxn(desired_action,type,db_id,reaction_id) {
+	switch (desired_action) {
+	case "set":
+		switch (type) {
+		case "edit":
+			db_id=a_db_id;
+			reaction_id=a_pk;
+		break;
+		}
+		compare_status=0;
+		var url="chooseAsync.php?desired_action=loadReactionRef&type="+defBlank(type)+"&ref_reaction_db_id="+db_id+"&ref_reaction_id="+reaction_id;
+		setFrameURL("comm",url);
+		// list.php: reload & display col compare_rxn (which also contains the JSON data for comparison)
+	break;
+	
+	case "reset":
+		ref_reaction=undefined;
+		ref_reaction_diagram="";
+		
+		if (top.sidenav) {
+			top.sidenav.setiHTML("ref_reaction","");
+			if (top.searchBottom && top.searchBottom.showControl) { //  && is_function(top.searchBottom.showControl)
+				top.searchBottom.setiHTML("ref_reaction","");
+				top.searchBottom.showControl("ref_reaction",false);
+			}
+		}
+		switch (type) {
+		case "edit":
+			applyComparisonList(type);
+		break;
+		case "list":
+			activateView();
+		break;
+		}
+	break;
+	}
+}
+
+function assignReactionChemical(ref_list_int_name,ref_pos,list_int_name,pos,sameStruc) {
+	var amount_diff;
+	
+	this.reaction_ref[ref_list_int_name][ref_pos]["used"]=true;
+	this.reaction[list_int_name][pos]["found"]=true;
+	
+	// compare amount
+	this.reaction_chemical_diff[list_int_name][pos]["rc_amount"]=tolCompare(amount_tolerance,this.reaction_ref[ref_list_int_name][ref_pos]["rc_amount"]*getUnitFactor(this.reaction_ref[ref_list_int_name][ref_pos]["rc_amount_unit"]),this.reaction[list_int_name][pos]["rc_amount"]*getUnitFactor(this.reaction[list_int_name][pos]["rc_amount_unit"]));
+	if (this.reaction_chemical_diff[list_int_name][pos]["rc_amount"]==1) {
+		this.reaction_chemical_diff[list_int_name][pos]["stoch_coeff"]=tolCompare(amount_tolerance,this.reaction_ref[ref_list_int_name][ref_pos]["stoch_coeff"],this.reaction[list_int_name][pos]["stoch_coeff"]);
+	}
+	
+	if (this.reaction_chemical_diff[list_int_name][pos]["rc_amount"]==1 || this.reaction_chemical_diff[list_int_name][pos]["stoch_coeff"]==1) {
+		amount_diff=true;
+	}
+	else if (sameStruc) {
+		return;
+	}
+	
+	if (sameStruc) {
+		this.diff_text+="<li>";
+		this.diff_text+=compareGetName(this.reaction,list_int_name,pos);
+		this.diff_text+=": "+formatAmount(this.reaction[list_int_name][pos])+" "+s("instead_of")+" "+formatAmount(this.reaction_ref[ref_list_int_name][ref_pos])+"</li>";
+	}
+	else {
+		this.reaction_chemical_diff[list_int_name][pos]["standard_name"]=1;
+		this.reaction_chemical_diff[list_int_name][pos]["cas_nr"]=1;
+		this.reaction_chemical_diff[list_int_name][pos]["molfile_blob"]=1;
+		
+		this.diff_text+="<li>"+compareGetName(this.reaction,list_int_name,pos)+" ";
+		if (amount_diff) {
+			this.diff_text+=formatAmount(this.reaction[list_int_name][pos])+" ";
+		}
+		this.diff_text+=s("instead_of")+" "+compareGetName(this.reaction_ref,ref_list_int_name,ref_pos);
+		if (amount_diff) {
+			this.diff_text+=" "+formatAmount(this.reaction_ref[ref_list_int_name][ref_pos]);
+		}
+		this.diff_text+="</li>";
+	}
+	this.diff_count++;
+}
+
+function compareReactionChemical(ref_list_int_name,ref_pos,list_int_name,pos) {
+	var var1,var2,compare;
+	for (var comp=0,max_comp=reaction_chemical_compare.length;comp<max_comp;comp++) {
+		compare=reaction_chemical_compare[comp];
+		var1=this.reaction_ref[ref_list_int_name][ref_pos][compare];
+		var2=this.reaction[list_int_name][pos][compare];
+		
+		if (isEmptyStr(var1)) {
+			continue;
+		}
+		if (var1==var2) {
+			this.assignReactionChemical(ref_list_int_name,ref_pos,list_int_name,pos,true);
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	return false;
+}
+
+function formatAmount(rc) {
+	return rxnRound(rc["rc_amount"])+"&nbsp;"+rc["rc_amount_unit"]+ifnotempty(" (",rxnRound(rc["stoch_coeff"]),"&nbsp;eq)")
+}
+
+function compareGetName(reaction,list_int_name,pos) {
+	if (reaction[list_int_name][pos]["standard_name"]) {
+		return reaction[list_int_name][pos]["standard_name"];
+	}
+	else {
+		return getRCname(list_int_name)+" "+(pos+1)+ifnotempty(" (",getBeautySum(reaction[list_int_name][pos]["emp_formula"]),")");
+	}
+}
+
+function tolCompare(tolerance,val1,val2) {
+	val1=def0(parseFloat(val1));
+	val2=def0(parseFloat(val2));
+	if (val1==val2) {
+		return 0;
+	}
+	if (val1==0 || val2==0) {
+		return 1;
+	}
+	return ((Math.abs(val1-val2)/val1>tolerance)?1:0);
+}
+
+function getDisableCmpButton() {
+	return "<a href=\"Javascript:setRefRxn(&quot;reset&quot;,&quot;"+this.type+"&quot;); \"><img src=\"lib/del_sm.png\" border=\"0\""+getTooltip("compare_rxn_disable")+"></a>";
+}
+
+function performCompare() { // compare 1 reaction object to reference
+	this.diff_text="";
+	
+	if (this.reaction_ref["db_id"]==this.reaction["db_id"] && this.reaction_ref["reaction_id"]==this.reaction["reaction_id"]) {
+		this.diagram="<table class=\"diagram_table\"><tbody><tr><td>"+this.getDisableCmpButton()+"</td><td style=\"width:"+(bar_width+5)+"px\">"+s("reference_reaction")+"</td><td style=\"width:"+(bar_width+5)+"px\">"+ref_reaction_diagram+"</td></tr></tbody></table>"; // todo: show different products in diagram?
+		this.is_reference=true;
+		return;
+	}
+	this.diagram="<table class=\"diagram_table\"><tbody><tr><td>"+this.getDisableCmpButton()+"</td><td style=\"width:"+(bar_width+5)+"px\">"+getGraphicalYield(this.reaction["products"])+"</td><td style=\"width:"+(bar_width+5)+"px\">"+ref_reaction_diagram+"</td></tr></tbody></table>"; // todo: show different products in diagram?
+	this.is_reference=false;
+	this.diff_text+="<ul class=\"compare_rxn\">";
+	this.diff_count=0;
+	
+	// conditions
+	var reaction_chemical_list,reaction_chemical_join,compare_condition,compare_condition2,compare_conditions=array_unique(array_diff(arr_merge(this.reaction_ref["reaction_property"],this.reaction["reaction_property"],reaction_condition_include),reaction_condition_exclude)),additional=[],missing=[];
+	
+	for (var b=0,max=compare_conditions.length;b<max;b++) {
+		compare_condition=compare_conditions[b];
+		switch (compare_condition) {
+		// fine tune comparison here
+		case "ref_amount_unit":
+		break;
+		case "ref_amount":
+			compare_condition2="ref_amount_unit";
+			if (tolCompare(amount_tolerance,this.reaction_ref[compare_condition]*getUnitFactor(this.reaction_ref[compare_condition2]),this.reaction[compare_condition]*getUnitFactor(this.reaction[compare_condition2]))) {
+				this.diff_list.push(compare_condition);
+				this.diff_text+="<li>"+ifnotempty("",s(compare_condition),": ")+defBlank(this.reaction[compare_condition])+" "+defBlank(this.reaction[compare_condition2])+" "+s("instead_of")+" "+defBlank(this.reaction_ref[compare_condition])+" "+defBlank(this.reaction_ref[compare_condition2])+"</li>";
+				this.diff_count++;
+			}
+		break;
+		default:
+			if (defBlank(this.reaction_ref[compare_condition])!=defBlank(this.reaction[compare_condition])) {
+				this.diff_list.push(compare_condition);
+				this.diff_text+="<li>"+ifnotempty("",s(compare_condition),": ")+defBlank(this.reaction[compare_condition])+" "+s("instead_of")+" "+defBlank(this.reaction_ref[compare_condition])+"</li>";
+				this.diff_count++;
+			}
+		}
+	}
+	
+	// create dummy objects if necessary
+	for (var b=0,max=reaction_chemical_lists.length;b<max;b++) {
+		reaction_chemical_list=reaction_chemical_lists[b];
+		
+		if (!this.reaction_chemical_diff[reaction_chemical_list]) {
+			this.reaction_chemical_diff[reaction_chemical_list]=[];
+		}
+		if (!this.reaction[reaction_chemical_list]) {
+			this.reaction[reaction_chemical_list]=[];
+		}
+		for (var c=0,max2=this.reaction[reaction_chemical_list].length;c<max2;c++) { // reset as object is referenced
+			this.reaction[reaction_chemical_list][c]["found"]=false;
+		}
+		if (!this.reaction_ref[reaction_chemical_list]) {
+			this.reaction_ref[reaction_chemical_list]=[];
+		}
+		for (var d=0,max3=this.reaction_ref[reaction_chemical_list].length;d<max3;d++) { // reset as object is referenced
+			this.reaction_ref[reaction_chemical_list][d]["used"]=false;
+		}
+	}
+	
+	// components
+	// A same place same structure
+	var max3,struc_changed=false;
+	for (var b=0,max=reaction_chemical_lists.length;b<max;b++) {
+		reaction_chemical_list=reaction_chemical_lists[b];
+		max3=this.reaction_ref[reaction_chemical_list].length;
+		
+		for (var c=0,max2=this.reaction[reaction_chemical_list].length;c<max2;c++) {
+			this.reaction_chemical_diff[reaction_chemical_list][c]=[]; // init here
+			
+			if (c<max3) {
+				this.compareReactionChemical(reaction_chemical_list,c,reaction_chemical_list,c);
+			}
+		}
+	}
+	
+	// B different place, same structure
+	for (var b=0,max=reaction_chemical_lists.length;b<max;b++) {
+		reaction_chemical_list=reaction_chemical_lists[b];
+		
+		for (var c=0,max2=this.reaction[reaction_chemical_list].length;c<max2;c++) {
+			if (this.reaction[reaction_chemical_list][c]["found"]) {
+				continue;
+			}
+			reaction_chemical_join_loop: for (var e=0,max4=reaction_chemical_joins[reaction_chemical_list].length;e<max4;e++) {
+				reaction_chemical_join=reaction_chemical_joins[reaction_chemical_list][e];
+				
+				for (var d=0,max3=this.reaction_ref[reaction_chemical_join].length;d<max3;d++) {
+					if (this.reaction_ref[reaction_chemical_join][d]["used"]) {
+						continue;
+					}
+					if (this.compareReactionChemical(reaction_chemical_join,d,reaction_chemical_list,c)) {
+						break reaction_chemical_join_loop;
+					}
+				}
+			}
+		}
+	}
+	
+	// C same place, similar formula
+	for (var b=0,max=reaction_chemical_lists.length;b<max;b++) {
+		reaction_chemical_list=reaction_chemical_lists[b];
+		
+		for (var c=0,max2=Math.min(this.reaction[reaction_chemical_list].length,this.reaction_ref[reaction_chemical_list].length);c<max2;c++) {
+			if (this.reaction[reaction_chemical_list][c]["found"] || this.reaction_ref[reaction_chemical_list][c]["used"]) {
+				continue;
+			}
+			if (0.9*getSumFormulaSimilarity(this.reaction_ref[reaction_chemical_list][c]["emp_formula"],this.reaction[reaction_chemical_list][c]["emp_formula"])>min_similarity) {
+				this.assignReactionChemical(reaction_chemical_list,c,reaction_chemical_list,c,false);
+			}
+		}
+	}
+	
+	// D no match
+	for (var b=0,max=reaction_chemical_lists.length;b<max;b++) {
+		reaction_chemical_list=reaction_chemical_lists[b];
+		
+		for (var c=0,max2=this.reaction[reaction_chemical_list].length;c<max2;c++) {
+			if (!this.reaction[reaction_chemical_list][c]["found"]) {
+				this.reaction_chemical_diff[reaction_chemical_list][c]["all"]=1;
+				this.reaction_chemical_diff[reaction_chemical_list][c]["molfile_blob"]=1;
+				this.reaction_chemical_diff[reaction_chemical_list][c]["stoch_coeff"]=1;
+				this.reaction_chemical_diff[reaction_chemical_list][c]["rc_amount"]=1;
+				additional.push(compareGetName(this.reaction,reaction_chemical_list,c)+" "+formatAmount(this.reaction[reaction_chemical_list][c]) );
+			}
+		}
+	}
+	
+	// E unmatched
+	for (var b=0,max=reaction_chemical_lists.length;b<max;b++) {
+		reaction_chemical_list=reaction_chemical_lists[b];
+		for (var d=0,max3=this.reaction_ref[reaction_chemical_list].length;d<max3;d++) {
+			if (!this.reaction_ref[reaction_chemical_list][d]["used"]) {
+				missing.push(compareGetName(this.reaction_ref,reaction_chemical_list,d));
+			}
+		}
+	}
+	
+	this.diff_count+=additional.length+missing.length;
+	
+	if (this.diff_count==0) {
+		this.diff_text=s("identical"); // this.getDisableCmpButton()+
+	}
+	else if (this.diff_count>max_differences) {
+		this.diff_text=s("fundamentally_different"); // this.getDisableCmpButton()+
+		this.diff_list=[];
+		this.reaction_chemical_diff=[];
+	}
+	else {
+		if (additional.length) {
+			this.diff_text+="<li>"+s("additional1")+" "+additional.join(", ")+" "+s("additional2")+"</li>";
+			struc_changed=true;
+		}
+		if (missing.length) {
+			this.diff_text+="<li>"+s("missing1")+" "+missing.join(", ")+" "+s("missing2")+"</li>";
+			struc_changed=true;
+		}
+	}
+	
+	if (struc_changed) {
+		this.diff_list.push("rxn_structure");
+	}
+	
+	// analytics: maybe later
+	this.diff_text+="</ul>";
+}
+
+function setCompare(comp_reaction) { // compare 1 reaction object to reference
+	this.reaction=comp_reaction;
+	this.diff_text="";
+	this.diagram="";
+	this.diff_notice=""; // less relevant information
+	this.diff_list=[];
+	this.reaction_chemical_diff=[];
+	if (this.reaction_ref) { // otherwise doing reset
+		this.performCompare();
+	}
+}
+
+function reaction_comparison(reference_reaction,type) {
+	this.reaction_ref=reference_reaction; // obj
+	this.diagram=getGraphicalYield(a(reference_reaction,"products"));
+	this.is_reference=false;
+	this.type=type;
+	this.getDisableCmpButton=getDisableCmpButton;
+	this.diff_count=0;
+	this.assignReactionChemical=assignReactionChemical;
+	this.compareReactionChemical=compareReactionChemical;
+	this.performCompare=performCompare;
+	this.setCompare=setCompare;
+}
+
+function listGetId(idx,col,index,sub_item) {
+	return col+ifnotempty("_",index)+ifnotempty("_",sub_item)+"_"+idx;
+}
+
+function cmpUnhighlight(id) { // idx,col,index,sub_item
+	var obj=$(id); // listGetId(idx,col,index,sub_item)
+	if (obj) {
+		obj.style.backgroundColor="";
+	}
+}
+
+function idHighlight(id) {
+	var obj=$(id);
+	if (obj) {
+		obj.style.backgroundColor=highlightColor;
+		highlighted_fields.push(id);
+	}
+}
+
+function editHighlight(int_name) {
+	idHighlight(int_name);
+	idHighlight("ro_"+int_name);
+}
+
+function SILHighlight(list_int_name,UID,int_name) {
+	editHighlight(SILgetObjName(list_int_name,UID,int_name));
+}
+
+function listHighlight(idx,col,index,sub_item) {
+	idHighlight(listGetId(idx,col,index,sub_item));
+}
+
+function getYieldBar(value,title,color,style) { // very simplified compared to the resp PHP
+	if (value<=0 || isNaN(value)) {
+		return "";
+	}
+	
+	var borderWidth=1,borderStyle="solid";
+	
+	switch (style) {
+	case 2:
+		borderStyle="dotted";
+	break;
+	case 3:
+		borderWidth=2;
+	break;
+	}
+	
+	var width=bar_width*value*0.01-borderWidth*2;
+	return "<td class=\"diagram\" title="+fixStr(title)+" style=\"width:"+width+"px;min-width:"+width+"px;height:"+bar_height+"px;background-color:"+color+";border:"+borderWidth+"px "+borderStyle+" black\">&nbsp;</td>";
+}
+
+function getGraphicalYield(products) {
+	var retval="",yield_text=" ("+s("diagram_yield")+") : ",gc_yield_text=" ("+s("diagram_gc_yield")+") : ",product_text=s("product");
+	
+	if (!products) {
+		return retval;
+	}
+	
+	for (var b=0,max=products.length;b<max;b++) {
+		retval+="<table cellspacing=0 class=\"diagram\"><tbody><tr>";
+		var this_yield=parseFloat(products[b]["yield"]),this_gc_yield=parseFloat(products[b]["gc_yield"]);
+		var product_name=ifempty(products[b]["standard_name"],product_text+" "+(b+1));
+		if (this_yield>this_gc_yield || isNaN(this_yield)) {
+			retval+=
+				getYieldBar(this_gc_yield,product_name+gc_yield_text+yieldFmt(this_gc_yield),diagram_colors[b],2)+
+				getYieldBar(this_yield-this_gc_yield,product_name+yield_text+yieldFmt(this_yield),diagram_colors[b],3);
+		}
+		else {
+			retval+=
+				getYieldBar(this_yield,product_name+yield_text+yieldFmt(this_yield),diagram_colors[b],3)+
+				getYieldBar(this_gc_yield-this_yield,product_name+gc_yield_text+yieldFmt(this_gc_yield),diagram_colors[b],2);
+		}
+		retval+="</tr></tbody></table>";
+	}
+	return retval;
+}
+
+function applyComparisonList(type) {
+	// check conditions
+	switch (type) {
+	case "edit":
+		var comparison=new reaction_comparison(ref_reaction,type),UID,id,diagram="";
+		comparison.setCompare(a(dataCache,a_db_id,a_pk));
+		
+		// unhighlight all
+		for (var b=0,max=highlighted_fields.length;b<max;b++) {
+			cmpUnhighlight(highlighted_fields[b]);
+		}
+		highlighted_fields.length=0;
+		
+		setiHTML("compare_rxn_td",comparison.diagram+comparison.diff_text); // Text
+		
+		if (comparison.is_reference==true) {
+			return;
+		}
+		
+		// highlight diffs
+		for (var c=0,max2=comparison.diff_list.length;c<max2;c++) {
+			editHighlight(comparison.diff_list[c]);
+		}
+		
+		// reaction_chemical
+		for (var e=0,max4=reaction_chemical_lists.length;e<max4;e++) { // Listen durchgehen
+			reaction_chemical_list=reaction_chemical_lists[e];
+			if (!comparison.reaction_chemical_diff[reaction_chemical_list]) {
+				continue;
+			}
+			
+			for (var c=0,max2=comparison.reaction[reaction_chemical_list].length;c<max2;c++) { // diese Liste (zB Edukte) durchgehen
+				if (!comparison.reaction_chemical_diff[reaction_chemical_list][c]) {
+					continue;
+				}
+				
+				UID=SILgetUID(reaction_chemical_list,c);
+				
+				for (var d=0,max3=rc_compares.length;d<max3;d++) { // Kriterien durchgehen
+					rc_compare=rc_compares[d];
+					if (comparison.reaction_chemical_diff[reaction_chemical_list][c][rc_compare]==1) {
+						//~ if (rc_compare=="all") {
+							//~ rc_compare=undefined;
+						//~ }
+						if (rc_compare=="molfile_blob") {
+							id=SILgetObjName(reaction_chemical_list,UID,rc_compare);
+							idHighlight("img"+id);
+							idHighlight("img_ro_"+id);
+						}
+						else {
+							SILHighlight(reaction_chemical_list,UID,rc_compare);
+						}
+					}
+				}
+			}
+		}
+		
+	break;
+	case "list":
+		if (compare_status==1) { // done already
+			return;
+		}
+		var reaction_chemical_list,rc_compare;
+		
+		// unhighlight all
+		for (var b=0,max=highlighted_fields.length;b<max;b++) {
+			cmpUnhighlight(highlighted_fields[b]);
+		}
+		highlighted_fields.length=0;
+		
+		// go through list
+		for (var b=0,max=compare_obj.length;b<max;b++) {
+			var comparison=new reaction_comparison(ref_reaction,type);
+			comparison.setCompare(compare_obj[b]);
+			setiHTML("compare_rxn_"+b,comparison.diagram+comparison.diff_text); // Text
+			
+			if (comparison.is_reference==true || !ref_reaction) {
+				continue;
+			}
+			
+			// highlight diffs
+			for (var c=0,max2=comparison.diff_list.length;c<max2;c++) {
+				listHighlight(b,comparison.diff_list[c]);
+			}
+			
+			// reaction_chemical
+			for (var e=0,max4=reaction_chemical_lists.length;e<max4;e++) { // Listen durchgehen
+				reaction_chemical_list=reaction_chemical_lists[e];
+				
+				if (comparison.reaction_chemical_diff[reaction_chemical_list]) for (var c=0,max2=comparison.reaction[reaction_chemical_list].length;c<max2;c++) { // diese Liste (zB Edukte) durchgehen
+					for (var d=0,max3=rc_compares.length;d<max3;d++) { // Kriterien durchgehen
+						rc_compare=rc_compares[d];
+						if (comparison.reaction_chemical_diff[reaction_chemical_list][c][rc_compare]==1) {
+							if (rc_compare=="all") {
+								rc_compare=undefined;
+							}
+							listHighlight(b,reaction_chemical_list,c,rc_compare);
+						}
+					}
+				}
+			}
+		}
+		compare_status=1;
+	break;
+	}
+}

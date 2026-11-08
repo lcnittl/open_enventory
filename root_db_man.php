@@ -423,6 +423,106 @@ switch ($_REQUEST["desired_action"]) {
 	}
 	break;
 	
+	case "repair_for_uw":
+		$molfile_thresh="100";
+		// get list of reaction's with RXNfile and at least one component where SMILES are empty & mw > 0
+		$entries = mysql_select_array_from_dbObj("reaction.reaction_id,reaction.rxnfile_blob FROM reaction INNER JOIN reaction_chemical ON reaction_chemical.reaction_id=reaction.reaction_id "
+				. "WHERE LENGTH(reaction.rxnfile_blob) > ".$molfile_thresh. " "
+				. "AND (reaction_chemical.smiles = '' OR reaction_chemical.smiles IS NULL) "
+				. "AND reaction_chemical.mw > 0.0;", $db, array(
+			"distinct" => true,
+			"noErrors" => $paramHash["noErrors"] ?? null
+		));
+		foreach ($entries as $entry_idx => $entry) {
+			//if ($entry_idx > 10) break; // testing
+			
+			$reaction = readRxnfile($entry["rxnfile_blob"]);
+			$sql_query=array();
+			$reactants=array();
+			$products=array();
+			foreach ($reaction["molecules"] as $idx => $molecule) {
+				$mw = round($molecule["mw"], 1);
+				if ($mw > 0.0) {
+					if ($idx < $reaction["reactants"]) {
+						$arr=$reactants[$mw]??array();
+						$reactants[$mw]=$arr;
+					} else {
+						$arr=$products[$mw]??array();
+						$products[$mw]=$arr;
+					}
+					$arr[]=$molecule;
+				}
+			}
+			$components = mysql_select_array_from_dbObj("* FROM reaction_chemical "
+					. "WHERE reaction_id=" . fixNull($entry["reaction_id"])." "
+					. "AND (molfile_blob IS NULL OR LENGTH(molfile_blob) < ".$molfile_thresh. ") "
+					. "ORDER BY role ASC,nr_in_reaction ASC;", $db, array(
+				"noErrors" => $paramHash["noErrors"] ?? null
+			));
+			foreach ($components as $component) {
+				$role=$component["role"];
+				$mw_from_db=round($component["mw"]??0.0, 1);
+				$molecule=null;
+				
+				$arr=null;
+				if ($role=="reactant") {
+					$arr=$reactants[$mw_from_db]??null;
+				} elseif ($role=="product") {
+					$arr=$products[$mw_from_db]??null;
+				}
+				if (is_array($arr)) {
+					$molecule= array_shift($arr);
+				}
+				if (is_null($molecule)) {
+					// try molecule_id
+					$molecule_id=$component["molecule_id"];
+					list($retval)=mysql_select_array(array(
+						"table" => "molecule_mol", 
+						"filter" => "molecule_id=".fixNull($component["molecule_id"]), 
+						"dbs" => $db_id, 
+						"limit" => 1, 
+					));
+					$molecule=readMolfile($retval["molfile"]);
+					if (arrCount($molecule)==0) {
+						// skip this component
+						continue;
+					}
+				}
+				// generate SMILES, images, fingerprints
+				
+				// formula & MW only if none present yet
+				$sql="UPDATE reaction_chemical SET ";
+				if (isEmptyStr($component["emp_formula"]??"")) {
+					$sql.="emp_formula=".fixStrSQL(getEmpFormula($molecule)).",";
+				}
+				if ($mw_from_db<=0.0) {
+					$sql.="mw=".fixNull($molecule["mw"]??null).",";
+				}
+				// save to DB
+				$sql.=getFingerprintSQL($molecule).
+					"molfile_blob=".fixBlob(writeMolfile($molecule)).
+					",molecule_serialized=".fixBlob(serializeMolecule($molecule)).
+					",smiles=".fixStrSQL($molecule["smiles"]??"").
+					",smiles_stereo=".fixStrSQL($molecule["smiles_stereo"]??"").
+					"WHERE reaction_chemical_id=" . fixNull($entry["reaction_chemical_id"]).";";
+				$sql_query[]=$sql;
+			}
+			
+			// RXNfile -> image
+			list($gif,$svg)=getReactionGif($reaction,rxn_gif_x,rxn_gif_y,0,1,6,array("png","svg"));
+			// save to DB
+			$sql_query[]="UPDATE reaction SET ".
+			"rxn_gif_file=".fixBlob($gif).",".
+			"rxn_svg_file=".fixBlob($svg)." ".
+			"WHERE reaction_id=" . fixNull($entry["reaction_id"]).";";
+			//print_r($sql_query);
+			if (!performQueries($sql_query,$db)) {
+				echo "Error while executing ";
+				print_r($sql_query);
+				break;
+			}
+		}
+		break;
 	case "fix_structures":
 	if ($db_user==ROOT) {
 		
@@ -492,7 +592,7 @@ switch ($_REQUEST["desired_action"]) {
 						if ($doWorkingInstr) {
 							$fieldsWithDefaults=array("betr_anw_gefahren","betr_anw_schutzmass","betr_anw_verhalten","betr_anw_erste_h","betr_anw_entsorgung");
 						}
-						else {
+						elseif (array_sum(array_key_filter($_REQUEST,array("smiles","molfile_blob","fingerprint","emp_formula","mw","rdb","molfile")))==0) { // smiles etc all must be false
 							// save time as it will not work without CAS
 							$query_filter[]="NOT (".getNullCrit("cas_nr").")";
 						}
@@ -525,116 +625,118 @@ switch ($_REQUEST["desired_action"]) {
 						
 						if (is_array($results)) foreach ($results as $result) {
 							set_time_limit(180);
-							if ($_REQUEST["read_ext"]??false) {
-								if (!empty($result["cas_nr"])) {
-									$molecule=array_clean($result);
-									if ($_REQUEST["overwrite_msds"]??false) {
-										// copy object with old values
-										$old_molecule=$molecule;
-										
-										// clean safety data
-										foreach ($safety_fields as $safety_field) {
-											unset($molecule[$safety_field]);
+							if (($_REQUEST["read_ext"]??false)
+								&& !empty($result["cas_nr"])) {
+								$molecule=array_clean($result);
+								if ($_REQUEST["overwrite_msds"]??false) {
+									// copy object with old values
+									$old_molecule=$molecule;
+
+									// clean safety data
+									foreach ($safety_fields as $safety_field) {
+										unset($molecule[$safety_field]);
+									}
+								}
+								getAddInfo($molecule,true); // Daten von suppliern holen, kann dauern
+								extendMoleculeNames($molecule);
+
+								if ($_REQUEST["overwrite_msds"]??false) {
+									// put back safety data if still empty
+									foreach ($safety_fields as $safety_field) {
+										if (isEmptyStr($molecule[$safety_field]??null)) {
+											$molecule[$safety_field]=$old_molecule[$safety_field]??null;
 										}
 									}
-									getAddInfo($molecule,true); // Daten von suppliern holen, kann dauern
-									extendMoleculeNames($molecule);
-									
-									if ($_REQUEST["overwrite_msds"]??false) {
-										// put back safety data if still empty
-										foreach ($safety_fields as $safety_field) {
-											if (isEmptyStr($molecule[$safety_field]??null)) {
-												$molecule[$safety_field]=$old_molecule[$safety_field]??null;
+								}
+
+								$oldReq=$_REQUEST;
+								$_REQUEST=array_merge($_REQUEST,$molecule);
+								$list_int_name="molecule_property";
+								$_REQUEST[$list_int_name]=array();
+								if (is_array($molecule[$list_int_name])) foreach ($molecule[$list_int_name] as $UID => $property) {
+									$_REQUEST[$list_int_name][]=$UID;
+									$_REQUEST["desired_action_".$list_int_name."_".$UID]="add";
+									$_REQUEST[$list_int_name."_".$UID."_class"]=$property["class"]??null;
+									$_REQUEST[$list_int_name."_".$UID."_source"]=$property["source"]??null;
+									$_REQUEST[$list_int_name."_".$UID."_conditions"]=$property["conditions"]??null;
+									$_REQUEST[$list_int_name."_".$UID."_value_low"]=$property["value_low"]??null;
+									$_REQUEST[$list_int_name."_".$UID."_value_high"]=$property["value_high"]??null;
+									$_REQUEST[$list_int_name."_".$UID."_unit"]=$property["unit"]??null;
+								}
+
+								// using the regular update procedure
+								prepareWorkingInstructions($result,
+									$languages,$fieldsWithDefaults);
+								/*$list_int_name="molecule_instructions";
+								//~ var_dump($result[$list_int_name]);die();
+								//~ var_dump($_REQUEST);die();
+								$_REQUEST[$list_int_name]=array();
+								foreach ($languages as $language) {
+									switch ($_REQUEST["betr_anw_".$language]) {
+									case "create_missing":
+										// check if there is one
+										foreach ($result[$list_int_name] as $entry) {
+											if ($entry["lang"]==$language) {
+												// something is there
+												break 2;
 											}
 										}
-									}
-									
-									$oldReq=$_REQUEST;
-									$_REQUEST=array_merge($_REQUEST,$molecule);
-									$list_int_name="molecule_property";
-									$_REQUEST[$list_int_name]=array();
-									if (is_array($molecule[$list_int_name])) foreach ($molecule[$list_int_name] as $UID => $property) {
+									case "create_or_replace":
+										// DELETE anything present for this $language
+										mysqli_query($db,"DELETE FROM molecule_instructions WHERE molecule_id=".$result["molecule_id"]." AND lang LIKE ".fixStrSQL($language).";");
+									case "append":
+										// auto-generate array of symbols for protective equipment from substance data, like regularly done in Javascript
+										$protEquip=getProtEquip($result["safety_s"],$result["safety_p"],$result["safety_h"]);
+
+										// get any texts from previous entries, append default unless already present
+										$defaults=array();
+										foreach ($fieldsWithDefaults as $fieldWithDefaults) {
+											$defaults[$fieldWithDefaults]=$g_settings["instr_defaults"][$fieldWithDefaults][$language];
+										}
+										foreach ($result[$list_int_name] as $entry) {
+											if ($entry["lang"]==$language) {
+												foreach ($fieldsWithDefaults as $fieldWithDefaults) {
+													$oldValue=$entry[$fieldWithDefaults];
+													if (!endswith($oldValue,$defaults[$fieldWithDefaults])) {
+														// append default text if not yet present
+														$oldValue.=" ".$defaults[$fieldWithDefaults];
+													}
+													// set new value
+													$defaults[$fieldWithDefaults]=$oldValue;
+												}
+												break; // use only the newest entry
+											}
+										}
+
+										// create new betr_anw
+										$UID=uniqid();
 										$_REQUEST[$list_int_name][]=$UID;
 										$_REQUEST["desired_action_".$list_int_name."_".$UID]="add";
-										$_REQUEST[$list_int_name."_".$UID."_class"]=$property["class"]??null;
-										$_REQUEST[$list_int_name."_".$UID."_source"]=$property["source"]??null;
-										$_REQUEST[$list_int_name."_".$UID."_conditions"]=$property["conditions"]??null;
-										$_REQUEST[$list_int_name."_".$UID."_value_low"]=$property["value_low"]??null;
-										$_REQUEST[$list_int_name."_".$UID."_value_high"]=$property["value_high"]??null;
-										$_REQUEST[$list_int_name."_".$UID."_unit"]=$property["unit"]??null;
-									}
-									
-									// using the regular update procedure
-									prepareWorkingInstructions($result,
-										$languages,$fieldsWithDefaults);
-									/*$list_int_name="molecule_instructions";
-									//~ var_dump($result[$list_int_name]);die();
-									//~ var_dump($_REQUEST);die();
-									$_REQUEST[$list_int_name]=array();
-									foreach ($languages as $language) {
-										switch ($_REQUEST["betr_anw_".$language]) {
-										case "create_missing":
-											// check if there is one
-											foreach ($result[$list_int_name] as $entry) {
-												if ($entry["lang"]==$language) {
-													// something is there
-													break 2;
-												}
-											}
-										case "create_or_replace":
-											// DELETE anything present for this $language
-											mysqli_query($db,"DELETE FROM molecule_instructions WHERE molecule_id=".$result["molecule_id"]." AND lang LIKE ".fixStrSQL($language).";");
-										case "append":
-											// auto-generate array of symbols for protective equipment from substance data, like regularly done in Javascript
-											$protEquip=getProtEquip($result["safety_s"],$result["safety_p"],$result["safety_h"]);
-											
-											// get any texts from previous entries, append default unless already present
-											$defaults=array();
-											foreach ($fieldsWithDefaults as $fieldWithDefaults) {
-												$defaults[$fieldWithDefaults]=$g_settings["instr_defaults"][$fieldWithDefaults][$language];
-											}
-											foreach ($result[$list_int_name] as $entry) {
-												if ($entry["lang"]==$language) {
-													foreach ($fieldsWithDefaults as $fieldWithDefaults) {
-														$oldValue=$entry[$fieldWithDefaults];
-														if (!endswith($oldValue,$defaults[$fieldWithDefaults])) {
-															// append default text if not yet present
-															$oldValue.=" ".$defaults[$fieldWithDefaults];
-														}
-														// set new value
-														$defaults[$fieldWithDefaults]=$oldValue;
-													}
-													break; // use only the newest entry
-												}
-											}
-											
-											// create new betr_anw
-											$UID=uniqid();
-											$_REQUEST[$list_int_name][]=$UID;
-											$_REQUEST["desired_action_".$list_int_name."_".$UID]="add";
-											$_REQUEST[$list_int_name."_".$UID."_lang"]=$language;
-											$_REQUEST[$list_int_name."_".$UID."_betr_anw_schutzmass_sym"]=$protEquip;
-											$_REQUEST[$list_int_name."_".$UID."_betr_anw_verhalten_sym"]=$protEquip;
-											$_REQUEST[$list_int_name."_".$UID."_betr_anw_erste_h_sym"]=array("E003");
-											foreach ($fieldsWithDefaults as $fieldWithDefaults) {
-												$_REQUEST[$list_int_name."_".$UID."_".$fieldWithDefaults]=$defaults[$fieldWithDefaults];
-											}
-											//~ var_dump($_REQUEST);die();
-										break;
+										$_REQUEST[$list_int_name."_".$UID."_lang"]=$language;
+										$_REQUEST[$list_int_name."_".$UID."_betr_anw_schutzmass_sym"]=$protEquip;
+										$_REQUEST[$list_int_name."_".$UID."_betr_anw_verhalten_sym"]=$protEquip;
+										$_REQUEST[$list_int_name."_".$UID."_betr_anw_erste_h_sym"]=array("E003");
+										foreach ($fieldsWithDefaults as $fieldWithDefaults) {
+											$_REQUEST[$list_int_name."_".$UID."_".$fieldWithDefaults]=$defaults[$fieldWithDefaults];
 										}
-									}*/
-									
-									$_REQUEST["desired_action"]="edit";
-									//~ print_r($molecule);print_r($_REQUEST);die();
-								
-									performEdit("molecule",-1,$db,array("ignoreLock" => true, ));
-									$_REQUEST=$oldReq;
-								}
+										//~ var_dump($_REQUEST);die();
+									break;
+									}
+								}*/
+
+								$_REQUEST["desired_action"]="edit";
+								//~ print_r($molecule);print_r($_REQUEST);die();
+
+								performEdit("molecule",-1,$db,array("ignoreLock" => true, ));
+								$_REQUEST=$oldReq;
+
+								sleep(5); // avoid being blocked by Sial, Acros & maybe others
 								
 								// skip the rest
 								continue;
 							}
 							
+							// no readExt or no CAS no, still do the reprocessing
 							if (!empty($result["molfile_blob"])) {
 								$molecule_search=readMolfile($result["molfile_blob"],array() ); // for  fingerprinting and serialisation
 							}
@@ -668,8 +770,8 @@ switch ($_REQUEST["desired_action"]) {
 							}
 							
 							if (($_REQUEST["smiles"]??false) && !empty($result["molfile_blob"])) {
-								$sql_parts[]="smiles_stereo=".fixStrSQL($molecule_search["smiles_stereo"]);
-								$sql_parts[]="smiles=".fixStrSQL($molecule_search["smiles"]);
+								$sql_parts[]="smiles_stereo=".fixStrSQL($molecule_search["smiles_stereo"]??null);
+								$sql_parts[]="smiles=".fixStrSQL($molecule_search["smiles"]??null);
 							}
 							
 							if (($_REQUEST["molfile"]??false) && !empty($result["molfile_blob"])) {
