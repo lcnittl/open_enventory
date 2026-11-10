@@ -40,10 +40,10 @@ $GLOBALS["suppliers"][$GLOBALS["code"]]=new class extends Supplier {
 	
 	function __construct() {
         $this->code = $GLOBALS["code"];
-		$this->urls["search"]=$this->urls["server"]."/solr/cchProduct/select?qf=catalogNum%5E2000%20exactname%5E5000%20exactSynonyms%5E4000%20edgename%5E4000%20synonymsPlain%5E2000%20formalNameDelimited%5E1500%20vendorItemNumber%5E4000%20casNumber%5E10000%20name%5E1500%20ngram_name%5E1000%20delimited_name%5E1500%20tagline%5E0.01%20keyInformation%5E0.01%20keywords%5E200%20inchi%5E20000%20inchiKey%5E20000%20smiles%5E20000%20ngram_synonym%5E400%20ngram_general%5E0.01&rows=100&defType=edismax&q.op=AND&enableElevation=true&facet=true&facet.field=newProduct&facet.field=raptas&facet.limit=100000&facet.mincount=1&wt=json&&start=0&bust=uhrdtm2owmh&version=2.2&q=";
+		$this->urls["search"]=$this->urls["server"]."/seawolf/open/product/search?q=";
 		$this->urls["detail"]=$this->urls["server"]."/product/";
-		$this->urls["detail_data"]=$this->urls["server"]."/solr/cchProduct/select?wt=json&fq=europeOnly:false&q=catalogNum:\"";
-		$this->urls["price"]=$this->urls["server"]."/solr/cchProductVariant/select?wt=json&rows=100000&sort=amount%20asc&q=catalogNum:(";
+		$this->urls["detail_data"]=$this->urls["server"]."/seawolf/open/product/details/";
+		$this->urls["price"]=$this->urls["server"]."/seawolf/open/product/variants?ids=";
 		$this->urls["startPage"]=$this->urls["server"];
    }
 	
@@ -72,12 +72,13 @@ $GLOBALS["suppliers"][$GLOBALS["code"]]=new class extends Supplier {
 	public function getInfo($catNo) {
 		global $noConnection,$default_http_options;
 		
-		$url=$this->urls["detail_data"].$catNo."\"";
+		$url=$this->urls["detail_data"].$catNo."/cch?";
 		if (empty($url)) {
 			return $noConnection;
 		}
 		$my_http_options=$default_http_options;
 		$my_http_options["redirect"]=maxRedir;
+		$my_http_options["header"]=array("Accept" => "application/json");
 		$response=@oe_http_get($url,$my_http_options);
 		if ($response==FALSE) {
 			return $noConnection;
@@ -92,6 +93,7 @@ $GLOBALS["suppliers"][$GLOBALS["code"]]=new class extends Supplier {
 		$url=$this->urls["search"].urlencode($searchText)."&qf=";
 		$my_http_options=$default_http_options;
 		$my_http_options["redirect"]=maxRedir;
+		$my_http_options["header"]=array("Accept" => "application/json");
 		$response=oe_http_get($url,$my_http_options);
 		if ($response==FALSE) {
 			return $noConnection;
@@ -109,7 +111,7 @@ $GLOBALS["suppliers"][$GLOBALS["code"]]=new class extends Supplier {
 		$result["molecule_names_array"]=array();
 		$result["price"]=array();
 		
-		$docs=$json["response"]["docs"]??null;
+		$docs=$json["content"]??null;
 		$beautifulCatNo=null;
 		if (is_array($docs)) foreach ($docs as $doc) {
 			$result["molecule_names_array"][]=fixTags($doc["name"]??"");
@@ -137,10 +139,11 @@ $GLOBALS["suppliers"][$GLOBALS["code"]]=new class extends Supplier {
 		
 		$my_http_options=$default_http_options;
 		$my_http_options["redirect"]=maxRedir;
-		$response=@oe_http_get($this->urls["price"].$catNo.")",$my_http_options);
+		$my_http_options["header"]=array("Accept" => "application/json");
+		$response=@oe_http_get($this->urls["price"].$catNo,$my_http_options);
 		if ($response!==FALSE) {
 			$pricedata=json_decode(@$response->getBody(),TRUE);
-			$docs=$pricedata["response"]["docs"]??null;
+			$docs=$pricedata["content"]??null;
 			if (is_array($docs)) foreach ($docs as $doc) {
 				list(,$amount,$amount_unit)=getRange(fixTags($doc["name"]??""));
 				$result["price"][]=array(
@@ -166,7 +169,7 @@ $GLOBALS["suppliers"][$GLOBALS["code"]]=new class extends Supplier {
 //		echo "*/";
 
 		$results=array();
-		if (arrCount($json)) foreach ($json["response"]["docs"] as $doc) {
+		if (arrCount($json)) foreach ($json["content"]["docs"] as $doc) {
 			if (isset($doc["catalogNum"])) {
 				$results[]=array(
 					"name" => fixTags($doc["name"]??""), 

@@ -53,6 +53,7 @@ $GLOBALS["suppliers"][$GLOBALS["code"]]=new class extends Supplier {
 	function __construct() {
         $this->code = $GLOBALS["code"];
 		$this->urls["search"]=$this->urls["startPage"]."/search/Search.html?keyword=";
+		$this->urls["countrycookie"]=$this->urls["startPage"]."/webapi/v1/countrycookie";
 		$this->urls["search_api"]=$this->urls["startPage"]."/webapi/v1/searchquery?params=";
 		$this->urls["detail"]=$this->urls["startPage"]."/products/";
 		$this->urls["price"]=$this->urls["startPage"]."/webapi/v1/product/productPriceInfo/";
@@ -86,7 +87,7 @@ $GLOBALS["suppliers"][$GLOBALS["code"]]=new class extends Supplier {
 		}
 		$my_http_options=$default_http_options;
 		$my_http_options["redirect"]=maxRedir;
-		$response=@oe_http_get($url,$my_http_options);
+		$response=oe_http_get($url,$my_http_options);
 		if ($response==FALSE) {
 			return $noConnection;
 		}
@@ -98,6 +99,9 @@ $GLOBALS["suppliers"][$GLOBALS["code"]]=new class extends Supplier {
 		
 		$my_http_options=$default_http_options;
 		$my_http_options["redirect"]=maxRedir;
+
+		$response=oe_http_post_fields($this->urls["countrycookie"], base64_encode(json_encode(array("params" => array("country" => "Germany", "currency" => "EUR"), "_xsrf" => ""))), null, $my_http_options);
+		
 		$response=oe_http_get($this->getHistlistURL($searchText), $my_http_options);
 		if ($response==FALSE) {
 			return $noConnection;
@@ -109,7 +113,7 @@ $GLOBALS["suppliers"][$GLOBALS["code"]]=new class extends Supplier {
 	public function procDetail(& $response,$catNo="",$loadData=true) {
 		global $default_http_options;
 		
-		$body=@$response->getBody();
+		$body=$response->getBody();
 		cutRange($body,"<h2","<div class=\"foot_top_bg\"");
 
 		$result=array(
